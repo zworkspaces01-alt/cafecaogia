@@ -133,3 +133,7 @@ Cần chạy `supabase/migrations/0006_seo_analytics.sql` (thêm tiêu đề/mô
 - [ ] Bổ sung ngành nghề bán buôn/xuất khẩu nông sản trong đăng ký doanh nghiệp
 - [ ] Kiểm tra thông số sản phẩm, điều kiện giao dịch, lịch mùa vụ, nội dung EUDR với thực tế
 - [ ] Nhờ người bản ngữ Nga / Ả Rập đọc lại bản dịch
+
+### Tiêu chuẩn Robusta (09/2026)
+
+Chạy `supabase/migrations/0007_robusta_standards.sql` để cập nhật database đang chạy theo tiêu chuẩn xuất khẩu mới: thông số Robusta loại 1 sàng 18 / sàng 16, loại 2 sàng 13, và thêm sản phẩm Robusta chế biến ướt special loại 1 (gắn nhãn “Mẫu” cho đến khi duyệt mô tả và ảnh). Chỉ ghi đè thông số và số lượng tối thiểu (kèm bản tiếng Nga, Ả Rập); các chỉnh sửa khác trong CMS được giữ. Chạy nhiều lần không sao.
