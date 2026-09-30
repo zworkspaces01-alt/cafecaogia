@@ -4,13 +4,9 @@ import { site } from "@/lib/site";
 
 export type Inquiry = {
   name: string;
-  company: string | null;
   email: string;
   phone: string | null;
-  country: string;
   product_slug: string | null;
-  quantity: string | null;
-  incoterm: string | null;
   message: string;
   locale: string;
 };
@@ -32,14 +28,10 @@ export async function notifyInquiry(inquiry: Inquiry): Promise<boolean> {
 
   const rows: [string, string | null][] = [
     ["Name", inquiry.name],
-    ["Company", inquiry.company],
     ["Email", inquiry.email],
     ["Phone / WhatsApp", inquiry.phone],
-    ["Country", inquiry.country],
     ["Site language", inquiry.locale.toUpperCase()],
     ["Product", inquiry.product_slug ? `${site.url}/en/products/${inquiry.product_slug}` : null],
-    ["Quantity", inquiry.quantity],
-    ["Incoterm", inquiry.incoterm],
   ];
   const filled = rows.filter((row): row is [string, string] => Boolean(row[1]));
 
@@ -68,7 +60,7 @@ export async function notifyInquiry(inquiry: Inquiry): Promise<boolean> {
         from: process.env.INQUIRY_FROM_EMAIL,
         to: process.env.INQUIRY_NOTIFY_TO!.split(",").map((s) => s.trim()),
         reply_to: inquiry.email,
-        subject: `New inquiry: ${inquiry.product_slug ?? "general"} — ${inquiry.name} (${inquiry.country})`,
+        subject: `New inquiry: ${inquiry.product_slug ?? "general"} — ${inquiry.name}`,
         html,
         text,
       }),

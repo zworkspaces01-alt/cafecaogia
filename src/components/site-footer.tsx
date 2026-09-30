@@ -14,10 +14,10 @@ export async function SiteFooter() {
     {
       title: dict.footer.coffee,
       links: [
-        { href: "/products/robusta-grade-1-screen-18", label: links.robusta },
-        { href: "/products/arabica-cau-dat-screen-18", label: links.arabica },
-        { href: "/products/fine-robusta-honey-process", label: links.fineRobusta },
-        { href: "/products/roasted-coffee-private-label", label: links.privateLabel },
+        { href: "/products/robusta-s18-clean", label: links.robustaS18 },
+        { href: "/products/robusta-s18-wet-polished", label: links.robustaWetPolished },
+        { href: "/products/arabica-s18-clean", label: links.arabicaS18 },
+        { href: "/products?category=coffee", label: links.allCoffee },
       ],
     },
     {

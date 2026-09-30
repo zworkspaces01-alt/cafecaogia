@@ -55,7 +55,7 @@ export const entities: Entity[] = [
     hasTranslations: true,
     fields: [
       { name: "name", label: "Tên sản phẩm", type: "text", translatable: true, required: true },
-      { name: "slug", label: "Đường dẫn (slug)", type: "text", required: true, help: "Chữ thường, không dấu, nối bằng gạch ngang. Ví dụ: robusta-grade-1-screen-18" },
+      { name: "slug", label: "Đường dẫn (slug)", type: "text", required: true, help: "Chữ thường, không dấu, nối bằng gạch ngang. Ví dụ: robusta-s18-clean" },
       {
         name: "category",
         label: "Danh mục",

@@ -8,7 +8,7 @@ import { getSupabase } from "@/lib/supabase";
 export type InquiryState = {
   status: "idle" | "success" | "error";
   message?: string;
-  fieldErrors?: Partial<Record<"name" | "email" | "country" | "message", string>>;
+  fieldErrors?: Partial<Record<"name" | "email" | "message", string>>;
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,13 +27,9 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
 
   const inquiry: Inquiry = {
     name: field(form, "name", 120),
-    company: field(form, "company", 160) || null,
     email: field(form, "email", 200),
     phone: field(form, "phone", 40) || null,
-    country: field(form, "country", 80),
     product_slug: field(form, "product", 120) || null,
-    quantity: field(form, "quantity", 80) || null,
-    incoterm: field(form, "incoterm", 10) || null,
     message: field(form, "message", 4000),
     locale: isLocale(locale) ? locale : "en",
   };
@@ -41,7 +37,6 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
   const fieldErrors: InquiryState["fieldErrors"] = {};
   if (!inquiry.name) fieldErrors.name = errors.name;
   if (!EMAIL_RE.test(inquiry.email)) fieldErrors.email = errors.email;
-  if (!inquiry.country) fieldErrors.country = errors.country;
   if (!inquiry.message) fieldErrors.message = errors.message;
   if (Object.keys(fieldErrors).length > 0) {
     return { status: "error", message: errors.check, fieldErrors };

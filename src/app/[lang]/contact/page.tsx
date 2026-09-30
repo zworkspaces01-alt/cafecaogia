@@ -99,8 +99,6 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
           <InquiryForm
             locale={locale}
             t={dict.form}
-            products={products.map((p) => ({ value: p.slug, label: p.name }))}
-            incoterms={site.incoterms}
             defaultProduct={selected?.slug}
             defaultMessage={selected && sample ? format(t.sampleMessage, { product: selected.name }) : undefined}
           />

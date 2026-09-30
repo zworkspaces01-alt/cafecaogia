@@ -52,7 +52,7 @@ export default async function InquiriesPage({ searchParams }: PageProps<"/admin/
                     {q.company && <span className="font-normal text-muted"> · {q.company}</span>}
                   </p>
                   <p className="mt-0.5 text-xs text-muted">
-                    {new Date(q.created_at).toLocaleString("vi-VN")} · {q.country} · Website {languageNames[q.locale] ?? q.locale}
+                    {new Date(q.created_at).toLocaleString("vi-VN")} · {q.country && `${q.country} · `}Website {languageNames[q.locale] ?? q.locale}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -62,17 +62,20 @@ export default async function InquiriesPage({ searchParams }: PageProps<"/admin/
               </div>
 
               <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+                {/* Quantity and Incoterm are only on inquiries sent before the form was shortened */}
                 {[
+                  ["Điện thoại", q.phone],
                   ["Sản phẩm", q.product_slug],
                   ["Số lượng", q.quantity],
                   ["Incoterm", q.incoterm],
-                  ["Điện thoại", q.phone],
-                ].map(([label, value]) => (
-                  <div key={label}>
-                    <dt className="text-xs text-muted">{label}</dt>
-                    <dd className="text-forest">{value || "—"}</dd>
-                  </div>
-                ))}
+                ]
+                  .filter(([label, value]) => value || label === "Điện thoại")
+                  .map(([label, value]) => (
+                    <div key={label}>
+                      <dt className="text-xs text-muted">{label}</dt>
+                      <dd className="text-forest">{value || "—"}</dd>
+                    </div>
+                  ))}
               </dl>
               <p className="mt-4 rounded-2xl bg-sand p-4 text-sm whitespace-pre-wrap text-forest">{q.message}</p>
 

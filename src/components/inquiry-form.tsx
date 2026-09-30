@@ -7,8 +7,6 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 import { cn } from "@/lib/utils";
 
-type Option = { value: string; label: string };
-
 const inputClass =
   "w-full rounded-xl border border-mist bg-sand px-4 py-3 text-sm text-forest outline-none transition placeholder:text-muted/70 focus:border-leaf focus:bg-white focus:ring-2 focus:ring-lime/60";
 
@@ -46,15 +44,11 @@ function Field({
 export function InquiryForm({
   locale,
   t,
-  products,
-  incoterms,
   defaultProduct,
   defaultMessage,
 }: {
   locale: Locale;
   t: Dictionary["form"];
-  products: Option[];
-  incoterms: string[];
   defaultProduct?: string;
   defaultMessage?: string;
 }) {
@@ -76,8 +70,9 @@ export function InquiryForm({
   return (
     <form action={action} data-reveal className="relative rounded-3xl bg-white p-6 md:p-10" noValidate>
       <input type="hidden" name="lang" value={locale} />
+      {defaultProduct && <input type="hidden" name="product" value={defaultProduct} />}
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label={t.name} name="name" required error={errors.name}>
+        <Field label={t.name} name="name" required error={errors.name} className="sm:col-span-2">
           <input
             id="name"
             name="name"
@@ -87,9 +82,6 @@ export function InquiryForm({
             aria-describedby={describedBy("name")}
             className={inputClass}
           />
-        </Field>
-        <Field label={t.company} name="company">
-          <input id="company" name="company" autoComplete="organization" className={inputClass} />
         </Field>
         <Field label={t.email} name="email" required error={errors.email}>
           <input
@@ -105,40 +97,6 @@ export function InquiryForm({
         </Field>
         <Field label={t.phone} name="phone">
           <input id="phone" name="phone" type="tel" autoComplete="tel" dir="ltr" className={cn(inputClass, "text-start rtl:text-end")} />
-        </Field>
-        <Field label={t.country} name="country" required error={errors.country}>
-          <input
-            id="country"
-            name="country"
-            autoComplete="country-name"
-            required
-            aria-invalid={!!errors.country}
-            aria-describedby={describedBy("country")}
-            className={inputClass}
-          />
-        </Field>
-        <Field label={t.product} name="product">
-          <select id="product" name="product" defaultValue={defaultProduct ?? ""} className={inputClass}>
-            <option value="">{t.productNone}</option>
-            {products.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label={t.quantity} name="quantity">
-          <input id="quantity" name="quantity" placeholder={t.quantityPlaceholder} className={inputClass} />
-        </Field>
-        <Field label={t.incoterm} name="incoterm">
-          <select id="incoterm" name="incoterm" defaultValue="" className={inputClass}>
-            <option value="">{t.incotermNone}</option>
-            {incoterms.map((term) => (
-              <option key={term} value={term}>
-                {term}
-              </option>
-            ))}
-          </select>
         </Field>
         <Field label={t.message} name="message" required error={errors.message} className="sm:col-span-2">
           <textarea
