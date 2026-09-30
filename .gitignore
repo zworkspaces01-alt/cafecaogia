@@ -46,3 +46,6 @@ next-env.d.ts
 .wrangler
 .dev.vars*
 !.dev.vars.example
+
+# Raw Lighthouse JSON (archived as cafecaogia-audit/lighthouse-*.tar.gz)
+/cafecaogia-audit/performance/
