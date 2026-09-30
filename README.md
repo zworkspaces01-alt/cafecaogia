@@ -37,7 +37,7 @@ Khi chưa cấu hình Supabase, danh mục sản phẩm lấy từ `src/data/pro
 
 1. Tạo project trên supabase.com.
 2. SQL Editor → chạy lần lượt `supabase/migrations/0001_init.sql`, `0002_i18n.sql`, rồi `supabase/seed.sql`.
-3. Lấy `Project URL` và publishable key (hoặc anon key) điền vào `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (tên cũ `SUPABASE_URL`, `SUPABASE_ANON_KEY` vẫn được chấp nhận). **Không** dùng khoá `service_role`/`secret`.
+3. Lấy `Project URL` và publishable key (hoặc anon key) điền vào `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (tên cũ `SUPABASE_URL`, `SUPABASE_ANON_KEY` vẫn được chấp nhận). **Không** dùng khoá `service_role`/`secret`. Nếu không khai báo, website dùng URL + publishable key của project production ghi sẵn trong `src/lib/supabase-env.ts` (hai giá trị này công khai theo thiết kế của Supabase). Đặt `SUPABASE_DISABLED=1` để chạy bằng nội dung mẫu.
 
 RLS chỉ cho phép khách **đọc sản phẩm đã publish** và **gửi** (không đọc được) yêu cầu báo giá.
 Quản lý sản phẩm và xem yêu cầu báo giá trong Table Editor của Supabase (cột `status`: new → contacted → quoted → won/lost).

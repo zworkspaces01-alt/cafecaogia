@@ -8,6 +8,14 @@ import "server-only";
  * and, on hosted platforms, localhost URLs that a cloud build can never reach.
  */
 
+/**
+ * Production project defaults, used when no valid variable is set. Both values are public by
+ * design: the publishable key ships to browsers in a normal Supabase app and all data access is
+ * enforced by Row Level Security. Never put the service_role/secret key or DB password here.
+ */
+const DEFAULT_URL = "https://bevtazcodyajyzntsich.supabase.co";
+const DEFAULT_KEY = "sb_publishable_qBY5Pcar-zAhanFlPMno8Q_IvDqpmZo";
+
 const URL_VARS = ["NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL"] as const;
 const KEY_VARS = ["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_ANON_KEY"] as const;
 
@@ -35,16 +43,22 @@ function urlProblem(value: string): string | null {
 const normalizeUrl = (v: string) => v.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
 
 export function getSupabaseEnv(): { url: string; key: string } | null {
+  // Local development can opt out of Supabase (sample content only) with SUPABASE_DISABLED=1.
+  if (process.env.SUPABASE_DISABLED === "1") return null;
   const vars = readVars();
   const url = URL_VARS.map((name) => clean(vars[name]))
     .map((v) => (v ? normalizeUrl(v) : v))
     .find((v): v is string => Boolean(v) && urlProblem(v!) === null);
   const key = KEY_VARS.map((name) => clean(vars[name])).find(Boolean);
-  return url && key ? { url, key } : null;
+  if (url && key) return { url, key };
+  // Fall back to the production project as a pair, so a stray URL is never mixed with another project's key.
+  return { url: DEFAULT_URL, key: DEFAULT_KEY };
 }
 
 /** Human-readable (Vietnamese) reasons the configuration is unusable — names only, never values. */
 export function describeSupabaseEnvProblems(): string[] {
+  // The built-in production defaults always provide a usable configuration.
+  if (getSupabaseEnv()) return [];
   const vars = readVars();
   const problems: string[] = [];
 
