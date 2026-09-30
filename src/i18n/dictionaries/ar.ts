@@ -37,6 +37,8 @@ export const ar: Dictionary = {
   megaMenu: {
     coffeeTitle: "البن الأخضر والمحمّص",
     cashewTitle: "حبات الكاجو",
+    robusta: "روبوستا",
+    arabica: "أرابيكا",
     featured: "الأكثر طلبًا",
     viewSpecs: "عرض المواصفات",
     viewAll: "جميع المنتجات",

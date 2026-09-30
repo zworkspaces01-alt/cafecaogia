@@ -44,6 +44,8 @@ export const en = {
   megaMenu: {
     coffeeTitle: "Green & roasted coffee",
     cashewTitle: "Cashew kernels",
+    robusta: "Robusta",
+    arabica: "Arabica",
     featured: "Most requested",
     viewSpecs: "View specs",
     viewAll: "View all products",
