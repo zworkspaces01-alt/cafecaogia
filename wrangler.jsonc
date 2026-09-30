@@ -36,6 +36,6 @@
   // Public, non-secret values. Secrets (SUPABASE_*) go in via `wrangler secret put`.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://caogia.com",
-    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": ""
+    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "dq6mmebqr"
   }
 }
