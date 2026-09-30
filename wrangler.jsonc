@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "caogia",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // Self-reference service binding, must match the worker name
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "caogia"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "caogia-tag-cache",
+      // Replace with the id printed by: npx wrangler d1 create caogia-tag-cache
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "caogia-opennext-cache"
+    }
+  ],
+  // Public, non-secret values. Secrets (SUPABASE_*) go in via `wrangler secret put`.
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://caogia.com",
+    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": ""
+  }
+}
