@@ -11,7 +11,7 @@ const rememberLocale = (locale: Locale) => {
   document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=31536000; samesite=lax`;
 };
 
-/** Dropdown for the desktop header. */
+/** Language dropdown in the site header, on every screen size. */
 export function LanguageSwitcher({ locale, label }: { locale: Locale; label: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -43,7 +43,7 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
       >
         <Globe className="size-4" />
         {localeNames[locale].short}
-        <ChevronDown className={cn("size-3.5 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("hidden size-3.5 transition-transform sm:block", open && "rotate-180")} />
       </button>
 
       {open && (
@@ -75,30 +75,3 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
   );
 }
 
-/** Inline segmented control for the mobile menu. */
-export function LanguageTabs({ locale, label, onSelect }: { locale: Locale; label: string; onSelect?: () => void }) {
-  const pathname = usePathname();
-  return (
-    <div role="group" aria-label={label} className="grid grid-cols-3 gap-1 rounded-xl bg-white/10 p-1">
-      {locales.map((l) => (
-        <NextLink
-          key={l}
-          href={switchLocalePath(pathname, l)}
-          hrefLang={l}
-          lang={l}
-          aria-current={l === locale ? "true" : undefined}
-          onClick={() => {
-            rememberLocale(l);
-            onSelect?.();
-          }}
-          className={cn(
-            "rounded-lg py-2.5 text-center text-sm",
-            l === locale ? "bg-white font-medium text-forest" : "text-white/85",
-          )}
-        >
-          {localeNames[l].native}
-        </NextLink>
-      ))}
-    </div>
-  );
-}

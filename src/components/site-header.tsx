@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Home, Menu, X } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/whatsapp";
-import { LanguageSwitcher, LanguageTabs } from "@/components/language-switcher";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import Link from "@/components/link";
 import { Logo } from "@/components/logo";
 import { MegaMenuPanel, MegaMenuTrigger, type MenuProduct } from "@/components/products-mega-menu";
@@ -84,7 +84,7 @@ export function SiteHeader({
         scrolled || open || megaOpen ? "bg-forest/90 py-3 shadow-lg shadow-black/10 backdrop-blur-md" : "py-6",
       )}
     >
-      <div className="container-page flex items-center justify-between gap-6">
+      <div className="container-page flex items-center justify-between gap-3 sm:gap-6">
         <Logo label={common.homeLabel} />
 
         <nav
@@ -120,9 +120,7 @@ export function SiteHeader({
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="hidden lg:block">
-            <LanguageSwitcher locale={locale} label={common.language} />
-          </div>
+          <LanguageSwitcher locale={locale} label={common.language} />
           <a
             href={whatsappHref}
             target="_blank"
@@ -182,9 +180,6 @@ export function SiteHeader({
               {labels[item.key]}
             </Link>
           ))}
-          <div className="mt-2">
-            <LanguageTabs locale={locale} label={common.language} onSelect={() => setOpen(false)} />
-          </div>
         </nav>
       )}
     </header>
