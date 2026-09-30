@@ -35,15 +35,27 @@ export function SiteHeader({
   const [megaOpen, setMegaOpen] = useState(false);
   const closeTimer = useRef<number | undefined>(undefined);
 
-  // Hover intent: open immediately, close after a short grace period so the pointer can
-  // travel from the trigger to the panel.
+  // Hover intent, mouse only: open when the pointer is over the Products trigger or the panel,
+  // close shortly after it leaves both (the delay lets it cross the gap between them).
+  // Touch and keyboard open and close the menu by tapping or pressing the trigger instead.
   const openMega = () => {
     window.clearTimeout(closeTimer.current);
     setMegaOpen(true);
   };
   const scheduleCloseMega = () => {
     window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => setMegaOpen(false), 180);
+    closeTimer.current = window.setTimeout(() => setMegaOpen(false), 200);
+  };
+  const megaHover = {
+    onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && openMega(),
+    onPointerLeave: (e: React.PointerEvent) => e.pointerType === "mouse" && scheduleCloseMega(),
+  };
+  // A mouse click on the trigger lands on a menu that hover already opened, so it must not close it.
+  const lastPointer = useRef("");
+  const toggleMega = () => {
+    if (lastPointer.current === "mouse") openMega();
+    else setMegaOpen((v) => !v);
+    lastPointer.current = "";
   };
 
   useEffect(() => {
@@ -71,7 +83,6 @@ export function SiteHeader({
         "fixed inset-x-0 top-0 z-50 animate-drop transition-all duration-300 print:hidden",
         scrolled || open || megaOpen ? "bg-forest/90 py-3 shadow-lg shadow-black/10 backdrop-blur-md" : "py-6",
       )}
-      onMouseLeave={scheduleCloseMega}
     >
       <div className="container-page flex items-center justify-between gap-6">
         <Logo label={common.homeLabel} />
@@ -84,12 +95,12 @@ export function SiteHeader({
             .filter((item) => item.href !== "/contact")
             .map((item) =>
               item.key === "products" ? (
-                <div key={item.href} onMouseEnter={openMega}>
+                <div key={item.href} {...megaHover} onPointerDown={(e) => (lastPointer.current = e.pointerType)}>
                   <MegaMenuTrigger
                     label={labels.products}
                     open={megaOpen}
                     active={isActive(item.href)}
-                    onToggle={() => setMegaOpen((v) => !v)}
+                    onToggle={toggleMega}
                   />
                 </div>
               ) : (
@@ -143,14 +154,13 @@ export function SiteHeader({
       </div>
 
       {megaOpen && (
-        <div onMouseEnter={openMega}>
-          <MegaMenuPanel
-            products={menu.products}
-            t={menu.t}
-            categories={menu.categories}
-            onNavigate={() => setMegaOpen(false)}
-          />
-        </div>
+        <MegaMenuPanel
+          products={menu.products}
+          t={menu.t}
+          categories={menu.categories}
+          onNavigate={() => setMegaOpen(false)}
+          hoverProps={megaHover}
+        />
       )}
 
       {open && (

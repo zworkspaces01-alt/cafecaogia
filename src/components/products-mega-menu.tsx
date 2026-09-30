@@ -47,11 +47,14 @@ export function MegaMenuPanel({
   t,
   categories,
   onNavigate,
+  hoverProps,
 }: {
   products: MenuProduct[];
   t: Dictionary["megaMenu"];
   categories: Dictionary["categories"];
   onNavigate: () => void;
+  /** Keeps the menu open while the pointer is over the card itself (not the empty space beside it). */
+  hoverProps?: Pick<React.HTMLAttributes<HTMLDivElement>, "onPointerEnter" | "onPointerLeave">;
 }) {
   const columns = (
     [
@@ -73,7 +76,9 @@ export function MegaMenuPanel({
 
   return (
     <div id="products-mega-menu" className="container-page mt-3 hidden lg:block">
-      <div className="grid max-h-[calc(100dvh-6rem)] animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both] grid-cols-[minmax(0,1fr)_15rem] gap-6 overflow-y-auto rounded-3xl bg-white p-6 text-forest shadow-2xl shadow-black/20 xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-8 xl:p-8">
+      <div
+        {...hoverProps}
+        className="grid max-h-[calc(100dvh-6rem)] animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both] grid-cols-[minmax(0,1fr)_15rem] gap-6 overflow-y-auto rounded-3xl bg-white p-6 text-forest shadow-2xl shadow-black/20 xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-8 xl:p-8">
         <div className="grid content-start gap-x-6 xl:gap-x-8" style={{ gridTemplateColumns: `repeat(${totalSpan}, minmax(0, 1fr))` }}>
           {columns.map(({ category, title, icon: Icon, items, shown, span }, col) => (
             <div key={category} style={{ gridColumn: `span ${span}` }}>
