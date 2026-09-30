@@ -13,13 +13,26 @@ export function getSupabase(): SupabaseClient | null {
   if (client !== undefined) return client;
 
   const env = getSupabaseEnv();
+  const host = env ? new URL(env.url).host : null;
+  // Printed once per process so build logs show which project is used (host only, never the key).
+  console.info(host ? `[supabase] using ${host}` : "[supabase] not configured — using bundled sample content");
+
   client = env
     ? createClient(env.url, env.key, {
-          auth: { persistSession: false },
-          global: {
-            fetch: (input, init) => fetch(input, { ...init, next: { tags: [CMS_CACHE_TAG], revalidate: 3600 } }),
+        auth: { persistSession: false },
+        global: {
+          fetch: async (input, init) => {
+            try {
+              return await fetch(input, { ...init, next: { tags: [CMS_CACHE_TAG], revalidate: 3600 } });
+            } catch (error) {
+              // Surface the real network cause (ENOTFOUND, ECONNREFUSED, …) instead of "fetch failed".
+              const cause = (error as { cause?: { code?: string; message?: string } }).cause;
+              console.error(`[supabase] request to ${host} failed: ${cause?.code ?? ""} ${cause?.message ?? error}`);
+              throw error;
+            }
           },
-        })
-      : null;
+        },
+      })
+    : null;
   return client;
 }

@@ -7,9 +7,16 @@ import "server-only";
  * connection string can't break the build.
  */
 export function getSupabaseEnv(): { url: string; key: string } | null {
+  const onHostedPlatform = Boolean(process.env.VERCEL || process.env.CF_PAGES);
   const url = [process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_URL]
     .map((v) => v?.trim().replace(/\/+$/, ""))
-    .find((v) => v && /^https?:\/\/[^\s/]+$/i.test(v));
+    .find(
+      (v) =>
+        v &&
+        /^https?:\/\/[a-z0-9.-]+(:\d+)?$/i.test(v) &&
+        // A local Supabase (npx supabase start) is unreachable from a cloud build.
+        !(onHostedPlatform && /\/\/(localhost|127\.0\.0\.1)\b/.test(v)),
+    );
 
   const key = [
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
