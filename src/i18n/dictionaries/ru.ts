@@ -43,6 +43,8 @@ export const ru: Dictionary = {
   megaMenu: {
     coffeeTitle: "Зелёный и обжаренный кофе",
     cashewTitle: "Ядра кешью",
+    robusta: "Робуста",
+    arabica: "Арабика",
     featured: "Чаще всего запрашивают",
     viewSpecs: "Спецификация",
     viewAll: "Вся продукция",
