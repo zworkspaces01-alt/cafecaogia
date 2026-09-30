@@ -208,7 +208,9 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
                 src={slide.image}
                 alt={i === index ? t.slides[i].alt : ""}
                 fill
-                priority={i === 0}
+                // The first slide is the LCP element; the others stay lazy until they are shown.
+                loading={i === 0 ? "eager" : "lazy"}
+                fetchPriority={i === 0 ? "high" : "auto"}
                 sizes="100vw"
                 className="object-cover"
               />
@@ -223,7 +225,8 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
         <div className="grid max-w-2xl" aria-live={playing ? "off" : "polite"}>
           {slides.map((slide, i) => {
             const text = t.slides[i];
-            const Heading = i === 0 ? "h1" : "h2";
+            // Only the first slide is a heading; the rest would otherwise lead the page outline.
+            const Heading = i === 0 ? "h1" : "p";
             const active = i === index;
             return (
               <div
@@ -244,7 +247,7 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
                     <span data-slide-line className="block">
                       {text.title}
                     </span>
-                  </span>
+                  </span>{" "}
                   <span className="block overflow-hidden pb-[0.1em]">
                     <span data-slide-line className="block">
                       {text.lead} <em className="font-serif font-normal">{text.accent}</em>

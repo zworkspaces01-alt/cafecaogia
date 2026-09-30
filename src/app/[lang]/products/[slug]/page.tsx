@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "@/components/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, MapPin, Package, Scale } from "lucide-react";
+import { JsonLd, schemaIds } from "@/components/json-ld";
 import { PostCard } from "@/components/post-card";
 import { ProductCard } from "@/components/product-card";
 import { ButtonLink, SectionHeading } from "@/components/ui";
@@ -43,23 +44,45 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
   const [siblings, insights] = await Promise.all([getProducts(product.category), getPostsForProduct(product.slug)]);
   const related = siblings.filter((p) => p.slug !== product.slug).slice(0, 3);
 
+  const pageUrl = `${site.url}/${locale}/products/${product.slug}`;
+  const property = (name: string, value: string) => ({ "@type": "PropertyValue", name, value });
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.description,
-    image: imageUrl(product.image),
-    category: categoryLabel,
-    countryOfOrigin: "VN",
-    brand: { "@type": "Brand", name: site.name },
+    "@graph": [
+      {
+        "@type": "Product",
+        "@id": `${pageUrl}#product`,
+        url: pageUrl,
+        sku: product.slug,
+        name: product.name,
+        description: product.description,
+        image: [product.image, ...product.gallery].map((src) => imageUrl(src)),
+        category: categoryLabel,
+        countryOfOrigin: "VN",
+        brand: { "@type": "Brand", name: site.name },
+        manufacturer: { "@type": "Organization", "@id": schemaIds.organization, name: site.name },
+        // Grade specs, origin, packing and MOQ as machine-readable facts (no public prices, so no Offer).
+        additionalProperty: [
+          ...product.specs.filter((s) => s.label && s.value).map((s) => property(s.label, s.value)),
+          ...(product.origin ? [property(t.origin, product.origin)] : []),
+          ...(product.packaging ? [property(t.packing, product.packaging)] : []),
+          ...(product.moq ? [property(t.moq, product.moq)] : []),
+        ],
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: dict.nav.home, item: `${site.url}/${locale}` },
+          { "@type": "ListItem", position: 2, name: t.products, item: `${site.url}/${locale}/products` },
+          { "@type": "ListItem", position: 3, name: product.name, item: pageUrl },
+        ],
+      },
+    ],
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
-      />
+      <JsonLd data={jsonLd} />
 
       <div className="bg-forest pt-28" />
 
@@ -84,7 +107,8 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
                   src={product.image}
                   alt={product.name}
                   fill
-                  priority
+                  loading="eager"
+                  fetchPriority="high"
                   sizes="(min-width: 1024px) 50vw, 100vw"
                   className="object-cover"
                 />

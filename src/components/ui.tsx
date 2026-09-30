@@ -88,6 +88,7 @@ export function SectionHeading({
               {title}
             </span>
           </span>
+          {accent && " "}
           {accent && (
             <span className="block overflow-hidden pb-[0.1em]">
               <em data-heading-line className="block font-serif text-[1.08em] font-normal">

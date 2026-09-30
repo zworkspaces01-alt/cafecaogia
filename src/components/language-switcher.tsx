@@ -39,7 +39,7 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={`${label}: ${localeNames[locale].native}`}
-        className="flex h-10 items-center gap-1.5 rounded-full border border-white/25 px-3 text-sm text-white transition-colors hover:bg-white/10"
+        className="flex h-11 items-center gap-1.5 rounded-full border border-white/25 px-3 text-sm text-white transition-colors hover:bg-white/10"
       >
         <Globe className="size-4" />
         {localeNames[locale].short}

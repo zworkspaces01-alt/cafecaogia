@@ -50,6 +50,7 @@ export function Wordmark({ className, tone = "onDark" }: { className?: string; t
       )}
     >
       <span className="font-[family-name:var(--font-geist-sans)] font-semibold">Cao</span>
+      {/* Laid out by flex (so it takes no space), but keeps "Cao Gia" two words for crawlers and screen readers. */}{" "}
       <span className="ms-[0.12em] font-[family-name:var(--font-instrument-serif)] text-[1.18em] italic">Gia</span>
     </span>
   );
@@ -69,7 +70,7 @@ export function Logo({
     <Link href="/" className="flex items-center gap-2.5" aria-label={label}>
       <LogoMark tone={tone} className={tagline ? "size-12" : undefined} />
       <span className="flex flex-col">
-        <Wordmark tone={tone} className={tagline ? "text-2xl" : undefined} />
+        <Wordmark tone={tone} className={tagline ? "text-2xl" : undefined} />{" "}
         {tagline && (
           <span
             dir="ltr"

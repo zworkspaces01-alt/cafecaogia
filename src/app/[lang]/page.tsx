@@ -10,6 +10,7 @@ import { Process } from "@/components/home/process";
 import { Strengths } from "@/components/home/strengths";
 import { Testimonials } from "@/components/home/testimonials";
 import { TradeTerms } from "@/components/home/trade-terms";
+import { JsonLd, schemaIds } from "@/components/json-ld";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getSettings, getTestimonials } from "@/lib/content";
 import { getProducts } from "@/lib/products";
@@ -37,30 +38,50 @@ export default async function HomePage() {
   const sameAs = Object.values(settings.socials).filter(Boolean);
   const organizationJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: company.legalName,
-    alternateName: [site.name, company.legalNameVi],
-    url: site.url,
-    description: dict.meta.description,
-    email: contact.email,
-    telephone: contact.phone,
-    foundingDate: String(company.foundingYear),
-    taxID: company.enterpriseCode,
-    ...(sameAs.length > 0 && { sameAs }),
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: contact.address.street,
-      addressLocality: contact.address.locality,
-      addressCountry: contact.address.countryCode,
-    },
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": schemaIds.organization,
+        // The brand buyers search for; the registered company name goes in legalName.
+        name: site.name,
+        legalName: company.legalName,
+        alternateName: company.legalNameVi,
+        url: site.url,
+        logo: { "@type": "ImageObject", url: `${site.url}/apple-icon.png`, width: 180, height: 180 },
+        description: dict.meta.description,
+        email: contact.email,
+        telephone: contact.phone,
+        foundingDate: String(company.foundingYear),
+        taxID: company.enterpriseCode,
+        ...(sameAs.length > 0 && { sameAs }),
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: contact.address.street,
+          addressLocality: contact.address.locality,
+          addressCountry: contact.address.countryCode,
+        },
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          email: contact.email,
+          telephone: contact.phone,
+          availableLanguage: ["English", "Russian", "Arabic", "Vietnamese"],
+        },
+      },
+      {
+        "@type": "WebSite",
+        "@id": schemaIds.website,
+        url: site.url,
+        name: site.name,
+        inLanguage: locale,
+        publisher: { "@id": schemaIds.organization },
+      },
+    ],
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c") }}
-      />
+      <JsonLd data={organizationJsonLd} />
       <Hero t={dict.hero} scrollLabel={dict.common.scroll} />
       <Markets />
       <Statement />

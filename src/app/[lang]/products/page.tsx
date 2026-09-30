@@ -59,6 +59,8 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
             })}
           </nav>
 
+          {/* Keeps the outline H1 → H2 → H3 (product cards) for crawlers and screen readers. */}
+          <h2 className="sr-only">{filters.find((f) => f.value === category)?.label}</h2>
           <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-6 sm:grid-cols-2 sm:gap-y-12 lg:grid-cols-3">
             {products.map((product) => (
               <li key={product.slug}>

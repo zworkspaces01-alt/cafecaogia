@@ -77,6 +77,15 @@ export async function getProductSlugs(): Promise<string[]> {
   return data.map((row) => row.slug as string);
 }
 
+/** Last edit of each published product, for the sitemap's lastmod. Empty on sample data. */
+export async function getProductUpdates(): Promise<Record<string, string>> {
+  const supabase = getSupabase();
+  if (!supabase) return {};
+  const { data, error } = await supabase.from("products").select("slug, updated_at").eq("published", true);
+  if (error) throw new Error(`Failed to load product dates: ${error.message}`);
+  return Object.fromEntries(data.map((row) => [row.slug as string, row.updated_at as string]));
+}
+
 /** English name and category of a product, without a locale (server actions, notifications). */
 export async function getProductSummary(slug: string): Promise<Pick<Product, "name" | "category"> | null> {
   const supabase = getSupabase();

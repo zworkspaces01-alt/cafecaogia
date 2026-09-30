@@ -101,7 +101,7 @@ export default async function InsightPage({ params }: PageProps<"/[lang]/insight
           </header>
 
           <div data-reveal-image className="relative mt-10 aspect-[16/9] overflow-hidden rounded-3xl bg-mist md:aspect-[21/9]">
-            <Image src={cover} alt="" fill priority sizes="(min-width: 1280px) 1200px, 100vw" className="object-cover" />
+            <Image src={cover} alt="" fill loading="eager" fetchPriority="high" sizes="(min-width: 1280px) 1200px, 100vw" className="object-cover" />
           </div>
 
           <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,42rem)_1fr] lg:gap-16">

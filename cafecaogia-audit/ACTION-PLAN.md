@@ -53,3 +53,15 @@ Ký hiệu người làm: **KD** = kinh doanh/nội dung (làm trong CMS hoặc 
 
 ## Mục tiêu sau khi xong giai đoạn 1–2
 Điểm SEO dự kiến **~72–75/100** (uy tín và nội dung vẫn cần giai đoạn 3 để vượt 80).
+
+## Đã làm trong code (30/09/2026)
+
+| # | Việc | Kết quả |
+|---|---|---|
+| 6 | Ảnh LCP được ưu tiên tải: thay `priority` (Next 16 đã bỏ) bằng `loading="eager"` + `fetchPriority="high"` ở hero trang chủ, hero các trang, ảnh sản phẩm, ảnh bài viết | Lighthouse xác nhận `fetchpriority=high`. Đo trên máy: FCP `/ar` 2,8 s → 1,1 s; LCP quan sát trang chủ 1,2 s → 0,75 s. LCP **mô phỏng** mobile trang chủ vẫn ~4,7 s do JavaScript hiệu ứng (GSAP) — bước tiếp theo: hoãn tải ScrollTrigger/hiệu ứng phần dưới. Lưu ý: slider tự chuyển slide ở giây thứ 8 có thể tạo LCP muộn nếu người xem không cuộn — cân nhắc tắt tự chạy trên mobile. |
+| 7 | Khoảng trắng giữa các dòng heading (page hero, heading các mục, slider); slide 2–4 không còn là H2; logo đọc được là "Cao Gia"; `/products` có H2 | Hết "Farmsto", "AboutOur CEO", "CaoGia" khi đọc HTML thô. |
+| 11 | Security headers: X-Content-Type-Options, Referrer-Policy, X-Frame-Options, CSP (frame-ancestors, base-uri, object-src), Permissions-Policy, HSTS | Có trên mọi trang. CSP cho script chưa bật (cần nonce). |
+| 12 | Schema: Organization (`name` = Cao Gia, `legalName`, logo, contactPoint, `@id`) + WebSite; Product (`url`, `sku`, `manufacturer`, `additionalProperty` từ thông số, xuất xứ, đóng gói, MOQ) + BreadcrumbList; ProfilePage + Person cho CEO | JSON-LD hợp lệ trên EN/RU. |
+| 13 | Sitemap: `x-default` cho mọi URL, `lastmod` sản phẩm từ `updated_at`; `favicon.ico` | 144 URL có x-default; favicon 200. |
+| 14 | Vùng chạm: nút ngôn ngữ 44 px (các nút header/slider đã 44 px) | — |
+| 3 | Tên miền chuẩn trên Vercel lấy theo tên miền production của project (vercel.app → tự chuyển sang cafecaogia.com khi gắn tên miền) | Deploy trước khi trỏ DNS không làm hỏng canonical. |

@@ -14,7 +14,10 @@ function resolveSiteUrl() {
   // A localhost value in a production build (e.g. `npm run deploy` picking up .env.local) would
   // poison canonical URLs, the sitemap and share links.
   const usable = configured && !(production && /localhost|127\.0\.0\.1/.test(configured)) ? configured : "";
-  const raw = usable || (production ? PRODUCTION_URL : "localhost:3000");
+  // On Vercel, the project's production domain: its vercel.app address until cafecaogia.com is
+  // added there, then cafecaogia.com — so canonicals never point at a domain that doesn't resolve yet.
+  const vercel = process.env.VERCEL ? process.env.VERCEL_PROJECT_PRODUCTION_URL : "";
+  const raw = usable || vercel || (production ? PRODUCTION_URL : "localhost:3000");
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `${raw.startsWith("localhost") ? "http" : "https"}://${raw}`;
   try {
     return new URL(withScheme).origin;

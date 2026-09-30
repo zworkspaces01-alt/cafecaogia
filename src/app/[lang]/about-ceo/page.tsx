@@ -4,14 +4,16 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Globe2, Mail, Plane, Ruler, ShieldCheck } from "lucide-react";
 import { CtaBanner } from "@/components/cta-banner";
 import { WhatsAppIcon } from "@/components/icons/whatsapp";
+import { JsonLd, schemaIds } from "@/components/json-ld";
 import { LogoMark } from "@/components/logo";
 import { PageHero } from "@/components/page-hero";
 import { ButtonLink, SectionHeading } from "@/components/ui";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getCeo, whatsappLink } from "@/lib/content";
+import { imageUrl } from "@/lib/image-url";
 import { pageMeta } from "@/lib/seo";
-import { photos } from "@/lib/site";
+import { photos, site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict, ceo] = await Promise.all([getLocale(), getDictionary(), getCeo()]);
@@ -25,12 +27,30 @@ export async function generateMetadata(): Promise<Metadata> {
 const focusIcons = [Plane, ShieldCheck, Globe2, Ruler];
 
 export default async function AboutCeoPage() {
-  const [dict, leader] = await Promise.all([getDictionary(), getCeo()]);
+  const [dict, leader, locale] = await Promise.all([getDictionary(), getCeo(), getLocale()]);
   if (!leader) notFound();
   const t = dict.ceo;
 
+  const pageUrl = `${site.url}/${locale}/about-ceo`;
+  const profileJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url: pageUrl,
+    inLanguage: locale,
+    mainEntity: {
+      "@type": "Person",
+      "@id": `${pageUrl}#person`,
+      name: leader.name,
+      jobTitle: leader.role,
+      ...(leader.photo && { image: imageUrl(leader.photo) }),
+      ...(leader.bio[0] && { description: leader.bio[0] }),
+      worksFor: { "@type": "Organization", "@id": schemaIds.organization, name: site.name },
+    },
+  };
+
   return (
     <>
+      <JsonLd data={profileJsonLd} />
       <PageHero
         eyebrow={t.eyebrow}
         title={t.title}
