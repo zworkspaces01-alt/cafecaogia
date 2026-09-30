@@ -3,15 +3,15 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getSupabaseEnv } from "@/lib/supabase-env";
 
 /** Supabase client bound to the signed-in editor's session cookies (RLS applies as that user). */
 export async function getAuthClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const env = getSupabaseEnv();
+  if (!env) return null;
 
   const store = await cookies();
-  return createServerClient(url, key, {
+  return createServerClient(env.url, env.key, {
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list) => {

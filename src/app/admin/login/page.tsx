@@ -2,7 +2,7 @@ import { LogoMark } from "@/components/logo";
 import { LoginForm } from "@/components/admin/login-form";
 
 const notices: Record<string, string> = {
-  config: "Chưa cấu hình Supabase. Thêm SUPABASE_URL và SUPABASE_ANON_KEY rồi khởi động lại.",
+  config: "Chưa cấu hình Supabase. Thêm NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY rồi khởi động lại.",
   forbidden: "Tài khoản này chưa được cấp quyền quản trị.",
 };
 

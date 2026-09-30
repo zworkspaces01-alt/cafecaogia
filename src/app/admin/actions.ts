@@ -16,7 +16,7 @@ export async function signIn(
   form: FormData,
 ): Promise<{ error?: string; email?: string }> {
   const supabase = await getAuthClient();
-  if (!supabase) return { error: "Chưa cấu hình Supabase (SUPABASE_URL, SUPABASE_ANON_KEY)." };
+  if (!supabase) return { error: "Chưa cấu hình Supabase (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)." };
 
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");

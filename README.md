@@ -37,7 +37,7 @@ Khi chưa cấu hình Supabase, danh mục sản phẩm lấy từ `src/data/pro
 
 1. Tạo project trên supabase.com.
 2. SQL Editor → chạy lần lượt `supabase/migrations/0001_init.sql`, `0002_i18n.sql`, rồi `supabase/seed.sql`.
-3. Lấy `Project URL` và `anon`/publishable key điền vào `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+3. Lấy `Project URL` và publishable key (hoặc anon key) điền vào `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (tên cũ `SUPABASE_URL`, `SUPABASE_ANON_KEY` vẫn được chấp nhận). **Không** dùng khoá `service_role`/`secret`.
 
 RLS chỉ cho phép khách **đọc sản phẩm đã publish** và **gửi** (không đọc được) yêu cầu báo giá.
 Quản lý sản phẩm và xem yêu cầu báo giá trong Table Editor của Supabase (cột `status`: new → contacted → quoted → won/lost).
@@ -97,7 +97,7 @@ Quản lý bằng tiếng Việt: **Sản phẩm, Đánh giá, Đối tác, Ch�
    ```
 4. Mở `https://<tên-miền>/admin` và đăng nhập.
 
-Chạy thử ở máy: `npx supabase start` (cần Docker) tạo database local với đủ migration + seed; dùng URL và `ANON_KEY` nó in ra cho `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+Chạy thử ở máy: `npx supabase start` (cần Docker) tạo database local với đủ migration + seed; dùng URL và `ANON_KEY` nó in ra cho `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
 Sửa nội dung mẫu trong code (`src/data/samples.ts`, `src/data/products.ts`) thì chạy `npm run seed:generate` để sinh lại `supabase/seed.sql`.
 

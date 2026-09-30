@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseEnv } from "@/lib/supabase-env";
 
 /** Every public read is tagged so a CMS save can expire it (see refreshSite in app/admin/actions.ts). */
 export const CMS_CACHE_TAG = "cms";
@@ -11,11 +12,9 @@ let client: SupabaseClient | null | undefined;
 export function getSupabase(): SupabaseClient | null {
   if (client !== undefined) return client;
 
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  client =
-    url && key
-      ? createClient(url, key, {
+  const env = getSupabaseEnv();
+  client = env
+    ? createClient(env.url, env.key, {
           auth: { persistSession: false },
           global: {
             fetch: (input, init) => fetch(input, { ...init, next: { tags: [CMS_CACHE_TAG], revalidate: 3600 } }),
