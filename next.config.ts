@@ -45,4 +45,7 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 
-initOpenNextCloudflareForDev();
+// Cloudflare bindings emulation for `next dev` only; not needed for builds (Vercel or Cloudflare).
+if (process.env.NODE_ENV === "development" && !process.env.VERCEL) {
+  initOpenNextCloudflareForDev();
+}
