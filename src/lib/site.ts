@@ -1,15 +1,20 @@
 // Static site configuration. Company details, contacts and stats are edited in the CMS
 // (site_settings); translatable UI text lives in src/i18n/dictionaries.
 
+/** The official domain. */
+const PRODUCTION_URL = "https://cafecaogia.com";
+
 /**
  * Canonical origin for metadata, sitemap and hreflang. Tolerates a missing scheme, spaces or a
- * trailing slash in NEXT_PUBLIC_SITE_URL, and falls back to the Vercel production domain.
+ * trailing slash in NEXT_PUBLIC_SITE_URL, and falls back to the official domain in production.
  */
 function resolveSiteUrl() {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  // On Vercel a localhost value (e.g. copied from .env.local) would poison canonical URLs and the sitemap.
-  const usable = configured && !(process.env.VERCEL && /localhost|127\.0\.0\.1/.test(configured)) ? configured : "";
-  const raw = usable || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || "localhost:3000";
+  const production = process.env.NODE_ENV === "production";
+  // A localhost value in a production build (e.g. `npm run deploy` picking up .env.local) would
+  // poison canonical URLs, the sitemap and share links.
+  const usable = configured && !(production && /localhost|127\.0\.0\.1/.test(configured)) ? configured : "";
+  const raw = usable || (production ? PRODUCTION_URL : "localhost:3000");
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `${raw.startsWith("localhost") ? "http" : "https"}://${raw}`;
   try {
     return new URL(withScheme).origin;
@@ -32,6 +37,7 @@ export const nav = [
   { href: "/products", key: "products" },
   { href: "/about", key: "about" },
   { href: "/process", key: "process" },
+  { href: "/insights", key: "insights" },
   { href: "/contact", key: "contact" },
 ] as const;
 

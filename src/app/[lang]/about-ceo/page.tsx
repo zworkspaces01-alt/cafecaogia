@@ -10,14 +10,14 @@ import { ButtonLink, SectionHeading } from "@/components/ui";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getCeo, whatsappLink } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 import { photos } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict, ceo] = await Promise.all([getLocale(), getDictionary(), getCeo()]);
   if (!ceo) return {};
   return {
-    title: dict.ceo.metaTitle,
-    description: dict.ceo.metaDescription,
+    ...(await pageMeta("about-ceo", { title: dict.ceo.metaTitle, description: dict.ceo.metaDescription })),
     alternates: localeAlternates(locale, "/about-ceo"),
   };
 }

@@ -2,17 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Award, Handshake, Inbox, LayoutDashboard, MessageSquareQuote, Package, Settings, Users } from "lucide-react";
+import { Award, Bell, ChartColumn, Handshake, Inbox, LayoutDashboard, MessageSquareQuote, Newspaper, Package, Search, Settings, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin", label: "Tổng quan", icon: LayoutDashboard },
   { href: "/admin/inquiries", label: "Yêu cầu báo giá", icon: Inbox },
   { href: "/admin/products", label: "Sản phẩm", icon: Package },
+  { href: "/admin/posts", label: "Bài viết", icon: Newspaper },
   { href: "/admin/testimonials", label: "Đánh giá", icon: MessageSquareQuote },
   { href: "/admin/partners", label: "Đối tác", icon: Handshake },
   { href: "/admin/certifications", label: "Chứng nhận", icon: Award },
   { href: "/admin/team", label: "Đội ngũ & CEO", icon: Users },
+  { href: "/admin/seo", label: "SEO", icon: Search },
+  { href: "/admin/analytics", label: "Phân tích", icon: ChartColumn },
+  { href: "/admin/notifications", label: "Thông báo", icon: Bell },
   { href: "/admin/settings", label: "Cài đặt công ty", icon: Settings },
 ];
 

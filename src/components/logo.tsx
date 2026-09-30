@@ -74,7 +74,7 @@ export function Logo({
           <span
             dir="ltr"
             className={cn(
-              "mt-1.5 text-[9px] font-medium tracking-[0.32em] uppercase",
+              "mt-1.5 text-[8.5px] font-medium tracking-[0.32em] uppercase whitespace-nowrap",
               tone === "onDark" ? "text-white/55" : "text-muted",
             )}
           >

@@ -1,6 +1,8 @@
 import "server-only";
 
+import { sourceLabel } from "@/lib/attribution";
 import { site } from "@/lib/site";
+import type { Attribution } from "@/lib/types";
 
 export type Inquiry = {
   name: string;
@@ -9,6 +11,8 @@ export type Inquiry = {
   product_slug: string | null;
   message: string;
   locale: string;
+  /** Where the buyer came from (UTM tags / referrer), when the browser allowed it to be recorded. */
+  attribution?: Attribution | null;
 };
 
 export function isEmailConfigured() {
@@ -32,6 +36,7 @@ export async function notifyInquiry(inquiry: Inquiry): Promise<boolean> {
     ["Phone / WhatsApp", inquiry.phone],
     ["Site language", inquiry.locale.toUpperCase()],
     ["Product", inquiry.product_slug ? `${site.url}/en/products/${inquiry.product_slug}` : null],
+    ["Source", sourceLabel(inquiry.attribution) || null],
   ];
   const filled = rows.filter((row): row is [string, string] => Boolean(row[1]));
 

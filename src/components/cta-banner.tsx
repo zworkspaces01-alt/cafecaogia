@@ -55,7 +55,7 @@ export async function CtaBanner() {
               {contacts.map((person) => (
                 <div
                   key={person.id}
-                  className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md"
+                  className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md"
                 >
                   {person.photo ? (
                     <span className="relative size-12 shrink-0 overflow-hidden rounded-full">
@@ -72,22 +72,25 @@ export async function CtaBanner() {
                       {person.role} · {t.languages}
                     </span>
                   </span>
-                  <a
-                    href={`mailto:${person.email}`}
-                    aria-label={format(t.emailPerson, { name: person.name })}
-                    className="grid size-10 shrink-0 place-items-center rounded-full border border-white/25 transition-colors hover:bg-white hover:text-forest"
-                  >
-                    <Mail className="size-4" />
-                  </a>
-                  <a
-                    href={whatsappLink(person.whatsapp)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={format(t.whatsappPerson, { name: person.name })}
-                    className="grid size-10 shrink-0 place-items-center rounded-full bg-[#25d366] text-white transition-opacity hover:opacity-90"
-                  >
-                    <WhatsAppIcon className="size-4" />
-                  </a>
+                  {/* On phones the buttons drop below the name so the role isn't squeezed. */}
+                  <span className="flex w-full gap-2 ps-16 sm:w-auto sm:ps-0">
+                    <a
+                      href={`mailto:${person.email}`}
+                      aria-label={format(t.emailPerson, { name: person.name })}
+                      className="grid size-11 shrink-0 place-items-center rounded-full border border-white/25 transition-colors hover:bg-white hover:text-forest"
+                    >
+                      <Mail className="size-4" />
+                    </a>
+                    <a
+                      href={whatsappLink(person.whatsapp)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={format(t.whatsappPerson, { name: person.name })}
+                      className="grid size-11 shrink-0 place-items-center rounded-full bg-[#25d366] text-white transition-opacity hover:opacity-90"
+                    >
+                      <WhatsAppIcon className="size-4" />
+                    </a>
+                  </span>
                 </div>
               ))}
             </div>

@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product-card";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getProducts } from "@/lib/products";
+import { pageMeta } from "@/lib/seo";
 import { photos } from "@/lib/site";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -13,8 +14,7 @@ import { cn } from "@/lib/utils";
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
   return {
-    title: dict.productsPage.metaTitle,
-    description: dict.productsPage.metaDescription,
+    ...(await pageMeta("products", { title: dict.productsPage.metaTitle, description: dict.productsPage.metaDescription })),
     alternates: localeAlternates(locale, "/products"),
   };
 }
@@ -49,7 +49,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
                   href={f.value ? `/products?category=${f.value}` : "/products"}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-full px-5 py-2 text-sm transition-colors",
+                    "inline-flex min-h-11 items-center rounded-full px-5 text-sm transition-colors",
                     active ? "bg-forest text-white" : "bg-white text-forest hover:bg-mist",
                   )}
                 >
@@ -59,10 +59,10 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
             })}
           </nav>
 
-          <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-6 sm:grid-cols-2 sm:gap-y-12 lg:grid-cols-3">
             {products.map((product) => (
               <li key={product.slug}>
-                <ProductCard product={product} categoryLabel={dict.categories[product.category]} />
+                <ProductCard product={product} categoryLabel={dict.categories[product.category]} compact />
               </li>
             ))}
           </ul>

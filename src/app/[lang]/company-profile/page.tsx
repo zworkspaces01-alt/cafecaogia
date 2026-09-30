@@ -7,13 +7,13 @@ import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getContacts, getSettings } from "@/lib/content";
 import { getProducts } from "@/lib/products";
+import { pageMeta } from "@/lib/seo";
 import { site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
   return {
-    title: dict.profile.metaTitle,
-    description: dict.profile.metaDescription,
+    ...(await pageMeta("company-profile", { title: dict.profile.metaTitle, description: dict.profile.metaDescription })),
     alternates: localeAlternates(locale, "/company-profile"),
   };
 }

@@ -38,6 +38,10 @@ export function MegaMenuTrigger({
   );
 }
 
+/** Rows per sub-column before a category's list wraps into another sub-column. */
+const ROWS = 6;
+const MAX_SUBCOLUMNS = 2;
+
 export function MegaMenuPanel({
   products,
   t,
@@ -49,72 +53,98 @@ export function MegaMenuPanel({
   categories: Dictionary["categories"];
   onNavigate: () => void;
 }) {
-  const columns: { category: Category; title: string; icon: typeof Bean }[] = [
-    { category: "coffee", title: t.coffeeTitle, icon: Bean },
-    { category: "cashew", title: t.cashewTitle, icon: Nut },
-  ];
+  const columns = (
+    [
+      { category: "coffee", title: t.coffeeTitle, icon: Bean },
+      { category: "cashew", title: t.cashewTitle, icon: Nut },
+    ] as const
+  )
+    .map((column) => {
+      const items = products.filter((p) => p.category === column.category);
+      const span = Math.min(MAX_SUBCOLUMNS, Math.max(1, Math.ceil(items.length / ROWS)));
+      // Keep the panel a fixed height: long categories show a "view all" row instead of growing.
+      const limit = span * ROWS;
+      const shown = items.length > limit ? items.slice(0, limit - 1) : items;
+      return { ...column, items, shown, span };
+    })
+    .filter((column) => column.items.length > 0);
+  const totalSpan = columns.reduce((sum, c) => sum + c.span, 0);
   const featured = products.find((p) => p.featured) ?? products[0];
 
   return (
     <div id="products-mega-menu" className="container-page mt-3 hidden lg:block">
-      <div className="grid animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both] grid-cols-[1fr_1fr_1.1fr] gap-8 rounded-3xl bg-white p-8 text-forest shadow-2xl shadow-black/20">
-        {columns.map(({ category, title, icon: Icon }, col) => (
-          <div key={category}>
-            <Link
-              href={`/products?category=${category}`}
-              onClick={onNavigate}
-              className="flex items-center gap-2 text-xs font-medium tracking-[0.18em] text-moss uppercase hover:text-forest"
-            >
-              <Icon className="size-4" />
-              {title}
-            </Link>
-            <ul className="mt-4 space-y-1">
-              {products
-                .filter((p) => p.category === category)
-                .map((product, i) => (
+      <div className="grid max-h-[calc(100dvh-6rem)] animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both] grid-cols-[minmax(0,1fr)_15rem] gap-6 overflow-y-auto rounded-3xl bg-white p-6 text-forest shadow-2xl shadow-black/20 xl:grid-cols-[minmax(0,1fr)_18rem] xl:gap-8 xl:p-8">
+        <div className="grid content-start gap-x-6 xl:gap-x-8" style={{ gridTemplateColumns: `repeat(${totalSpan}, minmax(0, 1fr))` }}>
+          {columns.map(({ category, title, icon: Icon, items, shown, span }, col) => (
+            <div key={category} style={{ gridColumn: `span ${span}` }}>
+              <Link
+                href={`/products?category=${category}`}
+                onClick={onNavigate}
+                className="flex items-center gap-2 border-b border-mist pb-3 text-xs font-medium tracking-[0.18em] text-moss uppercase hover:text-forest"
+              >
+                <Icon className="size-4" />
+                {title}
+                <span className="ms-auto rounded-full bg-sand px-2 py-0.5 tracking-normal text-muted tabular-nums">{items.length}</span>
+              </Link>
+              <ul className="mt-3 grid gap-x-4 gap-y-0.5" style={{ gridTemplateColumns: `repeat(${span}, minmax(0, 1fr))` }}>
+                {shown.map((product, i) => (
                   <li
                     key={product.slug}
                     className="animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both]"
-                    style={{ animationDelay: `${80 + (col * 4 + i) * 45}ms` }}
+                    style={{ animationDelay: `${80 + (col * 4 + i) * 35}ms` }}
                   >
                     <Link
                       href={`/products/${product.slug}`}
                       onClick={onNavigate}
-                      className="group flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-sand"
+                      className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-sand"
                     >
-                      <span className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-mist">
+                      <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-mist">
                         <Image
                           src={product.image}
                           alt=""
                           fill
-                          sizes="48px"
+                          sizes="40px"
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium">{product.name}</span>
+                        <span className="block text-sm leading-snug font-medium">{product.name}</span>
                         <span className="block truncate text-xs text-muted">{product.grade}</span>
                       </span>
-                      <ArrowUpRight className="size-4 shrink-0 text-muted opacity-0 transition-all group-hover:opacity-100 rtl:-scale-x-100" />
                     </Link>
                   </li>
                 ))}
-            </ul>
-          </div>
-        ))}
+                {shown.length < items.length && (
+                  <li>
+                    <Link
+                      href={`/products?category=${category}`}
+                      onClick={onNavigate}
+                      className="group flex h-full items-center gap-3 rounded-xl p-1.5 text-sm font-medium text-leaf transition-colors hover:bg-sand hover:text-forest"
+                    >
+                      <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-sand text-xs tabular-nums group-hover:bg-white">
+                        +{items.length - shown.length}
+                      </span>
+                      {t.viewAll}
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
 
         <div className="flex flex-col gap-3">
           {featured && (
             <Link
               href={`/products/${featured.slug}`}
               onClick={onNavigate}
-              className="group relative isolate flex min-h-52 flex-1 flex-col justify-end overflow-hidden rounded-2xl p-5 text-white"
+              className="group relative isolate flex aspect-[16/10] flex-col justify-end overflow-hidden rounded-2xl p-5 text-white"
             >
               <Image
                 src={featured.image}
                 alt=""
                 fill
-                sizes="400px"
+                sizes="288px"
                 className="-z-10 object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <span className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/85 via-ink/30 to-transparent" />
@@ -122,8 +152,8 @@ export function MegaMenuPanel({
                 {t.featured}
               </span>
               <span className="text-xs text-white/70">{categories[featured.category]}</span>
-              <span className="mt-1 text-xl font-medium">{featured.name}</span>
-              <span className="mt-2 inline-flex items-center gap-1 text-sm text-lime">
+              <span className="mt-1 text-lg font-medium">{featured.name}</span>
+              <span className="mt-1.5 inline-flex items-center gap-1 text-sm text-lime">
                 {t.viewSpecs} <ArrowUpRight className="size-4 rtl:-scale-x-100" />
               </span>
             </Link>
@@ -131,21 +161,23 @@ export function MegaMenuPanel({
           <Link
             href="/contact"
             onClick={onNavigate}
-            className="group flex items-center gap-3 rounded-2xl bg-sand p-4 transition-colors hover:bg-mist"
+            className="group flex items-start gap-3 rounded-2xl bg-sand p-4 transition-colors hover:bg-mist"
           >
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime">
               <PackageCheck className="size-5" />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-sm font-medium">{t.samplesTitle}</span>
-              <span className="block text-xs text-muted">{t.samplesBody}</span>
+              <span className="mt-0.5 block text-xs leading-relaxed text-muted">{t.samplesBody}</span>
+              <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-leaf group-hover:text-forest">
+                {t.samplesCta} <ArrowUpRight className="size-3.5 rtl:-scale-x-100" />
+              </span>
             </span>
-            <span className="text-xs font-medium whitespace-nowrap text-leaf group-hover:text-forest">{t.samplesCta}</span>
           </Link>
           <Link
             href="/products"
             onClick={onNavigate}
-            className="inline-flex items-center justify-center gap-1 rounded-full border border-forest/15 py-2.5 text-sm font-medium transition-colors hover:bg-forest hover:text-white"
+            className="mt-auto inline-flex items-center justify-center gap-1 rounded-full border border-forest/15 py-2.5 text-sm font-medium transition-colors hover:bg-forest hover:text-white"
           >
             {t.viewAll} <ArrowUpRight className="size-4 rtl:-scale-x-100" />
           </Link>

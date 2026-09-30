@@ -8,13 +8,13 @@ import { format } from "@/i18n/format";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getSettings } from "@/lib/content";
+import { pageMeta } from "@/lib/seo";
 import { photos, site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
   return {
-    title: dict.about.metaTitle,
-    description: dict.about.metaDescription,
+    ...(await pageMeta("about", { title: dict.about.metaTitle, description: dict.about.metaDescription })),
     alternates: localeAlternates(locale, "/about"),
   };
 }

@@ -1,9 +1,13 @@
 "use server";
 
+import { after } from "next/server";
 import { isLocale } from "@/i18n/config";
 import { loadDictionary } from "@/i18n/dictionaries";
+import { parseAttribution } from "@/lib/attribution";
 import { isEmailConfigured, notifyInquiry, type Inquiry } from "@/lib/notify";
+import { getProductSummary } from "@/lib/products";
 import { getSupabase } from "@/lib/supabase";
+import { escapeHtml, notifyInquiryTelegram, notifyTelegram } from "@/lib/telegram";
 
 export type InquiryState = {
   status: "idle" | "success" | "error";
@@ -32,6 +36,7 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
     product_slug: field(form, "product", 120) || null,
     message: field(form, "message", 4000),
     locale: isLocale(locale) ? locale : "en",
+    attribution: parseAttribution(field(form, "attribution", 4000)),
   };
 
   const fieldErrors: InquiryState["fieldErrors"] = {};
@@ -44,15 +49,32 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
 
   const supabase = getSupabase();
   let stored = false;
+  let storeError = "";
   if (supabase) {
-    const { error } = await supabase.from("inquiries").insert(inquiry);
-    if (error) console.error("Failed to save inquiry", error);
-    else stored = true;
+    let { error } = await supabase.from("inquiries").insert(inquiry);
+    if (error?.code === "PGRST204") {
+      // The attribution column arrives with migration 0006; save the inquiry without it until then.
+      console.warn("[inquiries] attribution column missing — run supabase/migrations/0006_seo_analytics.sql");
+      ({ error } = await supabase.from("inquiries").insert({ ...inquiry, attribution: undefined }));
+    }
+    if (error) {
+      console.error("Failed to save inquiry", error);
+      storeError = error.message;
+    } else stored = true;
   }
 
-  // Email is a second, independent channel: the inquiry counts as received if either works.
-  const emailed = await notifyInquiry(inquiry);
-  if (stored || emailed) return { status: "success" };
+  // Email and Telegram are independent channels: the inquiry counts as received if any of them works.
+  const product = inquiry.product_slug ? await getProductSummary(inquiry.product_slug).catch(() => null) : null;
+  const [emailed, telegrammed] = await Promise.all([notifyInquiry(inquiry), notifyInquiryTelegram(inquiry, product)]);
+  if (storeError) {
+    after(() =>
+      notifyTelegram(
+        "system",
+        `🚨 <b>Yêu cầu báo giá không lưu được vào database</b>\nKhách: ${escapeHtml(inquiry.name)} · ${escapeHtml(inquiry.email)}\nLỗi: <code>${escapeHtml(storeError.slice(0, 300))}</code>\nEmail: ${emailed ? "đã gửi" : "không gửi được"} · Telegram: ${telegrammed ? "đã gửi" : "không gửi được"}`,
+      ),
+    );
+  }
+  if (stored || emailed || telegrammed) return { status: "success" };
 
   if (!supabase && !isEmailConfigured() && process.env.NODE_ENV !== "production") {
     console.info("[dev] Inquiry (no Supabase or email configured):", inquiry);

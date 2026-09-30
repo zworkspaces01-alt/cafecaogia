@@ -73,7 +73,7 @@ npx wrangler secret put CLOUDINARY_API_SECRET
 npm run deploy
 ```
 
-- Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc biến môi trường CI), vì Next nhúng chúng vào bundle.
+- Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc biến môi trường CI), vì Next nhúng chúng vào bundle. Riêng `NEXT_PUBLIC_SITE_URL`: bản build production bỏ qua giá trị `localhost` và dùng tên miền chính thức `https://cafecaogia.com` (khai báo trong `src/lib/site.ts`).
 - `npm run preview` để chạy thử bản build trên runtime Workers ở local (lệnh này nạp sẵn cache trang tĩnh; chạy `wrangler dev` trực tiếp sẽ báo 404 cho các trang tĩnh).
 - Lưu trong CMS làm mới website ngay (R2 lưu trang, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi 1 giờ.
 - Gắn tên miền: Cloudflare Dashboard → Workers → `caogia` → Settings → Domains & Routes.
@@ -101,10 +101,34 @@ Chạy thử ở máy: `npx supabase start` (cần Docker) tạo database local 
 
 Sửa nội dung mẫu trong code (`src/data/samples.ts`, `src/data/products.ts`) thì chạy `npm run seed:generate` để sinh lại `supabase/seed.sql`.
 
+### Thông báo Telegram
+
+CMS → **Thông báo**: gửi thông báo vào từng topic của một nhóm Telegram (bật Topics):
+
+| Loại | Khi nào |
+|---|---|
+| Yêu cầu báo giá mới | Form liên hệ gửi thành công — có thể tách riêng topic cà phê / hạt điều |
+| Tiến độ đơn hàng | Đổi trạng thái yêu cầu (đã liên hệ, đã báo giá, chốt đơn, không thành) |
+| Nội dung CMS | Ai thêm / sửa / xoá nội dung |
+| Hệ thống & cảnh báo | Lưu cài đặt, SEO, mã đo lường; yêu cầu báo giá không lưu được vào database |
+
+Token bot (từ @BotFather) đặt ở biến môi trường `TELEGRAM_BOT_TOKEN` — Cloudflare: `npx wrangler secret put TELEGRAM_BOT_TOKEN`. **Không** nhập token vào CMS: bảng `site_settings` đọc công khai. Nhóm và topic chọn trong CMS (nút “Dò nhóm & topic”, hoặc dán link topic). Telegram là kênh nhận yêu cầu báo giá thứ ba: yêu cầu được coi là gửi thành công nếu lưu vào database, gửi email **hoặc** gửi Telegram được.
+
+### SEO & phân tích
+
+Cần chạy `supabase/migrations/0006_seo_analytics.sql` (thêm tiêu đề/mô tả SEO cho sản phẩm và lưu nguồn khách hàng kèm yêu cầu báo giá). Website vẫn chạy nếu chưa chạy migration, chỉ là hai tính năng đó chưa hoạt động.
+
+- **CMS → SEO:** danh sách kiểm tra nhanh, bật/tắt lập chỉ mục (tắt = `noindex` + robots.txt chặn toàn bộ), mã xác minh Google / Bing / Yandex, ảnh chia sẻ mặc định, tiêu đề + mô tả từng trang theo từng ngôn ngữ (có xem trước kết quả Google). Tiêu đề/mô tả SEO của sản phẩm sửa trong từng sản phẩm.
+- **CMS → Phân tích:** báo cáo yêu cầu báo giá theo kênh (tìm kiếm, quảng cáo, mạng xã hội, trợ lý AI…), nguồn, trang vào đầu tiên, sản phẩm, ngôn ngữ; và ô nhập mã GA4, Google Tag Manager, Meta Pixel, Yandex Metrica, Microsoft Clarity, Cloudflare Web Analytics. Script chỉ nạp ở bản production.
+- Sự kiện chuyển đổi gửi tự động tới các công cụ đã kết nối: `generate_lead` (gửi form), `whatsapp_click`, `email_click`, `phone_click`.
+- Nguồn truy cập (UTM, gclid/fbclid, trang giới thiệu) được lưu 90 ngày trên trình duyệt khách và gửi kèm yêu cầu báo giá — hiện ở CMS và trong email thông báo.
+
 ## Trước khi ra mắt
 
-- [ ] Tên miền + email tên miền (ví dụ `sales@caogia.vn`) — cập nhật trong CMS → Cài đặt công ty và `NEXT_PUBLIC_SITE_URL`
+- [ ] Email tên miền (ví dụ `sales@cafecaogia.com`) — cập nhật trong CMS → Cài đặt công ty
 - [ ] Thay toàn bộ **nội dung mẫu** (xem danh sách ở CMS → Tổng quan)
+- [ ] CMS → SEO: xác minh Google Search Console (và Bing, Yandex), gửi `sitemap.xml`; CMS → Phân tích: điền mã GA4
+- [ ] Nếu chạy quảng cáo nhắm EU: thêm banner đồng ý cookie (GDPR) trước khi bật Meta Pixel / Clarity
 - [ ] Ảnh thật (kho, phân loại, đóng container, phòng QC) thay ảnh Unsplash
 - [ ] Bổ sung ngành nghề bán buôn/xuất khẩu nông sản trong đăng ký doanh nghiệp
 - [ ] Kiểm tra thông số sản phẩm, điều kiện giao dịch, lịch mùa vụ, nội dung EUDR với thực tế

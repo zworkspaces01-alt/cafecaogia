@@ -12,7 +12,8 @@ export default async function EntityListPage({ params, searchParams }: PageProps
   const { filter } = await searchParams;
   const { supabase } = await requireAdmin();
 
-  let query = supabase.from(entity.table).select("*").order("sort_order").order("created_at");
+  const order = entity.listOrder ?? { column: "sort_order", ascending: true };
+  let query = supabase.from(entity.table).select("*").order(order.column, { ascending: order.ascending }).order("created_at");
   if (filter === "sample") query = query.eq("is_sample", true);
   const { data: rows, error } = await query;
   if (error) throw new Error(error.message);

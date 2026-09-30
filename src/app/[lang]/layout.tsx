@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Amiri, Geist, IBM_Plex_Sans_Arabic, Instrument_Serif, PT_Serif } from "next/font/google";
+import { Analytics } from "@/components/analytics";
 import { ContactDock } from "@/components/contact-dock";
 import { MotionMain } from "@/components/motion";
 import { SiteFooter } from "@/components/site-footer";
@@ -7,9 +8,10 @@ import { SiteHeader } from "@/components/site-header";
 import { isRtl, locales, localeTags } from "@/i18n/config";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
-import { getContacts, getSettings, whatsappLink } from "@/lib/content";
+import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content";
 import { getProducts } from "@/lib/products";
 import { imageUrl } from "@/lib/image-url";
+import { pageMeta } from "@/lib/seo";
 import { photos, site } from "@/lib/site";
 import "../globals.css";
 
@@ -53,20 +55,30 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
+  const [locale, dict, { seo }] = await Promise.all([getLocale(), getDictionary(), getSettings()]);
+  const home = await pageMeta("home", { title: dict.meta.title, description: dict.meta.description });
+  const { google, bing, yandex } = seo.verification;
   return {
     metadataBase: new URL(site.url),
-    title: { default: dict.meta.title, template: `%s | ${site.name}` },
-    description: dict.meta.description,
+    title: { default: home.title, template: `%s | ${site.name}` },
+    description: home.description,
     keywords: [...dict.meta.keywords, site.name],
     alternates: localeAlternates(locale, "/"),
     openGraph: {
       type: "website",
       siteName: site.name,
       locale: localeTags[locale],
-      images: [{ url: imageUrl(photos.hero) }],
+      images: [{ url: imageUrl(seo.ogImage.trim() || photos.hero) }],
     },
     twitter: { card: "summary_large_image" },
+    robots: seo.indexing
+      ? { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } }
+      : { index: false, follow: false },
+    verification: {
+      google: google || undefined,
+      yandex: yandex || undefined,
+      other: bing ? { "msvalidate.01": bing } : undefined,
+    },
   };
 }
 
@@ -75,12 +87,13 @@ export async function generateMetadata(): Promise<Metadata> {
 const motionPendingScript = `if(!matchMedia("(prefers-reduced-motion: reduce)").matches){var d=document.documentElement;d.classList.add("motion-pending");setTimeout(function(){d.classList.remove("motion-pending")},3000)}`;
 
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
-  const [locale, dict, products, settings, contacts] = await Promise.all([
+  const [locale, dict, products, settings, contacts, posts] = await Promise.all([
     getLocale(),
     getDictionary(),
     getProducts(),
     getSettings(),
     getContacts(),
+    getPosts(),
   ]);
   const whatsapp = settings.contact.whatsapp;
   const menuProducts = products.map(({ slug, name, grade, category, image, featured }) => ({
@@ -105,6 +118,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
           common={dict.common}
           menu={{ products: menuProducts, t: dict.megaMenu, categories: dict.categories }}
           whatsappHref={whatsappLink(whatsapp, dict.common.whatsappGreeting)}
+          showInsights={posts.length > 0}
         />
         <MotionMain footer={<SiteFooter />}>{children}</MotionMain>
         <ContactDock
@@ -119,6 +133,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
           whatsapp={whatsapp}
           contactName={contacts[0]?.name ?? site.name}
         />
+        <Analytics ids={settings.analytics} />
       </body>
     </html>
   );

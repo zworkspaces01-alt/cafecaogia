@@ -1,11 +1,13 @@
 import "server-only";
 
 import { cache } from "react";
+import { samplePosts } from "@/data/posts";
 import { defaultSettings, sampleCertifications, samplePartners, sampleTeam, sampleTestimonials } from "@/data/samples";
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
+import { mergeSettings } from "@/lib/settings";
 import { getSupabase } from "@/lib/supabase";
-import type { CertificationRow, PartnerRow, SiteSettings, TeamMemberRow, TestimonialRow } from "@/lib/types";
+import type { CertificationRow, PartnerRow, PostRow, SiteSettings, TeamMemberRow, TestimonialRow } from "@/lib/types";
 
 type WithTranslations = { translations?: Record<string, Record<string, unknown> | undefined> | null };
 
@@ -32,25 +34,14 @@ export type Testimonial = Omit<TestimonialRow, "translations">;
 export type Partner = PartnerRow;
 export type Certification = Omit<CertificationRow, "translations">;
 export type TeamMember = Omit<TeamMemberRow, "translations">;
+export type Post = Omit<PostRow, "translations">;
 
 export const getSettings = cache(async (): Promise<SiteSettings> => {
   const supabase = getSupabase();
   if (!supabase) return defaultSettings;
   const { data, error } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
   if (error) throw new Error(`Failed to load site settings: ${error.message}`);
-  const saved = (data?.data ?? {}) as Partial<SiteSettings>;
-  // Shallow-merge each group so newly added settings keep their defaults.
-  return {
-    company: { ...defaultSettings.company, ...saved.company },
-    contact: {
-      ...defaultSettings.contact,
-      ...saved.contact,
-      address: { ...defaultSettings.contact.address, ...saved.contact?.address },
-    },
-    socials: { ...defaultSettings.socials, ...saved.socials },
-    memberships: saved.memberships ?? defaultSettings.memberships,
-    stats: saved.stats?.length ? saved.stats : defaultSettings.stats,
-  };
+  return mergeSettings((data?.data ?? {}) as Partial<SiteSettings>);
 });
 
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
@@ -88,4 +79,43 @@ export const whatsappLink = (number: string, text?: string) =>
 /** Locale-free check used by the sitemap (which has no [lang] segment). */
 export async function hasPublishedCeo(): Promise<boolean> {
   return (await readTable<TeamMemberRow>("team_members", sampleTeam)).some((m) => m.is_ceo);
+}
+
+// ── Insights ────────────────────────────────────────────────────────────────
+
+/** Newest first. A missing `posts` table (migration 0005 not run yet) reads as "no posts" instead of breaking every page. */
+const readPosts = cache(async (): Promise<PostRow[]> => {
+  const supabase = getSupabase();
+  if (!supabase) return samplePosts.filter((post) => post.published);
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("published", true)
+    .order("published_at", { ascending: false })
+    .order("sort_order");
+  if (error?.code === "PGRST205" || error?.code === "42P01") {
+    console.warn("[posts] table not found — run supabase/migrations/0005_posts.sql");
+    return [];
+  }
+  if (error) throw new Error(`Failed to load posts: ${error.message}`);
+  return data as PostRow[];
+});
+
+export const getPosts = cache(async (): Promise<Post[]> => {
+  const [locale, rows] = await Promise.all([getLocale(), readPosts()]);
+  return rows.map((row) => localize(row, locale));
+});
+
+export async function getPost(slug: string): Promise<Post | null> {
+  return (await getPosts()).find((post) => post.slug === slug) ?? null;
+}
+
+/** Articles tagged with a product, for its product page. */
+export async function getPostsForProduct(slug: string): Promise<Post[]> {
+  return (await getPosts()).filter((post) => post.product_slugs.includes(slug));
+}
+
+/** Locale-free, for generateStaticParams and the sitemap. */
+export async function getPostSlugs(): Promise<{ slug: string; published_at: string }[]> {
+  return (await readPosts()).map(({ slug, published_at }) => ({ slug, published_at }));
 }

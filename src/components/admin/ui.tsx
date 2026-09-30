@@ -34,3 +34,45 @@ export function PageTitle({
     </div>
   );
 }
+
+export function Panel({ title, description, children }: { title: string; description?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="rounded-3xl bg-white p-6 md:p-8">
+      <h2 className="text-lg font-semibold text-forest">{title}</h2>
+      {description && <p className="mt-1 text-sm text-muted">{description}</p>}
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
+/** Sticky save button with the result of the last save, for the settings-style forms. */
+export function SaveBar({
+  label,
+  saving,
+  onSave,
+  status,
+}: {
+  label: string;
+  saving: boolean;
+  onSave: () => void;
+  status: { tone: "ok" | "error"; text: string } | null;
+}) {
+  return (
+    <div className="sticky bottom-4 flex flex-wrap items-center gap-3 rounded-3xl bg-forest p-4 shadow-xl">
+      <button
+        type="button"
+        onClick={onSave}
+        disabled={saving}
+        className="inline-flex h-11 items-center gap-2 rounded-full bg-lime px-6 text-sm font-medium text-forest hover:bg-lime-deep disabled:opacity-60"
+      >
+        {saving && <span className="size-4 animate-spin rounded-full border-2 border-forest border-t-transparent" />}
+        {label}
+      </button>
+      {status && (
+        <span role="status" className={cn("text-sm", status.tone === "ok" ? "text-lime" : "text-red-300")}>
+          {status.text}
+        </span>
+      )}
+    </div>
+  );
+}

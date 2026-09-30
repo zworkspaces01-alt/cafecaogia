@@ -1,4 +1,4 @@
-# GEO-ANALYSIS — Cao Gia (caogia.com)
+# GEO-ANALYSIS — Cao Gia (cafecaogia.com)
 
 _Ngày phân tích: 30/09/2026 · Bản phân tích: production build chạy local (`next start`, dữ liệu từ Supabase local), vì website chưa lên mạng. Các trang đã đọc bằng user-agent `OAI-SearchBot`, **không chạy JavaScript**: `/en`, `/ru`, `/ar`, `/en/about`, `/en/process`, `/en/about-ceo`, `/en/company-profile`, `/en/products/robusta-grade-1-screen-18`._
 
@@ -36,7 +36,7 @@ Chưa có công cụ đo (DataForSEO / SE Ranking), và website chưa công khai
 ```
 User-Agent: *
 Allow: /
-Sitemap: https://caogia.com/sitemap.xml
+Sitemap: https://cafecaogia.com/sitemap.xml
 ```
 
 Không có quy tắc riêng cho bot nào, tức là **tất cả đều được phép**. Từng bot tương ứng với khả năng khác nhau:
@@ -96,7 +96,7 @@ Tìm "Cao Gia" + coffee/cashew exporter Vietnam: **không có kết quả nào**
 | # | Việc cần làm | Vì sao (quan sát gốc) | Phụ thuộc | Cách biết đã thất bại | Chỉ số theo dõi |
 |---|---|---|---|---|---|
 | 1 | **Thay nội dung mẫu bằng nội dung thật** (đánh giá, đối tác, chứng nhận, CEO), hoặc tắt hiển thị | AI và người mua đều đối chiếu; tuyên bố sai làm hỏng E-E-A-T và có thể bị phản bác công khai | Không — làm trước mọi việc khác | Có người tra "Kestrel Roastery" / chứng nhận mà không thấy | Số mục "Nội dung mẫu" trên CMS → 0 |
-| 2 | **Tạo dấu vết thương hiệu bên ngoài:** trang LinkedIn công ty, Google Business Profile, hồ sơ VICOFA/VINACAS, danh bạ xuất khẩu (Yellow Pages VN, VietnamExport, Kompass), một video YouTube về kho và quy trình | Mức độ được nhắc tên tương quan mạnh hơn backlink với việc được AI trích dẫn (Ahrefs, 12/2025) | Cần tên miền + email tên miền (#5) | Sau 3 tháng, tìm "Cao Gia coffee exporter" vẫn không ra trang bên thứ ba nào | Số kết quả nhắc "Cao Gia" không phải từ caogia.com |
+| 2 | **Tạo dấu vết thương hiệu bên ngoài:** trang LinkedIn công ty, Google Business Profile, hồ sơ VICOFA/VINACAS, danh bạ xuất khẩu (Yellow Pages VN, VietnamExport, Kompass), một video YouTube về kho và quy trình | Mức độ được nhắc tên tương quan mạnh hơn backlink với việc được AI trích dẫn (Ahrefs, 12/2025) | Cần tên miền + email tên miền (#5) | Sau 3 tháng, tìm "Cao Gia coffee exporter" vẫn không ra trang bên thứ ba nào | Số kết quả nhắc "Cao Gia" không phải từ cafecaogia.com |
 | 3 | **Câu định nghĩa thực thể + dữ liệu có cấu trúc đầy đủ:** câu "Cao Gia là…" ở đầu trang chủ và trang Giới thiệu; bổ sung `Organization` (logo, `sameAs` trỏ tới các kênh ở #2, `foundingLocation`), `WebSite`, `BreadcrumbList`, `Person` cho CEO | AI cần xác định "Cao Gia là ai" từ một đoạn tự đứng được và từ dữ liệu có cấu trúc | `sameAs` cần #2 | Google Rich Results Test báo lỗi, hoặc AI trả lời sai năm thành lập/địa điểm | Kết quả của Rich Results Test; câu trả lời của ChatGPT/Perplexity khi hỏi "Who is Cao Gia?" |
 | 4 | **Sửa khoảng trắng tiêu đề + làm sạch dàn ý:** tiêu đề các slide 2–4 của hero đang là H2 xuất hiện trước mọi section; đổi thành đoạn văn thường | Dàn ý H2 đầu trang đang là khẩu hiệu slider chứ không phải cấu trúc nội dung | Không | Công cụ xem dàn ý (headingsMap) vẫn hiện từ dính liền | Dàn ý H1/H2 đọc được thành câu |
 | 5 | **Tên miền + email tên miền; gửi sitemap lên Google Search Console và Bing Webmaster (bật IndexNow)** | AI Overviews lấy nguồn từ chỉ mục Google; Copilot lấy từ chỉ mục Bing. Chưa được lập chỉ mục thì không thể được trích | Deploy | Search Console báo "Discovered – not indexed" kéo dài | Số trang được lập chỉ mục (48 URL trong sitemap) |

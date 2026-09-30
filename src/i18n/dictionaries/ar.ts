@@ -12,6 +12,7 @@ export const ar: Dictionary = {
     products: "المنتجات",
     about: "من نحن",
     process: "طريقة عملنا",
+    insights: "المقالات",
     contact: "اتصل بنا",
   },
   common: {
@@ -243,6 +244,7 @@ export const ar: Dictionary = {
     accent: "وفق المواسم",
     description: "تعاقد مبكرًا لتضمن أفضل دفعات المحصول الجديد. ويُشحن مخزون المحصول السابق على مدار العام.",
     caption: "أشهر الحصاد وشحنات المحصول الجديد للروبوستا والأرابيكا والكاجو",
+    swipeHint: "اسحب جانبًا لرؤية الأشهر الاثني عشر كلها",
     cropColumn: "المحصول",
     crops: [
       { name: "روبوستا", region: "داك لاك · جيا لاي" },
@@ -401,6 +403,24 @@ export const ar: Dictionary = {
     all: "جميع المنتجات",
     empty: "لا توجد منتجات في هذه الفئة بعد.",
   },
+  insights: {
+    metaTitle: "المقالات — أدلة وتحديثات السوق حول القهوة والكاجو الفيتنامي",
+    metaDescription:
+      "أدلة للمشترين وتحديثات السوق وأخبار كاو جيا: درجات القهوة والكاجو، والمواصفات، وشروط إنكوترمز، والشحن من فيتنام.",
+    eyebrow: "المقالات",
+    title: "اعرفوا المنشأ،",
+    accent: "واشتروا بثقة",
+    description: "أدلة عملية حول الدرجات والمواصفات والشحن، وتحديثات السوق من مناطق القهوة والكاجو في فيتنام.",
+    filterLabel: "تصفية حسب الموضوع",
+    all: "جميع المقالات",
+    categories: { guide: "دليل المشتري", market: "تحديث السوق", news: "أخبار الشركة" },
+    minRead: "{n} دقيقة للقراءة",
+    empty: "لا توجد مقالات في هذا الموضوع بعد.",
+    productsTitle: "المنتجات في هذا المقال",
+    moreTitle: "المزيد",
+    moreAccent: "من مقالاتنا",
+    allArticles: "جميع المقالات",
+  },
   product: {
     metaTitle: "{name} — {category} من فيتنام",
     products: "المنتجات",
@@ -413,6 +433,8 @@ export const ar: Dictionary = {
     askSample: "اطلب عيّنة",
     relatedTitle: "قد يهمّك",
     relatedAccent: "أيضًا",
+    insightsTitle: "اقرأوا",
+    insightsAccent: "قبل الشراء",
   },
   about: {
     metaTitle: "من نحن",

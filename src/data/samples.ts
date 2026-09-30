@@ -283,4 +283,25 @@ export const defaultSettings: SiteSettings = {
     { value: "3", label: { en: "Sourcing regions", ru: "Региона закупок", ar: "مناطق توريد" } },
     { value: "24h", label: { en: "Reply time on inquiries", ru: "Время ответа на запрос", ar: "زمن الرد على الاستفسارات" } },
   ],
+  seo: {
+    indexing: true,
+    ogImage: "",
+    verification: { google: "", bing: "", yandex: "" },
+    pages: {},
+  },
+  analytics: { ga4: "", gtm: "", metaPixel: "", yandexMetrica: "", clarity: "", cloudflare: "" },
+  notifications: {
+    telegram: {
+      enabled: false,
+      chatId: "",
+      topics: {
+        inquiry: { enabled: true, threadId: "" },
+        inquiryCoffee: { enabled: false, threadId: "" },
+        inquiryCashew: { enabled: false, threadId: "" },
+        pipeline: { enabled: true, threadId: "" },
+        content: { enabled: false, threadId: "" },
+        system: { enabled: true, threadId: "" },
+      },
+    },
+  },
 };

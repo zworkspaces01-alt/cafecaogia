@@ -311,7 +311,7 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
               type="button"
               onClick={() => setUserPaused(!paused)}
               aria-label={paused ? t.play : t.pause}
-              className="grid size-10 place-items-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10"
+              className="grid size-11 place-items-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10"
             >
               {paused ? <Play className="size-4 rtl:-scale-x-100" /> : <Pause className="size-4" />}
             </button>
@@ -319,7 +319,7 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
               type="button"
               onClick={() => go(index - 1)}
               aria-label={t.previous}
-              className="grid size-10 place-items-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10"
+              className="grid size-11 place-items-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10"
             >
               <ArrowLeft className="size-4 rtl:-scale-x-100" />
             </button>
@@ -327,7 +327,7 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
               type="button"
               onClick={() => go(index + 1)}
               aria-label={t.next}
-              className="grid size-10 place-items-center rounded-full bg-lime text-forest transition-colors hover:bg-lime-deep"
+              className="grid size-11 place-items-center rounded-full bg-lime text-forest transition-colors hover:bg-lime-deep"
             >
               <ArrowRight className="size-4 rtl:-scale-x-100" />
             </button>

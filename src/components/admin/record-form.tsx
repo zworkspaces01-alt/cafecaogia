@@ -67,10 +67,19 @@ export function RecordForm({ entityKey, id, initial }: { entityKey: string; id: 
       case "textarea":
         return (
           <textarea
-            rows={field.name === "description" || field.name === "quote" ? 5 : 3}
+            rows={field.name === "body" ? 22 : field.name === "description" || field.name === "quote" ? 5 : 3}
             className={cn(inputClass, "resize-y")}
             dir={lang === "ar" ? "rtl" : undefined}
             placeholder={hint ?? field.placeholder}
+            value={(value as string) ?? ""}
+            onChange={(e) => set(field, e.target.value)}
+          />
+        );
+      case "date":
+        return (
+          <input
+            type="date"
+            className={cn(inputClass, "max-w-52")}
             value={(value as string) ?? ""}
             onChange={(e) => set(field, e.target.value)}
           />
@@ -114,7 +123,7 @@ export function RecordForm({ entityKey, id, initial }: { entityKey: string; id: 
             rows={5}
             className={cn(inputClass, "resize-y")}
             dir={lang === "ar" ? "rtl" : undefined}
-            placeholder={lang !== "en" ? ((english as string[]) ?? []).join("\n\n") : "Mỗi dòng là một đoạn văn"}
+            placeholder={lang !== "en" ? ((english as string[]) ?? []).join("\n\n") : (field.placeholder ?? "Mỗi dòng là một đoạn văn")}
             value={((value as string[]) ?? []).join("\n")}
             onChange={(e) => set(field, e.target.value.split("\n"))}
           />
@@ -143,8 +152,9 @@ export function RecordForm({ entityKey, id, initial }: { entityKey: string; id: 
   const title =
     String(values[entity.titleField] || "") ||
     `${entity.singular.charAt(0).toUpperCase()}${entity.singular.slice(1)} mới`;
-  const publicUrl =
-    entity.key === "products" && values.slug
+  const publicUrl = entity.publicPath
+    ? entity.publicPath(values)
+    : entity.key === "products" && values.slug
       ? `/en/products/${values.slug}`
       : entity.key === "team" && values.is_ceo
         ? "/en/about-ceo"

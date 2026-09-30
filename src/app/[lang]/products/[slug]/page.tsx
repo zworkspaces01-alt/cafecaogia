@@ -3,12 +3,15 @@ import Image from "next/image";
 import Link from "@/components/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, MapPin, Package, Scale } from "lucide-react";
+import { PostCard } from "@/components/post-card";
 import { ProductCard } from "@/components/product-card";
 import { ButtonLink, SectionHeading } from "@/components/ui";
+import { localeTags } from "@/i18n/config";
 import { format } from "@/i18n/format";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { imageUrl } from "@/lib/image-url";
+import { getPostsForProduct } from "@/lib/content";
 import { getProduct, getProductSlugs, getProducts } from "@/lib/products";
 import { site } from "@/lib/site";
 
@@ -22,20 +25,23 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/products/[
   const [product, locale, dict] = await Promise.all([getProduct((await params).slug), getLocale(), getDictionary()]);
   if (!product) return {};
   return {
-    title: format(dict.product.metaTitle, { name: product.name, category: dict.categories[product.category] }),
-    description: product.summary,
+    title:
+      product.seo_title?.trim() ||
+      format(dict.product.metaTitle, { name: product.name, category: dict.categories[product.category] }),
+    description: product.seo_description?.trim() || product.summary,
     alternates: localeAlternates(locale, `/products/${product.slug}`),
     openGraph: { images: [{ url: imageUrl(product.image) }] },
   };
 }
 
 export default async function ProductPage({ params }: PageProps<"/[lang]/products/[slug]">) {
-  const [product, dict] = await Promise.all([getProduct((await params).slug), getDictionary()]);
+  const [product, dict, locale] = await Promise.all([getProduct((await params).slug), getDictionary(), getLocale()]);
   if (!product) notFound();
   const t = dict.product;
   const categoryLabel = dict.categories[product.category];
 
-  const related = (await getProducts(product.category)).filter((p) => p.slug !== product.slug).slice(0, 3);
+  const [siblings, insights] = await Promise.all([getProducts(product.category), getPostsForProduct(product.slug)]);
+  const related = siblings.filter((p) => p.slug !== product.slug).slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -60,11 +66,11 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
       <section className="py-10 md:py-14">
         <div className="container-page">
           <nav aria-label={dict.common.breadcrumb} className="flex items-center gap-1.5 text-sm text-muted">
-            <Link href="/products" className="hover:text-forest">
+            <Link href="/products" className="-my-3 py-3 hover:text-forest">
               {t.products}
             </Link>
             <ChevronRight className="size-3.5 rtl:-scale-x-100" />
-            <Link href={`/products?category=${product.category}`} className="hover:text-forest">
+            <Link href={`/products?category=${product.category}`} className="-my-3 py-3 hover:text-forest">
               {categoryLabel}
             </Link>
             <ChevronRight className="size-3.5 rtl:-scale-x-100" />
@@ -143,14 +149,34 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
         </div>
       </section>
 
+      {insights.length > 0 && (
+        <section className="pb-20">
+          <div className="container-page">
+            <SectionHeading title={t.insightsTitle} accent={t.insightsAccent} />
+            <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {insights.slice(0, 3).map((post) => (
+                <li key={post.slug}>
+                  <PostCard
+                    post={post}
+                    categoryLabel={dict.insights.categories[post.category]}
+                    minRead={dict.insights.minRead}
+                    localeTag={localeTags[locale]}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
       {related.length > 0 && (
         <section className="bg-white py-20">
           <div className="container-page">
             <SectionHeading title={t.relatedTitle} accent={t.relatedAccent} />
-            <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-6 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-3">
               {related.map((p) => (
                 <li key={p.slug}>
-                  <ProductCard product={p} categoryLabel={dict.categories[p.category]} />
+                  <ProductCard product={p} categoryLabel={dict.categories[p.category]} compact />
                 </li>
               ))}
             </ul>

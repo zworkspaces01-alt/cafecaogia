@@ -4,12 +4,12 @@
   --color-ink: #13210f;
   --color-forest: #1d3518;
   --color-leaf: #2e5a23;
-  --color-moss: #5c7a4c;
+  --color-moss: #506b42;
   --color-lime: #d5f26b;
   --color-lime-deep: #b9dc45;
   --color-sand: #f3f3ee;
   --color-mist: #e7e9e1;
-  --color-muted: #6b7465;
+  --color-muted: #5f6859;
   --color-bean: #6a4428;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -165,6 +165,14 @@ html[lang="ar"] * {
 
 .motion-pending [data-word] {
   opacity: 0.14;
+}
+
+/* Background layers that move on every scroll frame (scrubbed parallax) get their own
+   compositor layer up front, instead of being promoted and dropped as scrolling starts and stops. */
+@media (prefers-reduced-motion: no-preference) {
+  :is([data-hero-bg], [data-slides-bg], [data-parallax]) {
+    will-change: transform;
+  }
 }
 
 /* Smoothly open FAQ answers where supported (Chromium); other browsers open instantly. */

@@ -5,14 +5,14 @@ import { CtaBanner } from "@/components/cta-banner";
 import { PageHero } from "@/components/page-hero";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
+import { pageMeta } from "@/lib/seo";
 import { photos } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
   return {
-    title: dict.processPage.metaTitle,
-    description: dict.processPage.metaDescription,
+    ...(await pageMeta("process", { title: dict.processPage.metaTitle, description: dict.processPage.metaDescription })),
     alternates: localeAlternates(locale, "/process"),
   };
 }

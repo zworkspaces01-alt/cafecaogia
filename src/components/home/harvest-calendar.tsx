@@ -1,3 +1,4 @@
+import { MoveHorizontal } from "lucide-react";
 import { SectionHeading } from "@/components/ui";
 import { localeTags } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/server";
@@ -37,12 +38,19 @@ export async function HarvestCalendar() {
           description={t.description}
         />
 
-        <div data-reveal className="relative mt-12 overflow-x-auto rounded-3xl bg-sand p-4 md:p-6">
+        <div data-reveal className="relative mt-12 rounded-3xl bg-sand p-4 md:p-6">
+          <p className="mb-3 flex items-center gap-2 text-xs text-muted md:hidden">
+            <MoveHorizontal aria-hidden className="size-4" />
+            {t.swipeHint}
+          </p>
+          {/* The crop column stays pinned while the months scroll; the edge fade hints at more. */}
+          <div className="relative">
+          <div className="relative overflow-x-auto">
           <table className="w-full min-w-[720px] border-separate border-spacing-x-1 border-spacing-y-2 text-sm">
             <caption className="sr-only">{t.caption}</caption>
             <thead>
               <tr>
-                <th scope="col" className="w-40 text-start font-normal text-muted">
+                <th scope="col" className="sticky start-0 z-10 w-28 bg-sand text-start font-normal text-muted md:w-40">
                   <span className="sr-only">{t.cropColumn}</span>
                 </th>
                 {months.map((m, i) => (
@@ -60,7 +68,7 @@ export async function HarvestCalendar() {
             <tbody data-grow-group>
               {crops.map((crop) => (
                 <tr key={crop.name}>
-                  <th scope="row" className="pe-4 text-start">
+                  <th scope="row" className="sticky start-0 z-10 bg-sand pe-3 text-start md:pe-4">
                     <span className="block font-medium text-forest">{crop.name}</span>
                     <span className="block text-xs font-normal text-muted">{crop.region}</span>
                   </th>
@@ -87,6 +95,12 @@ export async function HarvestCalendar() {
               ))}
             </tbody>
           </table>
+          </div>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 end-0 w-10 bg-gradient-to-l from-sand to-transparent md:hidden rtl:bg-gradient-to-r"
+            />
+          </div>
 
           <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted">
             <li className="flex items-center gap-2">

@@ -19,12 +19,15 @@ export function SiteHeader({
   common,
   menu,
   whatsappHref,
+  showInsights,
 }: {
   locale: Locale;
   nav: Dictionary["nav"];
   common: Dictionary["common"];
   menu: { products: MenuProduct[]; t: Dictionary["megaMenu"]; categories: Dictionary["categories"] };
   whatsappHref: string;
+  /** The Insights link only appears once at least one article is published. */
+  showInsights: boolean;
 }) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
@@ -59,6 +62,7 @@ export function SiteHeader({
 
   // Path without the locale prefix, e.g. "/ru/products/x" → "/products/x".
   const path = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, "") || "/";
+  const items = nav.filter((item) => item.href !== "/insights" || showInsights);
   const isActive = (href: string) => (href === "/" ? path === "/" : !href.includes("#") && path.startsWith(href));
 
   return (
@@ -76,7 +80,7 @@ export function SiteHeader({
           aria-label={common.mainNav}
           className="hidden items-center gap-1 rounded-full border border-white/20 bg-white/10 p-1 backdrop-blur-md lg:flex"
         >
-          {nav
+          {items
             .filter((item) => item.href !== "/contact")
             .map((item) =>
               item.key === "products" ? (
@@ -114,7 +118,7 @@ export function SiteHeader({
             rel="noopener noreferrer"
             aria-label={common.chatWhatsApp}
             title={common.chatWhatsApp}
-            className="group relative grid size-10 shrink-0 place-items-center rounded-full bg-[#25d366] text-white shadow-md shadow-[#25d366]/30 transition-transform hover:scale-110"
+            className="group relative grid size-11 shrink-0 place-items-center rounded-full bg-[#25d366] text-white shadow-md shadow-[#25d366]/30 transition-transform hover:scale-110"
           >
             <span aria-hidden className="absolute inset-0 animate-wa-ping rounded-full bg-[#25d366] [animation-duration:3.2s]" />
             <WhatsAppIcon className="relative size-5" />
@@ -128,7 +132,7 @@ export function SiteHeader({
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="grid size-10 place-items-center rounded-full border border-white/25 text-white lg:hidden"
+            className="grid size-11 place-items-center rounded-full border border-white/25 text-white lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? common.closeMenu : common.openMenu}
@@ -153,9 +157,9 @@ export function SiteHeader({
         <nav
           id="mobile-nav"
           aria-label={common.mobileNav}
-          className="container-page mt-3 grid gap-1 pb-4 lg:hidden [&>*]:animate-rise [&>*:nth-child(2)]:[animation-delay:40ms] [&>*:nth-child(3)]:[animation-delay:80ms] [&>*:nth-child(4)]:[animation-delay:120ms] [&>*:nth-child(5)]:[animation-delay:160ms] [&>*:nth-child(6)]:[animation-delay:200ms]"
+          className="container-page mt-3 grid gap-1 pb-4 lg:hidden [&>*]:animate-rise [&>*:nth-child(2)]:[animation-delay:40ms] [&>*:nth-child(3)]:[animation-delay:80ms] [&>*:nth-child(4)]:[animation-delay:120ms] [&>*:nth-child(5)]:[animation-delay:160ms] [&>*:nth-child(6)]:[animation-delay:200ms] [&>*:nth-child(7)]:[animation-delay:240ms]"
         >
-          {nav.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}

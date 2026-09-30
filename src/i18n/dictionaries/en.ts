@@ -19,6 +19,7 @@ export const en = {
     products: "Products",
     about: "About Us",
     process: "Our Process",
+    insights: "Insights",
     contact: "Contact",
   },
   common: {
@@ -251,6 +252,7 @@ export const en = {
     accent: "Around the Seasons",
     description: "Contract early to secure the best new-crop lots. Stock from the previous crop ships year-round.",
     caption: "Harvest and new-crop shipping months for Robusta, Arabica and cashew",
+    swipeHint: "Swipe sideways to see all 12 months",
     cropColumn: "Crop",
     crops: [
       { name: "Robusta", region: "Dak Lak · Gia Lai" },
@@ -410,6 +412,25 @@ export const en = {
     all: "All products",
     empty: "No products in this category yet.",
   },
+  insights: {
+    metaTitle: "Insights — Guides & Market Updates on Vietnamese Coffee and Cashew",
+    metaDescription:
+      "Buyer guides, market updates and company news from Cao Gia: coffee and cashew grades, specifications, Incoterms and shipping from Vietnam.",
+    eyebrow: "Insights",
+    title: "Know Your Origin,",
+    accent: "Buy with Confidence",
+    description:
+      "Practical guides on grades, specifications and shipping, plus market updates from Vietnam's coffee and cashew regions.",
+    filterLabel: "Filter by topic",
+    all: "All articles",
+    categories: { guide: "Buyer guide", market: "Market update", news: "Company news" },
+    minRead: "{n} min read",
+    empty: "No articles on this topic yet.",
+    productsTitle: "Products in this article",
+    moreTitle: "More",
+    moreAccent: "from Insights",
+    allArticles: "All articles",
+  },
   product: {
     metaTitle: "{name} — {category} from Vietnam",
     products: "Products",
@@ -422,6 +443,8 @@ export const en = {
     askSample: "Ask for a sample",
     relatedTitle: "You may also",
     relatedAccent: "be interested in",
+    insightsTitle: "Read before",
+    insightsAccent: "you buy",
   },
   about: {
     metaTitle: "About Us",

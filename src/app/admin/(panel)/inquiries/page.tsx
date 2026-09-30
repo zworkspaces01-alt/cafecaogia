@@ -4,6 +4,7 @@ import { InquiryStatusSelect } from "@/components/admin/inquiry-status";
 import { Badge, PageTitle } from "@/components/admin/ui";
 import { WhatsAppIcon } from "@/components/icons/whatsapp";
 import { requireAdmin } from "@/lib/admin/auth";
+import { channelLabels, channelOf, sourceLabel } from "@/lib/attribution";
 
 const languageNames: Record<string, string> = { en: "Tiếng Anh", ru: "Tiếng Nga", ar: "Tiếng Ả Rập" };
 const statusLabels: Record<string, string> = {
@@ -68,6 +69,8 @@ export default async function InquiriesPage({ searchParams }: PageProps<"/admin/
                   ["Sản phẩm", q.product_slug],
                   ["Số lượng", q.quantity],
                   ["Incoterm", q.incoterm],
+                  ["Nguồn", q.attribution ? `${sourceLabel(q.attribution)} · ${channelLabels[channelOf(q.attribution)]}` : null],
+                  ["Trang vào đầu tiên", q.attribution?.landing],
                 ]
                   .filter(([label, value]) => value || label === "Điện thoại")
                   .map(([label, value]) => (

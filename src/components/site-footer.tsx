@@ -3,10 +3,10 @@ import { WhatsAppIcon } from "@/components/icons/whatsapp";
 import Link from "@/components/link";
 import { Logo } from "@/components/logo";
 import { getDictionary } from "@/i18n/server";
-import { getCeo, getSettings, whatsappLink } from "@/lib/content";
+import { getCeo, getPosts, getSettings, whatsappLink } from "@/lib/content";
 
 export async function SiteFooter() {
-  const [dict, settings, ceo] = await Promise.all([getDictionary(), getSettings(), getCeo()]);
+  const [dict, settings, ceo, posts] = await Promise.all([getDictionary(), getSettings(), getCeo(), getPosts()]);
   const { links } = dict.footer;
   const { company, contact } = settings;
 
@@ -35,6 +35,7 @@ export async function SiteFooter() {
         { href: "/about", label: dict.nav.about },
         ...(ceo ? [{ href: "/about-ceo", label: links.leadership }] : []),
         { href: "/process", label: dict.nav.process },
+        ...(posts.length > 0 ? [{ href: "/insights", label: dict.nav.insights }] : []),
         { href: "/products", label: links.allProducts },
         { href: "/company-profile", label: links.profile },
         { href: "/contact", label: dict.common.requestQuote },
@@ -63,7 +64,7 @@ export async function SiteFooter() {
             </li>
             <li className="flex gap-3">
               <Mail className="mt-0.5 size-4 shrink-0 text-lime" />
-              <a href={`mailto:${contact.email}`} className="hover:text-lime">
+              <a href={`mailto:${contact.email}`} className="-my-1.5 py-1.5 hover:text-lime">
                 {contact.email}
               </a>
             </li>
@@ -73,7 +74,7 @@ export async function SiteFooter() {
                 href={whatsappLink(contact.whatsapp)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-lime"
+                className="-my-1.5 py-1.5 hover:text-lime"
                 dir="ltr"
               >
                 {contact.whatsapp}
@@ -105,7 +106,7 @@ export async function SiteFooter() {
               <ul className="mt-4 space-y-3 text-sm text-white/70">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="hover:text-white">
+                    <Link href={link.href} className="-my-1.5 inline-block py-1.5 hover:text-white">
                       {link.label}
                     </Link>
                   </li>

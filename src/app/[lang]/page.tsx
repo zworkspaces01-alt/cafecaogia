@@ -34,6 +34,7 @@ export default async function HomePage() {
   }));
   const featured = [...products.filter((p) => p.featured), ...products.filter((p) => !p.featured)].slice(0, 6);
 
+  const sameAs = Object.values(settings.socials).filter(Boolean);
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -45,6 +46,7 @@ export default async function HomePage() {
     telephone: contact.phone,
     foundingDate: String(company.foundingYear),
     taxID: company.enterpriseCode,
+    ...(sameAs.length > 0 && { sameAs }),
     address: {
       "@type": "PostalAddress",
       streetAddress: contact.address.street,

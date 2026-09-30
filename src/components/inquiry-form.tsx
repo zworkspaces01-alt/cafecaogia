@@ -1,14 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 import { submitInquiry, type InquiryState } from "@/app/actions";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/en";
+import { readAttribution, track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const inputClass =
-  "w-full rounded-xl border border-mist bg-sand px-4 py-3 text-sm text-forest outline-none transition placeholder:text-muted/70 focus:border-leaf focus:bg-white focus:ring-2 focus:ring-lime/60";
+  "w-full rounded-xl border border-mist bg-sand px-4 py-3 text-base text-forest outline-none sm:text-sm transition placeholder:text-muted/70 focus:border-leaf focus:bg-white focus:ring-2 focus:ring-lime/60";
 
 function Field({
   label,
@@ -55,6 +56,16 @@ export function InquiryForm({
   const [state, action, pending] = useActionState<InquiryState, FormData>(submitInquiry, { status: "idle" });
   const errors = state.fieldErrors ?? {};
 
+  // Attach where the visitor came from (read at submit time: it lives in localStorage).
+  const submit = (form: FormData) => {
+    form.set("attribution", JSON.stringify(readAttribution() ?? {}));
+    action(form);
+  };
+
+  useEffect(() => {
+    if (state.status === "success") track("generate_lead", { form: "inquiry", product: defaultProduct });
+  }, [state.status, defaultProduct]);
+
   if (state.status === "success") {
     return (
       <div className="flex animate-rise flex-col items-center rounded-3xl bg-white p-10 text-center md:p-14" role="status">
@@ -68,7 +79,7 @@ export function InquiryForm({
   const describedBy = (name: keyof typeof errors) => (errors[name] ? `${name}-error` : undefined);
 
   return (
-    <form action={action} data-reveal className="relative rounded-3xl bg-white p-6 md:p-10" noValidate>
+    <form action={submit} data-reveal className="relative rounded-3xl bg-white p-6 md:p-10" noValidate>
       <input type="hidden" name="lang" value={locale} />
       {defaultProduct && <input type="hidden" name="product" value={defaultProduct} />}
       <div className="grid gap-5 sm:grid-cols-2">

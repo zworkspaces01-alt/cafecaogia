@@ -1,7 +1,18 @@
 // Describes each editable content type. The admin list and edit screens are generated from this,
 // so adding a field here (and to the database) is all it takes to make it editable.
 
-export type FieldType = "text" | "textarea" | "number" | "boolean" | "select" | "image" | "file" | "gallery" | "lines" | "specs";
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "boolean"
+  | "select"
+  | "date"
+  | "image"
+  | "file"
+  | "gallery"
+  | "lines"
+  | "specs";
 
 export type Field = {
   name: string;
@@ -27,6 +38,10 @@ export type Entity = {
   hasTranslations: boolean;
   fields: Field[];
   defaults: Record<string, unknown>;
+  /** Admin list order; defaults to sort_order. */
+  listOrder?: { column: string; ascending: boolean };
+  /** Page on the English website that shows this record, for the "view on website" button. */
+  publicPath?: (values: Record<string, unknown>) => string | null;
 };
 
 const common: Field[] = [
@@ -76,6 +91,20 @@ export const entities: Entity[] = [
       { name: "packaging", label: "Đóng gói", type: "text", translatable: true },
       { name: "moq", label: "Đơn hàng tối thiểu (MOQ)", type: "text", translatable: true },
       { name: "featured", label: "Nổi bật trên trang chủ", type: "boolean" },
+      {
+        name: "seo_title",
+        label: "Tiêu đề SEO",
+        type: "text",
+        translatable: true,
+        help: "Tiêu đề hiện trên Google. Để trống sẽ dùng “Tên sản phẩm — Danh mục”. Nên dưới 60 ký tự; “| Cao Gia” được thêm tự động.",
+      },
+      {
+        name: "seo_description",
+        label: "Mô tả SEO",
+        type: "textarea",
+        translatable: true,
+        help: "Đoạn mô tả dưới tiêu đề trên Google. Để trống sẽ dùng phần Tóm tắt. Nên 120–160 ký tự.",
+      },
       ...common,
     ],
     defaults: { ...baseDefaults, category: "coffee", featured: false, gallery: [], specs: [] },
@@ -179,6 +208,66 @@ export const entities: Entity[] = [
       ...common,
     ],
     defaults: { ...baseDefaults, is_ceo: false, bio: [] },
+  },
+  {
+    key: "posts",
+    table: "posts",
+    label: "Bài viết",
+    singular: "bài viết",
+    description: "Mục Insights: hướng dẫn cho người mua, cập nhật thị trường, tin công ty.",
+    titleField: "title",
+    subtitleField: "published_at",
+    imageField: "cover",
+    hasTranslations: true,
+    listOrder: { column: "published_at", ascending: false },
+    publicPath: (values) => (values.slug ? `/en/insights/${values.slug}` : null),
+    fields: [
+      { name: "title", label: "Tiêu đề", type: "text", translatable: true, required: true },
+      {
+        name: "slug",
+        label: "Đường dẫn (slug)",
+        type: "text",
+        required: true,
+        help: "Chữ thường, không dấu, nối bằng gạch ngang. Ví dụ: cashew-kernel-grades-explained. Không nên đổi sau khi đã đăng.",
+      },
+      {
+        name: "category",
+        label: "Chủ đề",
+        type: "select",
+        required: true,
+        options: [
+          { value: "guide", label: "Hướng dẫn cho người mua" },
+          { value: "market", label: "Cập nhật thị trường" },
+          { value: "news", label: "Tin công ty" },
+        ],
+      },
+      { name: "published_at", label: "Ngày đăng", type: "date", required: true, help: "Bài mới nhất hiển thị đầu tiên." },
+      {
+        name: "excerpt",
+        label: "Tóm tắt",
+        type: "textarea",
+        translatable: true,
+        help: "1–2 câu. Hiện trên thẻ bài viết và làm mô tả trên Google.",
+      },
+      { name: "cover", label: "Ảnh bìa", type: "image", help: "Ảnh ngang, tối thiểu 1600px chiều rộng." },
+      {
+        name: "body",
+        label: "Nội dung",
+        type: "textarea",
+        translatable: true,
+        required: true,
+        help: "Cách dòng trống giữa các đoạn. “## ” đầu dòng = tiêu đề mục, “### ” = tiêu đề nhỏ, “- ” = gạch đầu dòng, “1. ” = danh sách số, “> ” = khung ghi chú. **chữ đậm**, *chữ nghiêng*, [chữ liên kết](/contact). Một đoạn chỉ có liên kết sẽ thành nút bấm.",
+      },
+      {
+        name: "product_slugs",
+        label: "Sản phẩm liên quan",
+        type: "lines",
+        placeholder: "Mỗi dòng một slug sản phẩm, ví dụ:\nrobusta-s18-clean\ncashew-ww320",
+        help: "Bài viết sẽ hiện ở cuối trang của các sản phẩm này, và sản phẩm hiện bên cạnh bài viết.",
+      },
+      ...common,
+    ],
+    defaults: { ...baseDefaults, category: "guide", body: "", product_slugs: [] },
   },
 ];
 
