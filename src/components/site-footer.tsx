@@ -23,9 +23,9 @@ export async function SiteFooter() {
     {
       title: dict.footer.cashew,
       links: [
-        { href: "/products/cashew-kernels-w240", label: links.w240 },
-        { href: "/products/cashew-kernels-w320", label: links.w320 },
-        { href: "/products/cashew-splits-and-pieces", label: links.splits },
+        { href: "/products/cashew-ww240", label: links.w240 },
+        { href: "/products/cashew-ww320", label: links.w320 },
+        { href: "/products/cashew-ws", label: links.splits },
         { href: "/products/roasted-salted-cashews", label: links.roasted },
       ],
     },

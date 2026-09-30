@@ -97,7 +97,7 @@ export const entities: Entity[] = [
       { name: "company", label: "Công ty", type: "text" },
       { name: "country", label: "Quốc gia", type: "text", translatable: true },
       { name: "flag", label: "Cờ (emoji)", type: "text", placeholder: "🇩🇪" },
-      { name: "product_slug", label: "Sản phẩm đã mua (slug)", type: "text", placeholder: "cashew-kernels-w320" },
+      { name: "product_slug", label: "Sản phẩm đã mua (slug)", type: "text", placeholder: "cashew-ww320" },
       { name: "since", label: "Hợp tác từ năm", type: "number" },
       { name: "rating", label: "Số sao (1–5)", type: "number" },
       { name: "image", label: "Ảnh minh hoạ", type: "image" },

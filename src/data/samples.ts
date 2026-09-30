@@ -40,13 +40,13 @@ export const sampleTestimonials: TestimonialRow[] = [
   {
     id: "sample-testimonial-2",
     quote:
-      "Clear specs, quick documents and honest updates when vessels were delayed. Switching our W320 supply to Cao Gia was easy.",
+      "Clear specs, quick documents and honest updates when vessels were delayed. Switching our WW320 supply to Cao Gia was easy.",
     name: "Marcus Reid",
     role: "Procurement Manager",
     company: "Mirabel Foods",
     country: "United States",
     flag: "🇺🇸",
-    product_slug: "cashew-kernels-w320",
+    product_slug: "cashew-ww320",
     since: 2022,
     rating: 5,
     image: photos.cashewPile,
@@ -54,12 +54,12 @@ export const sampleTestimonials: TestimonialRow[] = [
     translations: {
       ru: {
         quote:
-          "Понятные спецификации, быстрые документы и честная информация о задержках судов. Перевести закупки W320 на Cao Gia было просто.",
+          "Понятные спецификации, быстрые документы и честная информация о задержках судов. Перевести закупки WW320 на Cao Gia было просто.",
         role: "Менеджер по закупкам",
         country: "США",
       },
       ar: {
-        quote: "مواصفات واضحة ومستندات سريعة وتحديثات صادقة عند تأخر السفن. كان نقل توريد W320 إلى كاو جيا أمرًا سهلًا.",
+        quote: "مواصفات واضحة ومستندات سريعة وتحديثات صادقة عند تأخر السفن. كان نقل توريد WW320 إلى كاو جيا أمرًا سهلًا.",
         role: "مدير المشتريات",
         country: "الولايات المتحدة",
       },
@@ -279,7 +279,7 @@ export const defaultSettings: SiteSettings = {
   memberships: [],
   stats: [
     { value: "2018", label: { en: "Established", ru: "Год основания", ar: "سنة التأسيس" } },
-    { value: "9", label: { en: "Export grades in our catalog", ru: "Экспортных позиций в каталоге", ar: "درجة تصدير في كتالوجنا" } },
+    { value: "37", label: { en: "Export grades in our catalog", ru: "Экспортных позиций в каталоге", ar: "درجة تصدير في كتالوجنا" } },
     { value: "3", label: { en: "Sourcing regions", ru: "Региона закупок", ar: "مناطق توريد" } },
     { value: "24h", label: { en: "Reply time on inquiries", ru: "Время ответа на запрос", ar: "زمن الرد على الاستفسارات" } },
   ],

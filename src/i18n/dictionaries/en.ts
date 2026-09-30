@@ -106,7 +106,7 @@ export const en = {
         lead: "Graded to",
         accent: "AFI Standards",
         description:
-          "W240, W320, splits and roasted cashews — steamed, peeled and hand-graded in Vietnam's cashew heartland.",
+          "White wholes from WW160 to WW450, splits, pieces, roasted and flavoured cashews — steamed, peeled and hand-graded in Vietnam's cashew heartland.",
         primary: "Explore Cashews",
         secondary: "Request a Quote",
       },
@@ -297,12 +297,12 @@ export const en = {
       {
         title: "Importers & Distributors",
         body: "Full-container programs, forward contracts and reliable grades that keep your warehouses supplied year-round.",
-        products: ["Robusta G2 S13/S14", "Cashew W320"],
+        products: ["Robusta G2 S13/S14", "Cashew WW320"],
       },
       {
         title: "Food & Snack Manufacturers",
         body: "Ingredient-grade cashews and coffee with full specs, food-safety paperwork and steady monthly deliveries.",
-        products: ["Cashew splits & pieces", "Cashew W240"],
+        products: ["Cashew Large Pieces (LP)", "Cashew White Splits (WS)"],
       },
       {
         title: "Retail & Private Label",
@@ -385,9 +385,9 @@ export const en = {
       robustaWetPolished: "Robusta S18 Wet Polished",
       arabicaS18: "Arabica S18 Clean",
       allCoffee: "All coffee grades",
-      w240: "Cashew W240",
-      w320: "Cashew W320",
-      splits: "Splits & Pieces",
+      w240: "Cashew WW240",
+      w320: "Cashew WW320",
+      splits: "White Splits (WS)",
       roasted: "Roasted Salted",
       allProducts: "All Products",
       leadership: "Leadership",
@@ -566,7 +566,7 @@ export const en = {
         title: "Processing",
         lead: "Natural, washed and honey processing for coffee; steaming, shelling, drying and peeling for cashews.",
         points: ["Hulling, polishing and density sorting", "Optical color sorting for both crops", "Grading by screen size or kernel count"],
-        meta: "Coffee S16–S18 · Cashew W240–W320",
+        meta: "Coffee S13–S18 · Cashew WW160–WW450",
       },
       {
         title: "Quality Control",
