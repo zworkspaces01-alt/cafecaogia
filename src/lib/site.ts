@@ -1,9 +1,27 @@
 // Static site configuration. Company details, contacts and stats are edited in the CMS
 // (site_settings); translatable UI text lives in src/i18n/dictionaries.
 
+/**
+ * Canonical origin for metadata, sitemap and hreflang. Tolerates a missing scheme, spaces or a
+ * trailing slash in NEXT_PUBLIC_SITE_URL, and falls back to the Vercel production domain.
+ */
+function resolveSiteUrl() {
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL ||
+    "localhost:3000";
+  const withScheme = /^https?:\/\//i.test(raw) ? raw : `${raw.startsWith("localhost") ? "http" : "https"}://${raw}`;
+  try {
+    return new URL(withScheme).origin;
+  } catch {
+    return "http://localhost:3000";
+  }
+}
+
 export const site = {
   name: "Cao Gia",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: resolveSiteUrl(),
   /** Official lookup for the enterprise code shown on the About page. */
   registryUrl: "https://dangkykinhdoanh.gov.vn",
   incoterms: ["FOB", "CFR", "CIF", "EXW"],
