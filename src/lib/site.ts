@@ -6,11 +6,10 @@
  * trailing slash in NEXT_PUBLIC_SITE_URL, and falls back to the Vercel production domain.
  */
 function resolveSiteUrl() {
-  const raw =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
-    process.env.VERCEL_URL ||
-    "localhost:3000";
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  // On Vercel a localhost value (e.g. copied from .env.local) would poison canonical URLs and the sitemap.
+  const usable = configured && !(process.env.VERCEL && /localhost|127\.0\.0\.1/.test(configured)) ? configured : "";
+  const raw = usable || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || "localhost:3000";
   const withScheme = /^https?:\/\//i.test(raw) ? raw : `${raw.startsWith("localhost") ? "http" : "https"}://${raw}`;
   try {
     return new URL(withScheme).origin;
