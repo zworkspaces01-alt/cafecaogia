@@ -302,7 +302,7 @@ export const en = {
       {
         title: "Importers & Distributors",
         body: "Full-container programs, forward contracts and reliable grades that keep your warehouses supplied year-round.",
-        products: ["Robusta G2 S13/S14", "Cashew WW320"],
+        products: ["Robusta S13/S14", "Cashew WW320"],
       },
       {
         title: "Food & Snack Manufacturers",

@@ -72,6 +72,17 @@ export const factoryPhotos = {
   containerSeal: own("container-seal"),
   roastedBags: own("roasted-beans-bags"),
   roastingLine: own("roasting-packing-line"),
+  // Sample trays photographed with their spec cards — the main image of each grade's page.
+  gradeRobustaS18: own("grade-robusta-s18"),
+  gradeRobustaS16: own("grade-robusta-s16"),
+  gradeRobustaS13: own("grade-robusta-s13"),
+  gradeArabicaS18: own("grade-arabica-s18"),
+  gradeArabicaS16: own("grade-arabica-s16"),
+  gradeArabicaS13: own("grade-arabica-s13"),
+  arabicaS16Washed: own("arabica-s16-washed"),
+  greenBeansBasket: own("green-beans-basket"),
+  greenBeansGloves: own("green-beans-gloves"),
+  greenBeansPalm: own("green-beans-palm"),
 };
 
 /** Buyers visiting Cao Gia (published with their agreement). Same order as `about.visitPhotos` (alt text). */
