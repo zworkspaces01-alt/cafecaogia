@@ -5,15 +5,15 @@ import { useState } from "react";
 import { FlaskConical, Handshake, Minus, Plus, Ship, Sprout } from "lucide-react";
 import { SectionHeading } from "@/components/ui";
 import type { Dictionary } from "@/i18n/dictionaries/en";
-import { photos } from "@/lib/site";
+import { factoryPhotos } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Icon and photo per item; text comes from the dictionary (strengths.items, same order).
 const visuals = [
-  { icon: Sprout, image: photos.harvesters },
-  { icon: FlaskConical, image: photos.greenBeansScoop },
-  { icon: Handshake, image: photos.coffeeSack },
-  { icon: Ship, image: photos.port },
+  { icon: Sprout, image: factoryPhotos.dryingBeds },
+  { icon: FlaskConical, image: factoryPhotos.gradingLine },
+  { icon: Handshake, image: factoryPhotos.palletStack },
+  { icon: Ship, image: factoryPhotos.containerVacuumBags },
 ];
 
 export function Strengths({ t }: { t: Dictionary["strengths"] }) {

@@ -4,7 +4,7 @@ import { Eyebrow } from "@/components/ui";
 import { PartnerMark } from "@/components/partner-logo";
 import { getPartners } from "@/lib/content";
 import { getDictionary } from "@/i18n/server";
-import { markets, photos } from "@/lib/site";
+import { markets, factoryPhotos } from "@/lib/site";
 
 export async function Markets() {
   const [dict, partners] = await Promise.all([getDictionary(), getPartners()]);
@@ -69,7 +69,7 @@ export async function Statement() {
               data-word
               className="relative mx-2 inline-block h-[0.85em] w-[2.2em] translate-y-[0.1em] overflow-hidden rounded-full align-baseline"
             >
-              <Image src={photos.cherriesHand} alt="" fill sizes="120px" className="object-cover" />
+              <Image src={factoryPhotos.greenBeansHand} alt="" fill sizes="120px" className="object-cover" />
             </span>
             <Words text={t.part3} />
           </span>

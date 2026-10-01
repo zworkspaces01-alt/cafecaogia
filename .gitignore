@@ -49,3 +49,5 @@ next-env.d.ts
 
 # Raw Lighthouse JSON (archived as cafecaogia-audit/lighthouse-*.tar.gz)
 /cafecaogia-audit/performance/
+# Raw photos as received (faces, plates, GPS EXIF) — publish only processed copies in /public/photos
+/public/images/

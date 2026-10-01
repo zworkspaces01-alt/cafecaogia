@@ -79,7 +79,7 @@ export const en = {
     slides: [
       {
         label: "Vietnamese Harvest",
-        alt: "Coffee plants heavy with green cherries on a farm in Vietnam's Central Highlands",
+        alt: "Tagged jute sacks of green coffee lined up in front of the grading silos at our warehouse",
         eyebrow: "Coffee & Cashew · Made in Vietnam",
         title: "Vietnam's Harvest,",
         lead: "Delivered to",
@@ -91,7 +91,7 @@ export const en = {
       },
       {
         label: "Green Coffee",
-        alt: "Ripening Robusta coffee cherries on the branch",
+        alt: "Workers raking coffee on raised drying beds in the Central Highlands",
         eyebrow: "Green Coffee · Dak Lak & Lam Dong",
         title: "Bold Robusta,",
         lead: "Bright",
@@ -115,7 +115,7 @@ export const en = {
       },
       {
         label: "Global Shipping",
-        alt: "Shipping containers stacked at a busy port at sunset",
+        alt: "Sacks of green coffee going up a conveyor into a shipping container",
         eyebrow: "Export & Logistics",
         title: "From Our Farms",
         lead: "to",
@@ -465,7 +465,7 @@ export const en = {
       "We work directly with farm households and cooperatives in Dak Lak, Lam Dong and Binh Phuoc, run grading and quality control ourselves, and handle every step of documentation and logistics from our office in Hanoi.",
       "The result is a supply chain that is shorter, more transparent and more reliable — for the families who grow the crop and for the companies who buy it.",
     ],
-    harvesterAlt: "A farmer harvesting ripe coffee cherries",
+    harvesterAlt: "Freshly picked coffee cherries poured into a sorting tank",
     kernelsAlt: "Graded white whole cashew kernels",
     valuesEyebrow: "Our Values",
     valuesTitle: "What Every Container",

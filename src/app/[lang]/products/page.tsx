@@ -7,7 +7,7 @@ import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getProducts } from "@/lib/products";
 import { pageMeta } from "@/lib/seo";
-import { photos } from "@/lib/site";
+import { factoryPhotos } from "@/lib/site";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +36,7 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
 
   return (
     <>
-      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={photos.coffeeSack} />
+      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.forklift} />
 
       <section className="py-16 md:py-20">
         <div className="container-page">

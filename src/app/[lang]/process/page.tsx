@@ -6,7 +6,7 @@ import { PageHero } from "@/components/page-hero";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { pageMeta } from "@/lib/seo";
-import { photos } from "@/lib/site";
+import { factoryPhotos, photos } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,11 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
 // Icon and photo per step, same order as `processPage.steps` in the dictionaries.
 const visuals = [
   { icon: Trees, image: photos.hillside },
-  { icon: Sprout, image: photos.harvester },
-  { icon: Factory, image: photos.cashewRaw },
-  { icon: ClipboardCheck, image: photos.greenBeans },
-  { icon: Package, image: photos.coffeeSack },
-  { icon: Ship, image: photos.port },
+  { icon: Sprout, image: factoryPhotos.cherrySorting },
+  { icon: Factory, image: factoryPhotos.greenhouseDrying },
+  { icon: ClipboardCheck, image: factoryPhotos.greenBeansHand },
+  { icon: Package, image: factoryPhotos.stacking },
+  { icon: Ship, image: factoryPhotos.containerLoading },
 ];
 
 export default async function ProcessPage() {
@@ -32,7 +32,7 @@ export default async function ProcessPage() {
 
   return (
     <>
-      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={photos.harvesters} />
+      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.gradingLine} />
 
       <section className="py-20 md:py-28">
         <div className="container-page">
