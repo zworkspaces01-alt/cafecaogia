@@ -43,24 +43,27 @@ const ROWS = 8;
 const MAX_SUBCOLUMNS = 2;
 
 /** One sub-column: `more` is how many products it hides behind its "view all" row. */
-type Group = { label?: string; count: number; shown: MenuProduct[]; more: number };
+type Group = { label?: string; count: number; shown: MenuProduct[]; more: number; below?: Group };
 
 /** Keep the panel a fixed height: a long list ends in a "view all" row instead of growing. */
 const fit = (items: MenuProduct[], rows: number) => (items.length > rows ? items.slice(0, rows - 1) : items);
 
-/** Coffee splits into one column per variety (read from the slug: "arabica-…" vs "robusta-…"). */
+/** Coffee splits into one column per variety, read from the slug: "robusta-…", "arabica-…", "roasted-…". */
 function coffeeGroups(items: MenuProduct[], t: Dictionary["megaMenu"]): Group[] {
   const arabica = items.filter((p) => p.slug.startsWith("arabica"));
-  const robusta = items.filter((p) => !p.slug.startsWith("arabica"));
+  const roasted = items.filter((p) => p.slug.startsWith("roasted"));
+  const robusta = items.filter((p) => !arabica.includes(p) && !roasted.includes(p));
+  const group = (label: string, list: MenuProduct[], rows = ROWS): Group => {
+    const shown = fit(list, rows);
+    return { label, count: list.length, shown, more: list.length - shown.length };
+  };
+  // Roasted blends sit under Arabica (the shorter list) instead of taking a third column.
+  const short = arabica.length > 0 ? group(t.arabica, arabica, ROWS - Math.min(roasted.length, 3) - 1) : null;
+  const roastedGroup = roasted.length > 0 ? group(t.roasted, roasted, 3) : undefined;
   return [
-    { label: t.robusta, items: robusta },
-    { label: t.arabica, items: arabica },
-  ]
-    .filter((g) => g.items.length > 0)
-    .map(({ label, items }) => {
-      const shown = fit(items, ROWS);
-      return { label, count: items.length, shown, more: items.length - shown.length };
-    });
+    ...(robusta.length > 0 ? [group(t.robusta, robusta)] : []),
+    ...(short ? [{ ...short, below: roastedGroup }] : roastedGroup ? [roastedGroup] : []),
+  ];
 }
 
 /** Other categories fill up to MAX_SUBCOLUMNS columns of ROWS, top to bottom, with one "view all" at the end. */
@@ -104,6 +107,60 @@ export function MegaMenuPanel({
       return { ...column, items, groups, span: groups.length };
     })
     .filter((column) => column.items.length > 0);
+  /** One labelled product list inside a category column. */
+  const renderGroup = (group: Group, g: number, category: string, col: number) => (
+    <>
+      {group.label && (
+        <p className="px-1.5 pb-1 text-[11px] font-medium tracking-[0.14em] text-muted uppercase">
+          {group.label} <span className="tabular-nums">· {group.count}</span>
+        </p>
+      )}
+      <ul className="grid grid-cols-1 gap-y-0.5">
+        {group.shown.map((product, i) => (
+          <li
+            key={product.slug}
+            className="animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both]"
+            style={{ animationDelay: `${80 + ((col * 2 + g) * 3 + i) * 35}ms` }}
+          >
+            <Link
+              href={`/products/${product.slug}`}
+              onClick={onNavigate}
+              className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-sand"
+            >
+              <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-mist">
+                <Image
+                  src={product.image}
+                  alt=""
+                  fill
+                  sizes="40px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm leading-snug font-medium">{product.name}</span>
+                <span className="block truncate text-xs text-muted">{product.grade}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+        {group.more > 0 && (
+          <li>
+            <Link
+              href={`/products?category=${category}`}
+              onClick={onNavigate}
+              className="group flex h-full items-center gap-3 rounded-xl p-1.5 text-sm font-medium text-leaf transition-colors hover:bg-sand hover:text-forest"
+            >
+              <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-sand text-xs tabular-nums group-hover:bg-white">
+                +{group.more}
+              </span>
+              {t.viewAll}
+            </Link>
+          </li>
+        )}
+      </ul>
+    </>
+  );
+
   const totalSpan = columns.reduce((sum, c) => sum + c.span, 0);
   const featured = products.find((p) => p.featured) ?? products[0];
 
@@ -127,54 +184,8 @@ export function MegaMenuPanel({
               <div className="mt-3 grid gap-x-4" style={{ gridTemplateColumns: `repeat(${span}, minmax(0, 1fr))` }}>
                 {groups.map((group, g) => (
                   <div key={group.label ?? g} className="min-w-0">
-                    {group.label && (
-                      <p className="px-1.5 pb-1 text-[11px] font-medium tracking-[0.14em] text-muted uppercase">
-                        {group.label} <span className="tabular-nums">· {group.count}</span>
-                      </p>
-                    )}
-                    <ul className="grid grid-cols-1 gap-y-0.5">
-                      {group.shown.map((product, i) => (
-                        <li
-                          key={product.slug}
-                          className="animate-[rise_0.5s_cubic-bezier(0.2,0.7,0.2,1)_both]"
-                          style={{ animationDelay: `${80 + ((col * 2 + g) * 3 + i) * 35}ms` }}
-                        >
-                          <Link
-                            href={`/products/${product.slug}`}
-                            onClick={onNavigate}
-                            className="group flex items-center gap-3 rounded-xl p-1.5 transition-colors hover:bg-sand"
-                          >
-                            <span className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-mist">
-                              <Image
-                                src={product.image}
-                                alt=""
-                                fill
-                                sizes="40px"
-                                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-sm leading-snug font-medium">{product.name}</span>
-                              <span className="block truncate text-xs text-muted">{product.grade}</span>
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                      {group.more > 0 && (
-                        <li>
-                          <Link
-                            href={`/products?category=${category}`}
-                            onClick={onNavigate}
-                            className="group flex h-full items-center gap-3 rounded-xl p-1.5 text-sm font-medium text-leaf transition-colors hover:bg-sand hover:text-forest"
-                          >
-                            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-sand text-xs tabular-nums group-hover:bg-white">
-                              +{group.more}
-                            </span>
-                            {t.viewAll}
-                          </Link>
-                        </li>
-                      )}
-                    </ul>
+                    {renderGroup(group, g, category, col)}
+                    {group.below && <div className="mt-4">{renderGroup(group.below, g + 1, category, col)}</div>}
                   </div>
                 ))}
               </div>

@@ -15,7 +15,7 @@ export async function SiteFooter() {
       title: dict.footer.coffee,
       links: [
         { href: "/products/robusta-s18-clean", label: links.robustaS18 },
-        { href: "/products/robusta-s18-wet-polished", label: links.robustaWetPolished },
+        { href: "/products/roasted-ground-blend-70-30", label: links.roastedBlend },
         { href: "/products/arabica-s18-clean", label: links.arabicaS18 },
         { href: "/products?category=coffee", label: links.allCoffee },
       ],

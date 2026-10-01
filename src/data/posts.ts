@@ -125,7 +125,7 @@ Grade is only part of the picture. Ask for moisture (typically 5% max), the tole
     category: "guide",
     published_at: "2026-09-09",
     cover: photos.greenBeans,
-    product_slugs: ["robusta-s18-clean", "robusta-s16-clean", "robusta-s13-14", "robusta-s18-wet-polished"],
+    product_slugs: ["robusta-s18-clean", "robusta-s16-clean", "robusta-g2-s13-14"],
     body: `Vietnam is the world's largest producer of Robusta, and most of it is sold by screen size and grade. The labels look technical, but they come down to two questions: how big are the beans, and how clean is the lot?
 
 ## What a screen size is

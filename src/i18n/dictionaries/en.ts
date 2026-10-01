@@ -46,6 +46,7 @@ export const en = {
     cashewTitle: "Cashew kernels",
     robusta: "Robusta",
     arabica: "Arabica",
+    roasted: "Roasted & ground",
     featured: "Most requested",
     viewSpecs: "View specs",
     viewAll: "View all products",
@@ -296,7 +297,7 @@ export const en = {
       {
         title: "Coffee Roasters",
         body: "Consistent green coffee lots, pre-shipment samples and specialty micro-lots for blends and single origins.",
-        products: ["Robusta S18 Wet Polished", "Arabica S18 Clean", "Robusta S16 Clean"],
+        products: ["Robusta S18 Clean", "Arabica S18 Clean", "Robusta S16 Clean"],
       },
       {
         title: "Importers & Distributors",
@@ -311,7 +312,7 @@ export const en = {
       {
         title: "Retail & Private Label",
         body: "Roasted coffee and cashews packed under your brand — from recipe development to shelf-ready packaging.",
-        products: ["Arabica S16 Clean", "Roasted salted cashews"],
+        products: ["Roasted & Ground 70/30", "Roasted salted cashews"],
       },
     ],
     logosTitle: "Buyers who source with us",
@@ -386,7 +387,7 @@ export const en = {
     company: "Company",
     links: {
       robustaS18: "Robusta S18 Clean",
-      robustaWetPolished: "Robusta S18 Wet Polished",
+      roastedBlend: "Roasted & Ground 70/30",
       arabicaS18: "Arabica S18 Clean",
       allCoffee: "All coffee grades",
       w240: "Cashew WW240",
@@ -467,6 +468,19 @@ export const en = {
     ],
     harvesterAlt: "Freshly picked coffee cherries poured into a sorting tank",
     kernelsAlt: "Graded white whole cashew kernels",
+    visitsEyebrow: "Buyer Visits",
+    visitsTitle: "Come and See",
+    visitsAccent: "for Yourself",
+    visitsDescription:
+      "Buyers are welcome to visit before they order — to walk the warehouse, check lots and meet the team. A few moments from recent visits.",
+    visitPhotos: [
+      "Our team with a visiting buyer by Hoan Kiem Lake, Hanoi",
+      "With visiting partners at the Hai Ly church ruins, Nam Dinh",
+      "A seafood lunch with visiting buyers and our team",
+      "Meeting visiting buyers in Hanoi's Old Quarter",
+      "Dinner with a visiting buyer",
+      "Coffee with a visiting buyer",
+    ],
     valuesEyebrow: "Our Values",
     valuesTitle: "What Every Container",
     valuesAccent: "Stands For",

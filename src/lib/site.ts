@@ -74,6 +74,16 @@ export const factoryPhotos = {
   roastingLine: own("roasting-packing-line"),
 };
 
+/** Buyers visiting Cao Gia (published with their agreement). Same order as `about.visitPhotos` (alt text). */
+export const buyerVisitPhotos = [
+  own("visit-hoan-kiem-lake"),
+  own("visit-hai-ly-church"),
+  own("visit-dinner-toast"),
+  own("visit-hanoi-old-quarter"),
+  own("visit-dinner-selfie"),
+  own("visit-coffee-meeting"),
+];
+
 // Stock photography (Unsplash) still used where there is no own photo yet — mainly cashew.
 const u = (id: string) => `https://images.unsplash.com/photo-${id}`;
 

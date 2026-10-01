@@ -9,7 +9,7 @@ import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getSettings } from "@/lib/content";
 import { pageMeta } from "@/lib/seo";
-import { factoryPhotos, photos, site } from "@/lib/site";
+import { buyerVisitPhotos, factoryPhotos, photos, site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
@@ -189,6 +189,30 @@ export default async function AboutPage() {
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-20 md:py-28">
+        <div className="container-page">
+          <SectionHeading
+            eyebrow={t.visitsEyebrow}
+            title={t.visitsTitle}
+            accent={t.visitsAccent}
+            description={t.visitsDescription}
+          />
+          <ul data-reveal-stagger className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+            {buyerVisitPhotos.map((src, i) => (
+              <li key={src} className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-mist">
+                <Image
+                  src={src}
+                  alt={t.visitPhotos[i]}
+                  fill
+                  sizes="(min-width: 768px) 33vw, 50vw"
+                  className="object-cover"
+                />
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
