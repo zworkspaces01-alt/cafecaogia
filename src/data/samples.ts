@@ -289,7 +289,7 @@ export const defaultSettings: SiteSettings = {
     verification: { google: "", bing: "", yandex: "" },
     pages: {},
   },
-  analytics: { ga4: "", gtm: "", metaPixel: "", yandexMetrica: "", clarity: "", cloudflare: "" },
+  analytics: { ga4: "", gtm: "GTM-WMBX4TT9", metaPixel: "", yandexMetrica: "", clarity: "", cloudflare: "" },
   notifications: {
     telegram: {
       enabled: false,

@@ -24,9 +24,20 @@ export function Analytics({ ids }: { ids: AnalyticsSettings }) {
         </>
       )}
       {live && gtm && (
-        <Script id="gtm" strategy="afterInteractive">
-          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f)})(window,document,'script','dataLayer','${gtm}');`}
-        </Script>
+        <>
+          <Script id="gtm" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i;f.parentNode.insertBefore(j,f)})(window,document,'script','dataLayer','${gtm}');`}
+          </Script>
+          {/* Visitors with JavaScript off still reach GTM through this iframe. */}
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtm}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        </>
       )}
       {live && metaPixel && (
         <Script id="meta-pixel" strategy="afterInteractive">
