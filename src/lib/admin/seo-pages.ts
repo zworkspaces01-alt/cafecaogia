@@ -9,6 +9,7 @@ export const seoPages: { key: SeoPageKey; label: string; path: string; dictKey: 
   { key: "contact", label: "Liên hệ", path: "/contact", dictKey: "contact" },
   { key: "company-profile", label: "Hồ sơ công ty", path: "/company-profile", dictKey: "profile" },
   { key: "about-ceo", label: "Về CEO", path: "/about-ceo", dictKey: "ceo" },
+  { key: "gallery", label: "Thư viện ảnh", path: "/gallery", dictKey: "gallery" },
 ];
 
 /** Google shows roughly this many characters before cutting a title or description off. */

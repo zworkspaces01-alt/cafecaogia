@@ -213,6 +213,11 @@ export default async function AboutPage() {
               </li>
             ))}
           </ul>
+          <div className="mt-10 flex justify-center">
+            <ButtonLink href="/gallery" variant="dark" arrow>
+              {t.galleryCta}
+            </ButtonLink>
+          </div>
         </div>
       </section>
 

@@ -35,6 +35,7 @@ export async function SiteFooter() {
         { href: "/about", label: dict.nav.about },
         ...(ceo ? [{ href: "/about-ceo", label: links.leadership }] : []),
         { href: "/process", label: dict.nav.process },
+        { href: "/gallery", label: dict.nav.gallery },
         ...(posts.length > 0 ? [{ href: "/insights", label: dict.nav.insights }] : []),
         { href: "/products", label: links.allProducts },
         { href: "/company-profile", label: links.profile },

@@ -134,7 +134,7 @@ export type NotificationSettings = {
 };
 
 /** Pages whose search title/description can be overridden in the CMS ("home" is also the site default). */
-export type SeoPageKey = "home" | "products" | "about" | "process" | "contact" | "company-profile" | "about-ceo";
+export type SeoPageKey = "home" | "products" | "about" | "process" | "contact" | "company-profile" | "about-ceo" | "gallery";
 
 export type MetaText = { title: string; description: string };
 

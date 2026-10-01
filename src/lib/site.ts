@@ -40,6 +40,7 @@ export const nav = [
   { href: "/products", key: "products" },
   { href: "/about", key: "about" },
   { href: "/process", key: "process" },
+  { href: "/gallery", key: "gallery" },
   { href: "/insights", key: "insights" },
   { href: "/contact", key: "contact" },
 ] as const;
@@ -94,6 +95,52 @@ export const buyerVisitPhotos = [
   own("visit-dinner-selfie"),
   own("visit-coffee-meeting"),
 ];
+
+export type FactoryPhoto = keyof typeof factoryPhotos;
+
+/**
+ * The /gallery page: every own photo, grouped by stage. Alt text lives in `gallery.photos` in the
+ * dictionaries; `tall` marks portrait shots, which take two grid rows. Buyer visits come last,
+ * from `buyerVisitPhotos`.
+ */
+export const galleryGroups: { key: "drying" | "warehouse" | "grades" | "roasting" | "export"; photos: { key: FactoryPhoto; tall?: boolean }[] }[] = [
+  { key: "drying", photos: [{ key: "cherrySorting" }, { key: "dryingBeds" }, { key: "greenhouseDrying" }] },
+  {
+    key: "warehouse",
+    photos: [
+      { key: "sacksSilos" },
+      { key: "palletStack", tall: true },
+      { key: "processingFloor" },
+      { key: "gradingLine" },
+      { key: "silos" },
+      { key: "stacking" },
+      { key: "forklift" },
+      { key: "pallets" },
+      { key: "sacksLiners" },
+    ],
+  },
+  {
+    key: "grades",
+    photos: [
+      { key: "gradeRobustaS18" },
+      { key: "gradeRobustaS16" },
+      { key: "gradeRobustaS13" },
+      { key: "gradeArabicaS18" },
+      { key: "gradeArabicaS16" },
+      { key: "gradeArabicaS13" },
+      { key: "greenBeansHand", tall: true },
+      { key: "arabicaS16Washed" },
+      { key: "greenBeansBasket" },
+      { key: "greenBeansGloves" },
+      { key: "greenBeansPalm" },
+    ],
+  },
+  { key: "roasting", photos: [{ key: "roastingLine" }, { key: "roastedBags" }] },
+  { key: "export", photos: [{ key: "containerLoading" }, { key: "containerSeal", tall: true }, { key: "containerVacuumBags" }] },
+];
+
+/** Portrait buyer-visit photos, by index in `buyerVisitPhotos`. */
+export const tallVisitPhotos = new Set([0, 1, 4, 5]);
 
 // Stock photography (Unsplash) still used where there is no own photo yet — mainly cashew.
 const u = (id: string) => `https://images.unsplash.com/photo-${id}`;

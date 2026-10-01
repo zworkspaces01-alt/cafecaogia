@@ -110,6 +110,8 @@ export function SiteHeader({
                   className={cn(
                     "flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm whitespace-nowrap transition-colors",
                     isActive(item.href) ? "bg-white text-forest" : "text-white/85 hover:bg-white/15 hover:text-white",
+                    // No room for a sixth link beside the actions until xl (Russian labels are long).
+                    item.key === "gallery" && "hidden xl:flex",
                   )}
                 >
                   {item.href === "/" && <Home className="size-3.5" />}
