@@ -12,7 +12,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
     <div className="lg:grid lg:min-h-svh lg:grid-cols-[250px_1fr]">
       <aside className="flex flex-col gap-6 bg-forest p-5 text-white lg:sticky lg:top-0 lg:h-svh">
         <Link href="/admin" className="flex items-center gap-2.5">
-          <LogoMark className="size-9" />
+          <LogoMark onDark className="size-9 rounded-xl p-1" />
           <span className="font-semibold">Cao Gia CMS</span>
         </Link>
         <AdminNav />

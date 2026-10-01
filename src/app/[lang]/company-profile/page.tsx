@@ -48,9 +48,9 @@ export default async function CompanyProfilePage() {
           <div className="rounded-3xl bg-white p-6 shadow-xl shadow-black/5 md:p-12 print:rounded-none print:p-0 print:shadow-none">
             <header className="flex flex-wrap items-start justify-between gap-6 border-b border-mist pb-8">
               <div className="flex items-center gap-4">
-                <LogoMark tone="onLight" className="size-14" />
+                <LogoMark className="size-14" />
                 <div>
-                  <Wordmark tone="onLight" className="text-3xl" />
+                  <Wordmark className="h-6" />
                   <p className="mt-1 text-xs tracking-[0.3em] text-muted uppercase" dir="ltr">
                     Coffee · Cashew · Vietnam
                   </p>

@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
     <main className="grid min-h-svh place-items-center bg-forest p-5">
       <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl">
         <div className="flex items-center gap-3">
-          <LogoMark tone="onLight" className="size-11" />
+          <LogoMark className="size-11" />
           <div>
             <p className="text-lg font-semibold text-forest">Cao Gia CMS</p>
             <p className="text-xs text-muted">Đăng nhập để quản lý nội dung website</p>

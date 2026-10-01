@@ -13,6 +13,7 @@ import { Strengths } from "@/components/home/strengths";
 import { Testimonials } from "@/components/home/testimonials";
 import { TradeTerms } from "@/components/home/trade-terms";
 import { JsonLd, schemaIds } from "@/components/json-ld";
+import { brandAssets } from "@/components/logo";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getSettings, getTestimonials } from "@/lib/content";
 import { getProducts } from "@/lib/products";
@@ -65,7 +66,7 @@ export default async function HomePage() {
         legalName: company.legalName,
         alternateName: company.legalNameVi,
         url: site.url,
-        logo: { "@type": "ImageObject", url: `${site.url}/apple-icon.png`, width: 180, height: 180 },
+        logo: { "@type": "ImageObject", url: `${site.url}${brandAssets.logo.src}`, width: brandAssets.logo.width, height: brandAssets.logo.height },
         description: dict.meta.description,
         email: contact.email,
         telephone: contact.phone,

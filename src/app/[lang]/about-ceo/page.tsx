@@ -72,7 +72,7 @@ export default async function AboutCeoPage() {
               />
             ) : (
               <div className="grid h-full place-items-center">
-                <LogoMark className="size-40 opacity-90" />
+                <LogoMark onDark className="size-40 rounded-3xl p-6" />
               </div>
             )}
             <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/90 p-4 backdrop-blur">
