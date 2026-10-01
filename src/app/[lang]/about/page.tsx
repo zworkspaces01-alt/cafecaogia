@@ -9,7 +9,7 @@ import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getSettings } from "@/lib/content";
 import { pageMeta } from "@/lib/seo";
-import { photos, site } from "@/lib/site";
+import { factoryPhotos, photos, site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
@@ -39,7 +39,7 @@ export default async function AboutPage() {
 
   return (
     <>
-      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={photos.riceTerrace} />
+      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.pallets} />
 
       <section className="py-20 md:py-28">
         <div className="container-page grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -53,7 +53,7 @@ export default async function AboutPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div data-reveal-image className="relative aspect-[3/4] overflow-hidden rounded-3xl">
-              <Image src={photos.harvester} alt={t.harvesterAlt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
+              <Image src={factoryPhotos.cherrySorting} alt={t.harvesterAlt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
             </div>
             <div data-reveal-image className="relative mt-12 aspect-[3/4] overflow-hidden rounded-3xl">
               <Image src={photos.cashewRaw} alt={t.kernelsAlt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />

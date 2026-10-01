@@ -46,7 +46,35 @@ export const nav = [
 
 export const markets = ["us", "eu", "jp", "kr", "me", "au"] as const;
 
-// Placeholder photography (Unsplash). Swap for Cloudinary public IDs of Cao Gia's own photos.
+/**
+ * Cao Gia's own photos (warehouse, drying yard, container loading), served from /public/photos.
+ * Each has name.jpg (1200px, for share images) plus name-480/960/1600.webp picked by the image loader.
+ * Re-export from originals with EXIF (GPS) stripped; never commit raw phone photos to /public.
+ */
+const own = (name: string) => `/photos/${name}.jpg`;
+
+export const factoryPhotos = {
+  sacksSilos: own("factory-sacks-silos"),
+  silos: own("factory-silos"),
+  processingFloor: own("processing-floor"),
+  stacking: own("warehouse-stacking"),
+  forklift: own("warehouse-forklift"),
+  gradingLine: own("warehouse-grading-line"),
+  pallets: own("warehouse-pallets"),
+  palletStack: own("pallet-stack"),
+  sacksLiners: own("export-sacks-liners"),
+  dryingBeds: own("drying-beds"),
+  greenhouseDrying: own("greenhouse-drying"),
+  cherrySorting: own("cherry-sorting"),
+  greenBeansHand: own("green-beans-hand"),
+  containerLoading: own("container-loading"),
+  containerVacuumBags: own("container-vacuum-bags"),
+  containerSeal: own("container-seal"),
+  roastedBags: own("roasted-beans-bags"),
+  roastingLine: own("roasting-packing-line"),
+};
+
+// Stock photography (Unsplash) still used where there is no own photo yet — mainly cashew.
 const u = (id: string) => `https://images.unsplash.com/photo-${id}`;
 
 export const photos = {

@@ -5,7 +5,7 @@ import { ButtonLink } from "@/components/ui";
 import { format } from "@/i18n/format";
 import { getDictionary } from "@/i18n/server";
 import { getContacts, getSettings, whatsappLink } from "@/lib/content";
-import { photos } from "@/lib/site";
+import { factoryPhotos } from "@/lib/site";
 
 const initials = (name: string) =>
   name
@@ -28,7 +28,7 @@ export async function CtaBanner() {
           className="relative isolate grid gap-10 overflow-hidden rounded-3xl bg-forest px-6 py-14 text-white md:px-14 md:py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center"
         >
           <div data-parallax className="absolute inset-x-0 -top-[15%] -bottom-[15%] -z-10">
-            <Image src={photos.portSunset} alt="" fill sizes="100vw" className="object-cover opacity-70" />
+            <Image src={factoryPhotos.silos} alt="" fill sizes="100vw" className="object-cover opacity-70" />
           </div>
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-forest via-forest/85 to-forest/40 rtl:bg-gradient-to-l" />
 

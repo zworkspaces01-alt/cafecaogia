@@ -13,7 +13,7 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { getCeo, whatsappLink } from "@/lib/content";
 import { imageUrl } from "@/lib/image-url";
 import { pageMeta } from "@/lib/seo";
-import { photos, site } from "@/lib/site";
+import { factoryPhotos, site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict, ceo] = await Promise.all([getLocale(), getDictionary(), getCeo()]);
@@ -56,7 +56,7 @@ export default async function AboutCeoPage() {
         title={t.title}
         accent={t.accent}
         description={t.description}
-        image={photos.hillside}
+        image={factoryPhotos.processingFloor}
       />
 
       <section className="py-20 md:py-28">

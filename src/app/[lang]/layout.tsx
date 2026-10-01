@@ -12,7 +12,7 @@ import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content"
 import { getProducts } from "@/lib/products";
 import { imageUrl } from "@/lib/image-url";
 import { pageMeta } from "@/lib/seo";
-import { photos, site } from "@/lib/site";
+import { factoryPhotos, site } from "@/lib/site";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: site.name,
       locale: localeTags[locale],
-      images: [{ url: imageUrl(seo.ogImage.trim() || photos.hero) }],
+      images: [{ url: imageUrl(seo.ogImage.trim() || factoryPhotos.sacksSilos) }],
     },
     twitter: { card: "summary_large_image" },
     robots: seo.indexing

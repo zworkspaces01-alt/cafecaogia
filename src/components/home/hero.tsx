@@ -10,7 +10,7 @@ import { PACE } from "@/components/motion";
 import { ButtonLink } from "@/components/ui";
 import { format } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries/en";
-import { photos } from "@/lib/site";
+import { factoryPhotos, photos } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -19,10 +19,10 @@ const SLIDE_SECONDS = 8;
 
 // Visuals and links per slide; the text for each comes from the dictionary (hero.slides, same order).
 const slides = [
-  { image: photos.hero, primaryHref: "/contact", secondaryHref: "/products" },
-  { image: photos.cherriesBranch, primaryHref: "/products?category=coffee", secondaryHref: "/contact" },
+  { image: factoryPhotos.sacksSilos, primaryHref: "/contact", secondaryHref: "/products" },
+  { image: factoryPhotos.dryingBeds, primaryHref: "/products?category=coffee", secondaryHref: "/contact" },
   { image: photos.cashewWood, primaryHref: "/products?category=cashew", secondaryHref: "/contact" },
-  { image: photos.portSunset, primaryHref: "/contact", secondaryHref: "/process" },
+  { image: factoryPhotos.containerLoading, primaryHref: "/contact", secondaryHref: "/process" },
 ];
 
 const reducedMotionQuery = "(prefers-reduced-motion: reduce)";

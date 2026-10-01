@@ -5,15 +5,15 @@ import { useState } from "react";
 import { ClipboardCheck, Factory, MapPin, Ship, Sprout } from "lucide-react";
 import { SectionHeading } from "@/components/ui";
 import type { Dictionary } from "@/i18n/dictionaries/en";
-import { photos } from "@/lib/site";
+import { factoryPhotos } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Icon and photo per step; text comes from the dictionary (process.steps, same order).
 const visuals = [
-  { icon: Sprout, image: photos.harvester },
-  { icon: Factory, image: photos.cherriesBranch },
-  { icon: ClipboardCheck, image: photos.greenBeans },
-  { icon: Ship, image: photos.portSunset },
+  { icon: Sprout, image: factoryPhotos.cherrySorting },
+  { icon: Factory, image: factoryPhotos.greenhouseDrying },
+  { icon: ClipboardCheck, image: factoryPhotos.greenBeansHand },
+  { icon: Ship, image: factoryPhotos.sacksLiners },
 ];
 
 export function Process({

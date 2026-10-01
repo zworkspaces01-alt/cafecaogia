@@ -9,7 +9,7 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { getSettings, whatsappLink } from "@/lib/content";
 import { getProducts } from "@/lib/products";
 import { pageMeta } from "@/lib/seo";
-import { photos, site } from "@/lib/site";
+import { factoryPhotos, site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
@@ -48,7 +48,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
 
   return (
     <>
-      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={photos.portShip} />
+      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.sacksLiners} />
 
       <section className="py-16 md:py-24">
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.8fr]">

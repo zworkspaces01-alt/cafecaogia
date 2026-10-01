@@ -46,3 +46,6 @@ next-env.d.ts
 .wrangler
 .dev.vars*
 !.dev.vars.example
+
+# Raw photos as received (faces, plates, GPS EXIF) — publish only processed copies in /public/photos
+/public/images/
