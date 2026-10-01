@@ -686,6 +686,30 @@ export const en = {
     contactPerson: "Contact person",
     prepared: "Prepared {date}",
   },
+  homeAbout: {
+    eyebrow: "Who We Are",
+    title: "From Vietnamese Farms",
+    accent: "to Your Warehouse",
+    body: "Cao Gia is a Vietnamese exporter of green coffee and cashew kernels. We buy directly from farm households, grade and bag every lot in our own warehouse, and ship it with the documents your customs needs — so roasters and importers abroad can buy from Vietnam with confidence.",
+    points: [
+      "Exporting from Vietnam since {year}",
+      "{count} export grades of coffee and cashew",
+      "Sourced from Dak Lak, Lam Dong and Binh Phuoc",
+      "Pre-shipment samples and SGS or Vinacontrol inspection on request",
+    ],
+    yearsLabel: "years exporting from Vietnam",
+    cta: "Learn more about us",
+  },
+  photoStories: {
+    eyebrow: "Inside Cao Gia",
+    title: "From the Drying Yard",
+    accent: "to Your Container",
+    description: "Real photos from our drying yards, warehouse and loading bay — the people and checks behind every export lot.",
+    all: "All",
+    view: "View",
+    filterLabel: "Filter photos by stage",
+    seeAll: "See the full gallery",
+  },
   gallery: {
     metaTitle: "Photo Gallery — Inside Cao Gia's Warehouse",
     metaDescription:
