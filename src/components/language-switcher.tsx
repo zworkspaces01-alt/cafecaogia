@@ -43,7 +43,7 @@ export function LanguageSwitcher({ locale, label }: { locale: Locale; label: str
       >
         <Globe className="size-4" />
         {localeNames[locale].short}
-        <ChevronDown className={cn("hidden size-3.5 transition-transform sm:block", open && "rotate-180")} />
+        <ChevronDown className={cn("hidden size-3.5 transition-transform sm:block lg:hidden xl:block", open && "rotate-180")} />
       </button>
 
       {open && (

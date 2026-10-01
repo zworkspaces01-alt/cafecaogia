@@ -28,7 +28,7 @@ export function MegaMenuTrigger({
       aria-expanded={open}
       aria-controls="products-mega-menu"
       className={cn(
-        "flex items-center gap-1 rounded-full px-4 py-1.5 text-sm whitespace-nowrap transition-colors",
+        "flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[13px] whitespace-nowrap transition-colors xl:px-4 xl:text-sm",
         active || open ? "bg-white text-forest" : "text-white/85 hover:bg-white/15 hover:text-white",
       )}
     >

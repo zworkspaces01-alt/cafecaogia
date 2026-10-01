@@ -84,12 +84,12 @@ export function SiteHeader({
         scrolled || open || megaOpen ? "bg-forest/90 py-3 shadow-lg shadow-black/10 backdrop-blur-md" : "py-6",
       )}
     >
-      <div className="container-page flex items-center justify-between gap-3 sm:gap-6">
+      <div className="container-page flex items-center justify-between gap-3 sm:gap-6 lg:gap-2 xl:gap-6">
         <Logo label={common.homeLabel} />
 
         <nav
           aria-label={common.mainNav}
-          className="hidden items-center gap-1 rounded-full border border-white/20 bg-white/10 p-1 backdrop-blur-md lg:flex"
+          className="hidden items-center rounded-full border border-white/20 bg-white/10 p-1 backdrop-blur-md lg:flex xl:gap-1"
         >
           {items
             .filter((item) => item.href !== "/contact")
@@ -108,13 +108,12 @@ export function SiteHeader({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm whitespace-nowrap transition-colors",
+                    // Tighter between lg and xl so the long Russian labels fit beside the actions.
+                    "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] whitespace-nowrap transition-colors xl:px-4 xl:text-sm",
                     isActive(item.href) ? "bg-white text-forest" : "text-white/85 hover:bg-white/15 hover:text-white",
-                    // No room for a sixth link beside the actions until xl (Russian labels are long).
-                    item.key === "gallery" && "hidden xl:flex",
                   )}
                 >
-                  {item.href === "/" && <Home className="size-3.5" />}
+                  {item.href === "/" && <Home className="hidden size-3.5 xl:block" />}
                   {labels[item.key]}
                 </Link>
               ),
@@ -136,7 +135,7 @@ export function SiteHeader({
           </a>
           <Link
             href="/contact"
-            className="hidden h-10 items-center rounded-full bg-white px-5 text-sm font-medium whitespace-nowrap text-forest transition-colors hover:bg-lime sm:inline-flex"
+            className="hidden h-10 items-center rounded-full bg-white px-5 text-sm lg:px-3.5 xl:px-5 font-medium whitespace-nowrap text-forest transition-colors hover:bg-lime sm:inline-flex"
           >
             {common.requestQuote}
           </Link>
