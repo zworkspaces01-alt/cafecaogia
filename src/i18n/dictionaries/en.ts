@@ -580,6 +580,16 @@ export const en = {
       failed: "We couldn't send your inquiry right now. Please email us directly.",
     },
   },
+  autoReply: {
+    subject: "We've received your inquiry — Cao Gia",
+    greeting: "Dear {name},",
+    body: "Thank you for contacting Cao Gia. We've received your inquiry, and our export team will reply within one business day with pricing, availability and sample options.",
+    product: "Product: {product}",
+    urgent: "If your request is urgent, message us on WhatsApp at {whatsapp} or simply reply to this email.",
+    signoff: "Best regards,",
+    team: "Cao Gia Export Team",
+    footer: "You're receiving this email because an inquiry was sent with this address at {site}. If that wasn't you, please ignore it.",
+  },
   processPage: {
     metaTitle: "Our Process — From Farm to Export",
     metaDescription:

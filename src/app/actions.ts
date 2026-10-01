@@ -4,6 +4,8 @@ import { after } from "next/server";
 import { isLocale } from "@/i18n/config";
 import { loadDictionary } from "@/i18n/dictionaries";
 import { parseAttribution } from "@/lib/attribution";
+import { sendInquiryAutoReply } from "@/lib/auto-reply";
+import { isGmailConfigured } from "@/lib/gmail";
 import { isEmailConfigured, notifyInquiry, type Inquiry } from "@/lib/notify";
 import { getProductSummary } from "@/lib/products";
 import { getSupabase } from "@/lib/supabase";
@@ -74,7 +76,19 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
       ),
     );
   }
-  if (stored || emailed || telegrammed) return { status: "success" };
+  if (stored || emailed || telegrammed) {
+    // Confirmation to the buyer, sent after the response so they don't wait on Gmail.
+    if (isGmailConfigured()) {
+      after(async () => {
+        if (await sendInquiryAutoReply(inquiry)) return;
+        await notifyTelegram(
+          "system",
+          `⚠️ <b>Không gửi được email tự động cho khách</b>\nKhách: ${escapeHtml(inquiry.name)} · ${escapeHtml(inquiry.email)}\nYêu cầu báo giá vẫn được ghi nhận. Xem log Cloudflare; nếu lỗi là <code>invalid_grant</code>, chạy lại <code>npm run gmail:auth</code>.`,
+        );
+      });
+    }
+    return { status: "success" };
+  }
 
   if (!supabase && !isEmailConfigured() && process.env.NODE_ENV !== "production") {
     console.info("[dev] Inquiry (no Supabase or email configured):", inquiry);

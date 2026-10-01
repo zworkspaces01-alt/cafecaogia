@@ -86,13 +86,19 @@ export async function getProductUpdates(): Promise<Record<string, string>> {
   return Object.fromEntries(data.map((row) => [row.slug as string, row.updated_at as string]));
 }
 
-/** English name and category of a product, without a locale (server actions, notifications). */
-export async function getProductSummary(slug: string): Promise<Pick<Product, "name" | "category"> | null> {
+/**
+ * Name and category of a product for server actions and notifications, which have no [lang] segment.
+ * The name is English unless a locale is passed.
+ */
+export async function getProductSummary(slug: string, locale: Locale = "en"): Promise<Pick<Product, "name" | "category"> | null> {
   const supabase = getSupabase();
-  if (!supabase) {
-    const product = sampleProducts.find((p) => p.slug === slug);
-    return product ? { name: product.name, category: product.category } : null;
+  let row: Pick<ProductRow, "slug" | "name" | "category" | "translations"> | null;
+  if (!supabase) row = sampleProducts.find((p) => p.slug === slug) ?? null;
+  else {
+    const { data } = await supabase.from("products").select("slug, name, category, translations").eq("slug", slug).maybeSingle();
+    row = data;
   }
-  const { data } = await supabase.from("products").select("name, category").eq("slug", slug).maybeSingle();
-  return (data as Pick<Product, "name" | "category"> | null) ?? null;
+  if (!row) return null;
+  const name = locale === "en" ? "" : (row.translations ?? productTranslations[row.slug])?.[locale]?.name;
+  return { name: name || row.name, category: row.category };
 }

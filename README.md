@@ -50,6 +50,21 @@ Tạo tài khoản [Resend](https://resend.com), xác minh tên miền gửi, r�
 
 Sửa dữ liệu mẫu trong `src/data/products.ts` thì chạy `npm run seed:generate` để sinh lại `seed.sql`.
 
+## Email tự động cho khách
+
+Khách gửi form báo giá thành công sẽ nhận email xác nhận từ `davidcao.cg@gmail.com` (gửi qua Gmail API), theo ngôn ngữ khách đang xem: Anh, Nga hoặc Ả Rập. Thư cảm ơn, nhắc tên sản phẩm, hẹn trả lời trong 1 ngày làm việc và ghi số WhatsApp — không chép lại nội dung khách viết. Khách trả lời thư thì thư về hộp `davidcao.cg@gmail.com`. Gửi lỗi thì báo vào topic “Hệ thống” trên Telegram; yêu cầu báo giá vẫn được ghi nhận. Chưa cài đặt thì website chỉ bỏ qua bước này.
+
+Cài đặt một lần, đăng nhập Google bằng `davidcao.cg@gmail.com`:
+
+1. [Google Cloud Console](https://console.cloud.google.com) → tạo project mới (ví dụ “Cao Gia Website”).
+2. **APIs & Services → Library** → tìm **Gmail API** → Enable.
+3. **Google Auth Platform** (OAuth consent screen) → Get started: tên ứng dụng “Cao Gia Website”, email hỗ trợ, Audience **External**. Sau đó vào **Audience → Publish app** để chuyển sang *In production* — nếu để *Testing*, token hết hạn sau 7 ngày.
+4. **Clients → Create client** → Application type **Desktop app** → lưu lại Client ID và Client secret.
+5. Trên máy: `npm run gmail:auth` → dán Client ID và secret → trình duyệt mở ra, đăng nhập `davidcao.cg@gmail.com`. Google báo *“Google hasn’t verified this app”* → **Advanced → Go to Cao Gia Website** → cho phép quyền gửi email. Script in ra refresh token và hỏi có gửi thư thử không.
+6. Lưu 3 secret lên Cloudflare: `npx wrangler secret put GMAIL_CLIENT_ID`, `npx wrangler secret put GMAIL_CLIENT_SECRET`, `npx wrangler secret put GMAIL_REFRESH_TOKEN`. Địa chỉ gửi `GMAIL_SENDER` đã có trong `wrangler.jsonc`.
+
+Quyền cấp chỉ cho phép **gửi** thư, không đọc được hộp thư. Gmail cá nhân gửi tối đa khoảng 500 thư/ngày. Token mất hiệu lực khi đổi mật khẩu Google, thu hồi quyền ở [myaccount.google.com/permissions](https://myaccount.google.com/permissions), hoặc 6 tháng không gửi thư nào — Telegram sẽ báo lỗi `invalid_grant`, khi đó làm lại bước 5–6.
+
 ## Cloudinary
 
 Đặt `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`. Trường `image`/`gallery` của sản phẩm nhận:
