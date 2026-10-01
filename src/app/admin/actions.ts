@@ -221,9 +221,11 @@ export async function saveSettings(data: SiteSettings): Promise<ActionResult> {
   }, "Cài đặt công ty");
 }
 
-/** Accepts either the code or the whole <meta … content="code"> tag the search engine shows. */
+/** Accepts the code, the whole <meta … content="code"> tag, or a `name=code` DNS TXT value. */
 function verificationCode(value: string) {
-  const code = (value.match(/content=["']([^"']+)["']/)?.[1] ?? value).trim();
+  const code = (value.match(/content=["']([^"']+)["']/)?.[1] ?? value)
+    .trim()
+    .replace(/^(google-site-verification|yandex-verification|msvalidate\.01)=/i, "");
   return /^[\w.:=+/-]{1,200}$/.test(code) ? code : "";
 }
 
