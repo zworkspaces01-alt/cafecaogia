@@ -194,37 +194,38 @@ export const sampleCertifications: CertificationRow[] = [
 
 export const sampleTeam: TeamMemberRow[] = [
   {
-    id: "sample-ceo",
-    name: "Cao Minh Duc",
-    role: "Founder & CEO",
+    id: "team-ceo-cao-duc",
+    // Confirmed by Cao Gia (October 2026); the bio uses only confirmed company facts.
+    name: "Cao Đức",
+    role: "CEO",
     bio: [
-      "Leads Cao Gia's export business, from building relationships with partner farms to agreeing specifications and delivery programs with buyers overseas.",
-      "Sets the company's standard: specifications written down, samples approved before shipment and every container documented from farm to port.",
+      "Mr. Cao Đức leads Cao Gia, which has exported Vietnamese green coffee and cashew kernels since 2018.",
+      "Under his direction the company ships 10–30 containers a year from its warehouses in Dak Lak and northern Vietnam to buyers in the United States, the European Union, Russia, the Middle East, Japan, South Korea and Australia.",
     ],
-    quote: "Every container carries our name. We would rather say no to an order than ship a lot we wouldn't buy ourselves.",
+    quote: "",
     photo: null,
     email: "caogiaxk2022@gmail.com",
     whatsapp: "+84 867 282 139",
     is_ceo: true,
     translations: {
       ru: {
-        role: "Основатель и генеральный директор",
+        role: "Генеральный директор",
         bio: [
-          "Руководит экспортным направлением Cao Gia — от выстраивания отношений с фермами-партнёрами до согласования спецификаций и программ поставок с зарубежными покупателями.",
-          "Задаёт стандарт компании: спецификации фиксируются письменно, образцы одобряются до отгрузки, а каждый контейнер документируется от фермы до порта.",
+          "Г-н Као Дык руководит компанией Cao Gia, которая с 2018 года экспортирует вьетнамский зелёный кофе и ядра кешью.",
+          "Под его руководством компания отгружает 10–30 контейнеров в год со своих складов в Даклаке и на севере Вьетнама покупателям в США, Европейском союзе, России, на Ближнем Востоке, в Японии, Южной Корее и Австралии.",
         ],
-        quote: "Каждый контейнер несёт наше имя. Мы скорее откажемся от заказа, чем отгрузим партию, которую не купили бы сами.",
+        quote: "",
       },
       ar: {
-        role: "المؤسس والرئيس التنفيذي",
+        role: "الرئيس التنفيذي",
         bio: [
-          "يقود أعمال التصدير في كاو جيا، من بناء العلاقات مع المزارع الشريكة إلى الاتفاق على المواصفات وبرامج التوريد مع المشترين في الخارج.",
-          "يضع معيار الشركة: مواصفات مكتوبة، وعيّنات تُعتمد قبل الشحن، وتوثيق كل حاوية من المزرعة إلى الميناء.",
+          "يقود السيد كاو دوك شركة كاو جيا التي تصدّر البن الأخضر وحبات الكاجو الفيتنامية منذ عام 2018.",
+          "وتحت إدارته تشحن الشركة من 10 إلى 30 حاوية سنويًا من مستودعاتها في داك لاك وشمال فيتنام إلى مشترين في الولايات المتحدة والاتحاد الأوروبي وروسيا والشرق الأوسط واليابان وكوريا الجنوبية وأستراليا.",
         ],
-        quote: "كل حاوية تحمل اسمنا. نفضّل رفض طلب على شحن دفعة لا نشتريها بأنفسنا.",
+        quote: "",
       },
     },
-    is_sample: true,
+    is_sample: false,
     published: true,
     sort_order: 10,
   },
