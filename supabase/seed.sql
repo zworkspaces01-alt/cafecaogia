@@ -61,14 +61,10 @@ where not exists (select 1 from public.partners);
 
 insert into public.certifications (name, issuer, year, scope, logo, file, translations, is_sample, published, sort_order)
 select * from (values
-  ('HACCP', 'Food safety', 2024, 'Hazard analysis and critical control points at our processing partners', null, null, '{"ru":{"scope":"Анализ рисков и критические контрольные точки у перерабатывающих партнёров"},"ar":{"scope":"تحليل المخاطر ونقاط التحكم الحرجة لدى شركائنا في المعالجة"}}'::jsonb, true, true, 10),
-  ('ISO 22000', 'Food safety management', 2024, 'Food safety management system', null, null, '{"ru":{"scope":"Система менеджмента безопасности пищевой продукции"},"ar":{"scope":"نظام إدارة سلامة الغذاء"}}'::jsonb, true, true, 20),
-  ('FDA Registered', 'U.S. Food & Drug Administration', 2024, 'Facility registration for export to the United States', null, null, '{"ru":{"name":"Регистрация FDA","scope":"Регистрация предприятия для экспорта в США"},"ar":{"name":"مسجّل لدى FDA","scope":"تسجيل المنشأة للتصدير إلى الولايات المتحدة"}}'::jsonb, true, true, 30),
-  ('Halal', 'Halal certification', 2024, 'Certified for Middle East and Southeast Asian markets', null, null, '{"ru":{"name":"Халяль","scope":"Сертификация для рынков Ближнего Востока и Юго-Восточной Азии"},"ar":{"name":"حلال","scope":"شهادة حلال لأسواق الشرق الأوسط وجنوب شرق آسيا"}}'::jsonb, true, true, 40),
-  ('Rainforest Alliance', 'Sustainable sourcing', 2024, 'Sustainable farming practices on partner farms', null, null, '{"ru":{"scope":"Устойчивые методы ведения хозяйства на фермах-партнёрах"},"ar":{"scope":"ممارسات زراعية مستدامة في المزارع الشريكة"}}'::jsonb, true, true, 50),
-  ('SGS Inspection', 'Third-party inspection', 2024, 'Quality and weight inspection before loading', null, null, '{"ru":{"name":"Инспекция SGS","scope":"Проверка качества и веса перед погрузкой"},"ar":{"name":"فحص SGS","scope":"فحص الجودة والوزن قبل التحميل"}}'::jsonb, true, true, 60),
-  ('Vinacontrol', 'Third-party inspection', 2024, 'Independent inspection and certification in Vietnam', null, null, '{"ru":{"scope":"Независимая инспекция и сертификация во Вьетнаме"},"ar":{"scope":"فحص وتصديق مستقل في فيتنام"}}'::jsonb, true, true, 70),
-  ('Cafecontrol', 'Coffee inspection', 2024, 'Specialist coffee quality and weight inspection', null, null, '{"ru":{"scope":"Специализированная проверка качества и веса кофе"},"ar":{"scope":"فحص متخصص لجودة القهوة ووزنها"}}'::jsonb, true, true, 80)
+  ('HACCP', 'Food safety', null, 'Held by our partner processing facility', null, null, '{"ru":{"scope":"Сертификат перерабатывающего предприятия-партнёра"},"ar":{"scope":"شهادة لدى منشأة المعالجة الشريكة لنا"}}'::jsonb, false, true, 10),
+  ('ISO 22000', 'Food safety management', null, 'Held by our partner processing facility', null, null, '{"ru":{"scope":"Сертификат перерабатывающего предприятия-партнёра"},"ar":{"scope":"شهادة لدى منشأة المعالجة الشريكة لنا"}}'::jsonb, false, true, 20),
+  ('Halal', 'Halal certification', null, 'Held by our partner processing facility', null, null, '{"ru":{"name":"Халяль","scope":"Сертификат перерабатывающего предприятия-партнёра"},"ar":{"name":"حلال","scope":"شهادة لدى منشأة المعالجة الشريكة لنا"}}'::jsonb, false, true, 30),
+  ('FDA Registered', 'U.S. Food & Drug Administration', null, 'Our partner processing facility is registered with the U.S. FDA', null, null, '{"ru":{"name":"Регистрация FDA","scope":"Предприятие-партнёр зарегистрировано в FDA США"},"ar":{"name":"مسجّل لدى FDA","scope":"منشأة المعالجة الشريكة مسجّلة لدى إدارة الغذاء والدواء الأمريكية"}}'::jsonb, false, true, 40)
 ) as v(name, issuer, year, scope, logo, file, translations, is_sample, published, sort_order)
 where not exists (select 1 from public.certifications);
 

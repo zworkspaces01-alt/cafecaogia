@@ -230,7 +230,7 @@ export const en = {
     title: "Certified Quality,",
     accent: "Fully Documented",
     description:
-      "Food-safety certifications, complete export paperwork and farm-level traceability — the proof your QA team and customs broker need.",
+      "Food-safety certifications held by our partner processing facility, complete export paperwork and farm-level traceability — the proof your QA team and customs broker need.",
     viewCertificate: "View certificate",
     onRequestTitle: "Certificates & lab reports on request",
     onRequestBody: "Ask our export team for current food-safety certificates, test reports and inspection records for the grade you need.",
@@ -531,7 +531,7 @@ export const en = {
     emailPerson: "Email {name}",
     whatsappPerson: "WhatsApp {name}",
     marketsLabel: "Shipping to",
-    markets: ["United States", "European Union", "Japan", "South Korea", "Middle East", "Australia"],
+    markets: ["United States", "European Union", "Russia", "Middle East", "Japan", "South Korea", "Australia"],
   },
   footer: {
     tagline: "Coffee · Cashew · Vietnam",
@@ -858,11 +858,12 @@ export const en = {
     eyebrow: "Who We Are",
     title: "From Vietnamese Farms",
     accent: "to Your Warehouse",
-    body: "Cao Gia is a Vietnamese exporter of green coffee and cashew kernels. We buy directly from farm households, grade and bag every lot in our own warehouse, and ship it with the documents your customs needs — so roasters and importers abroad can buy from Vietnam with confidence.",
+    body: "Cao Gia is a Vietnamese exporter of green coffee and cashew kernels. We buy directly from farm households, grade and bag every lot in our own warehouse in Dak Lak, and ship it with the documents your customs needs — so roasters and importers abroad can buy from Vietnam with confidence.",
     points: [
       "Exporting from Vietnam since {year}",
       "{count} export grades of coffee and cashew",
       "Sourced from Dak Lak, Gia Lai, Lam Dong, Son La and Dong Nai",
+      "10–30 containers shipped each year from our warehouses in Dak Lak and northern Vietnam",
       "Pre-shipment samples and SGS or Vinacontrol inspection on request",
     ],
     yearsLabel: "years exporting from Vietnam",
