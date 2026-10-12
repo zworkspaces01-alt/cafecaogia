@@ -1,4 +1,4 @@
-import { photos } from "@/lib/site";
+import { factoryPhotos } from "@/lib/site";
 import type { PostRow } from "@/lib/types";
 
 // Starter articles for the Insights section. They seed Supabase (npm run seed:generate) and are
@@ -14,7 +14,7 @@ export const samplePosts: PostRow[] = [
       "What the letters and numbers on a cashew contract mean, how whole grades differ from splits and pieces, and how to choose the right grade for your product.",
     category: "guide",
     published_at: "2026-09-16",
-    cover: photos.cashewWhite,
+    cover: factoryPhotos.cashewKernelsCloseup,
     product_slugs: ["cashew-ww240", "cashew-ww320", "cashew-ws", "cashew-lwp"],
     body: `Cashew kernels are traded on a grading system that tells you three things at a glance: the colour of the kernel, whether it is whole or broken, and — for wholes — how many kernels make up one pound. Knowing how to read it makes quotes easier to compare and avoids surprises when the container arrives.
 
@@ -124,7 +124,7 @@ Grade is only part of the picture. Ask for moisture (typically 5% max), the tole
       "How green coffee is graded by bean size and defects in Vietnam, and when it pays to buy S18 rather than S16 or S13.",
     category: "guide",
     published_at: "2026-09-09",
-    cover: photos.greenBeans,
+    cover: factoryPhotos.gradeRobustaS18,
     product_slugs: ["robusta-s18-clean", "robusta-s16-clean", "robusta-g2-s13-14"],
     body: `Vietnam is the world's largest producer of Robusta, and most of it is sold by screen size and grade. The labels look technical, but they come down to two questions: how big are the beans, and how clean is the lot?
 
@@ -140,7 +140,7 @@ Green beans are shaken over perforated sieves called screens. The screen number 
 
 ## Grade is about defects, not only size
 
-Alongside the screen, the specification sets limits for moisture (usually 12.5% max), foreign matter and black and broken beans. A "clean" lot has foreign matter around 0.1% max; Grade 1 typically allows about 2% black and broken, Grade 2 about 5%.
+Alongside the screen, the specification sets limits for moisture (usually 12.5% max), foreign matter and black and broken beans. A "clean" lot has foreign matter around 0.1% max. A standard Grade 1 lot typically allows about 2% black and broken and Grade 2 about 5%; clean, re-sorted lots such as our Robusta S18 Clean are held to 0.5% or less.
 
 ## Wet polished or natural?
 
@@ -170,11 +170,11 @@ Match the grade to the product: S18 for premium whole-bean and espresso, S16 for
 
 ## Сорт — это не только размер, но и дефекты
 
-Помимо сита, спецификация задаёт пределы по влажности (обычно не более 12,5%), посторонним примесям, чёрным и битым зёрнам. В «чистой» партии посторонних примесей около 0,1% максимум; Grade 1 обычно допускает около 2% чёрных и битых зёрен, Grade 2 — около 5%.
+Помимо сита, спецификация задаёт пределы по влажности (обычно не более 12,5%), посторонним примесям, чёрным и битым зёрнам. В «чистой» партии посторонних примесей около 0,1% максимум. Стандартный Grade 1 обычно допускает около 2% чёрных и битых зёрен, Grade 2 — около 5%; в чистых, повторно отсортированных партиях, таких как наша Robusta S18 Clean, их не более 0,5%.
 
 ## Влажная полировка или натуральная обработка?
 
-Большая часть вьетнамской робусты обрабатывается сухим (натуральным) способом. Зерно **wet polished** проходит дополнительную полировку, снимающую серебристую плёнку: оно выглядит чище и даёт чуть более чистую чашку — это оправдано, когда внешний вид важен вашим покупателям.
+Большая часть вьетнамской робусты обрабатывается сухим (натуральным) способом. Зерно **влажной полировки** (wet polished) проходит дополнительную полировку, снимающую серебристую плёнку: оно выглядит чище и даёт чуть более чистую чашку — это оправдано, когда внешний вид важен вашим покупателям.
 
 ## Как выбрать
 
@@ -200,7 +200,7 @@ Match the grade to the product: S18 for premium whole-bean and espresso, S16 for
 
 ## الدرجة تتعلق بالعيوب لا بالحجم فقط
 
-إلى جانب الغربال، تحدد المواصفات حدودًا للرطوبة (عادةً 12.5% كحد أقصى)، والمواد الغريبة، والحبوب السوداء والمكسورة. في الدفعة «النظيفة» تكون المواد الغريبة نحو 0.1% كحد أقصى؛ وتسمح الدرجة الأولى عادةً بنحو 2% من الحبوب السوداء والمكسورة، والدرجة الثانية بنحو 5%.
+إلى جانب الغربال، تحدد المواصفات حدودًا للرطوبة (عادةً 12.5% كحد أقصى)، والمواد الغريبة، والحبوب السوداء والمكسورة. في الدفعة «النظيفة» تكون المواد الغريبة نحو 0.1% كحد أقصى. وتسمح الدرجة الأولى القياسية عادةً بنحو 2% من الحبوب السوداء والمكسورة، والدرجة الثانية بنحو 5%؛ أما الدفعات النظيفة المعاد فرزها مثل روبوستا S18 Clean لدينا فلا تتجاوز فيها 0.5%.
 
 ## مصقولة رطبًا أم طبيعية؟
 
@@ -225,7 +225,7 @@ Match the grade to the product: S18 for premium whole-bean and espresso, S16 for
       "Who pays for freight and insurance, where the risk passes to you, and which term makes sense for your first container of coffee or cashews.",
     category: "guide",
     published_at: "2026-09-02",
-    cover: photos.portShip,
+    cover: factoryPhotos.containerLoading,
     product_slugs: [],
     body: `The Incoterm on your contract decides who books the ship, who pays for freight and insurance, and — most importantly — at which point the goods become your risk. For coffee and cashews shipped from Vietnam, three terms cover almost every deal.
 

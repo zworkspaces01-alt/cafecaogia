@@ -34,7 +34,7 @@ export function PageHero({
             </span>
             {accent && " "}
             {accent && (
-              <span className="block overflow-hidden pb-[0.08em]">
+              <span className="-mb-[0.17em] block overflow-hidden pb-[0.25em]">
                 <em data-hero-line className="block font-serif font-normal">
                   {accent}
                 </em>

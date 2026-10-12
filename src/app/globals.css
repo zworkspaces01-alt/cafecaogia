@@ -140,14 +140,19 @@ html[lang="ar"] * {
   letter-spacing: 0 !important;
 }
 
+/* Wide enough to fill large desktop screens (1440–1600px) instead of leaving wide empty gutters. */
 @utility container-page {
   width: 100%;
-  max-width: 80rem;
+  max-width: 96rem;
   margin-inline: auto;
   padding-inline: 1.25rem;
 
   @media (width >= 48rem) {
     padding-inline: 2.5rem;
+  }
+
+  @media (width >= 90rem) {
+    padding-inline: 4rem;
   }
 }
 
@@ -163,6 +168,11 @@ html[lang="ar"] * {
    The class is added by an inline script in layout.tsx and removed after hydration. */
 .motion-pending :is([data-hero-line], [data-hero-fade], [data-slide-line], [data-slide-fade], [data-heading-line], [data-grow], [data-reveal], [data-reveal-stagger] > *, [data-reveal-image]) {
   visibility: hidden;
+}
+
+/* The homepage's first slide (LCP image + H1) paints immediately; hero.tsx doesn't animate it in. */
+.motion-pending [data-slide-panel="0"] :is([data-slide-line], [data-slide-fade]) {
+  visibility: visible;
 }
 
 .motion-pending [data-word] {

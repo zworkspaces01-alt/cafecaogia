@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowUpRight, Building2, HeartHandshake, Leaf, ShieldCheck, Timer } from "lucide-react";
 import { CtaBanner } from "@/components/cta-banner";
+import { breadcrumbList, JsonLd, webPage } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
 import { ButtonLink, SectionHeading } from "@/components/ui";
+import { localeTags } from "@/i18n/config";
 import { format } from "@/i18n/format";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
@@ -37,8 +39,21 @@ export default async function AboutPage() {
     { label: dict.contact.office, value: `${address.street}, ${address.locality}, ${address.country}` },
   ];
 
+  const pageUrl = `${site.url}/${locale}/about`;
+  const pageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      webPage("AboutPage", pageUrl, t.metaTitle, localeTags[locale]),
+      breadcrumbList([
+        { name: dict.nav.home, url: `${site.url}/${locale}` },
+        { name: dict.nav.about, url: pageUrl },
+      ]),
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={pageJsonLd} />
       <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.pallets} />
 
       <section className="py-20 md:py-28">
@@ -56,7 +71,7 @@ export default async function AboutPage() {
               <Image src={factoryPhotos.cherrySorting} alt={t.harvesterAlt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
             </div>
             <div data-reveal-image className="relative mt-12 aspect-[3/4] overflow-hidden rounded-3xl">
-              <Image src={photos.cashewRaw} alt={t.kernelsAlt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
+              <Image src={factoryPhotos.cashewKernelsCloseup} alt={t.kernelsAlt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
             </div>
           </div>
         </div>

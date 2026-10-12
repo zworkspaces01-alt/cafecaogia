@@ -66,6 +66,8 @@ export default async function HomePage() {
         email: contact.email,
         telephone: contact.phone,
         foundingDate: String(company.foundingYear),
+        knowsAbout: ["Green coffee export", "Robusta coffee", "Arabica coffee", "Cashew kernels"],
+        areaServed: dict.cta.markets,
         taxID: company.enterpriseCode,
         ...(sameAs.length > 0 && { sameAs }),
         address: {

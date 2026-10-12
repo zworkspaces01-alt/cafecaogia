@@ -280,8 +280,8 @@ export const defaultSettings: SiteSettings = {
   memberships: [],
   stats: [
     { value: "2018", label: { en: "Established", ru: "Год основания", ar: "سنة التأسيس" } },
-    { value: "37", label: { en: "Export grades in our catalog", ru: "Экспортных позиций в каталоге", ar: "درجة تصدير في كتالوجنا" } },
-    { value: "3", label: { en: "Sourcing regions", ru: "Региона закупок", ar: "مناطق توريد" } },
+    { value: "34", label: { en: "Export grades in our catalog", ru: "Экспортных позиций в каталоге", ar: "درجة تصدير في كتالوجنا" } },
+    { value: "5", label: { en: "Sourcing provinces", ru: "Провинций закупок", ar: "مقاطعات توريد" } },
     { value: "24h", label: { en: "Reply time on inquiries", ru: "Время ответа на запрос", ar: "زمن الرد على الاستفسارات" } },
   ],
   seo: {

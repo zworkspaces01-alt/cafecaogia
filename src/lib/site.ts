@@ -32,7 +32,6 @@ export const site = {
   /** Official lookup for the enterprise code shown on the About page. */
   registryUrl: "https://dangkykinhdoanh.gov.vn",
   incoterms: ["FOB", "CFR", "CIF", "EXW"],
-  paymentTerms: ["T/T", "L/C at sight", "CAD"],
 };
 
 export const nav = [
@@ -82,6 +81,18 @@ export const factoryPhotos = {
   greenBeansBasket: own("green-beans-basket"),
   greenBeansGloves: own("green-beans-gloves"),
   greenBeansPalm: own("green-beans-palm"),
+  // Cashew kernels: raw whole kernels, vacuum packing, cartons and container loading.
+  cashewKernelsCloseup: own("cashew-kernels-closeup"),
+  cashewKernelsPile: own("cashew-kernels-pile"),
+  cashewKernelsHeap: own("cashew-kernels-heap"),
+  cashewVacuumBags: own("cashew-vacuum-bags"),
+  cashewVacuumBag: own("cashew-vacuum-bag"),
+  cashewBagsPallet: own("cashew-bags-pallet"),
+  cashewCartonsOpen: own("cashew-cartons-open"),
+  cashewCartonsPacking: own("cashew-cartons-packing"),
+  cashewPallets: own("cashew-pallets"),
+  cashewContainerCartons: own("cashew-container-cartons"),
+  cashewContainerNet: own("cashew-container-net"),
 };
 
 /** Buyers visiting Cao Gia (published with their agreement). Same order as `about.visitPhotos` (alt text). */
@@ -101,7 +112,7 @@ export type FactoryPhoto = keyof typeof factoryPhotos;
  * dictionaries; `tall` marks portrait shots, which take two grid rows. Buyer visits come last,
  * from `buyerVisitPhotos`.
  */
-export const galleryGroups: { key: "drying" | "warehouse" | "grades" | "roasting" | "export"; photos: { key: FactoryPhoto; tall?: boolean }[] }[] = [
+export const galleryGroups: { key: "drying" | "warehouse" | "grades" | "roasting" | "cashew" | "export"; photos: { key: FactoryPhoto; tall?: boolean }[] }[] = [
   { key: "drying", photos: [{ key: "cherrySorting" }, { key: "dryingBeds" }, { key: "greenhouseDrying" }] },
   {
     key: "warehouse",
@@ -134,6 +145,22 @@ export const galleryGroups: { key: "drying" | "warehouse" | "grades" | "roasting
     ],
   },
   { key: "roasting", photos: [{ key: "roastingLine" }, { key: "roastedBags" }] },
+  {
+    key: "cashew",
+    photos: [
+      { key: "cashewKernelsCloseup", tall: true },
+      { key: "cashewCartonsOpen" },
+      { key: "cashewVacuumBags", tall: true },
+      { key: "cashewPallets" },
+      { key: "cashewKernelsPile", tall: true },
+      { key: "cashewBagsPallet" },
+      { key: "cashewCartonsPacking", tall: true },
+      { key: "cashewVacuumBag" },
+      { key: "cashewKernelsHeap", tall: true },
+      { key: "cashewContainerCartons", tall: true },
+      { key: "cashewContainerNet", tall: true },
+    ],
+  },
   { key: "export", photos: [{ key: "containerLoading" }, { key: "containerSeal", tall: true }, { key: "containerVacuumBags" }] },
 ];
 

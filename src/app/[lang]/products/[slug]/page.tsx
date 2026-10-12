@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/product-card";
 import { ButtonLink, SectionHeading } from "@/components/ui";
 import { localeTags } from "@/i18n/config";
 import { format } from "@/i18n/format";
-import { localeAlternates } from "@/i18n/metadata";
+import { localeAlternates, openGraphBase } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { imageUrl } from "@/lib/image-url";
 import { getPostsForProduct } from "@/lib/content";
@@ -29,9 +29,20 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/products/[
     title:
       product.seo_title?.trim() ||
       format(dict.product.metaTitle, { name: product.name, category: dict.categories[product.category] }),
-    description: product.seo_description?.trim() || product.summary,
+    description:
+      product.seo_description?.trim() ||
+      format(dict.product.metaDescription, {
+        summary: product.summary,
+        grade: product.grade,
+        origin: product.origin,
+        moq: product.moq,
+      }),
     alternates: localeAlternates(locale, `/products/${product.slug}`),
-    openGraph: { images: [{ url: imageUrl(product.image) }] },
+    openGraph: {
+      type: "website",
+      ...openGraphBase(locale, `/products/${product.slug}`),
+      images: [{ url: imageUrl(product.image), alt: product.name }],
+    },
   };
 }
 
@@ -101,7 +112,8 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
           </nav>
 
           <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14">
-            <div data-reveal-stagger className="grid grid-cols-2 gap-3 self-start lg:sticky lg:top-24">
+            {/* No reveal animation: the main photo is the LCP element and paints straight from the HTML. */}
+            <div className="grid grid-cols-2 gap-3 self-start lg:sticky lg:top-24">
               <div className="relative col-span-2 aspect-[4/3] overflow-hidden rounded-3xl bg-mist">
                 <Image
                   src={product.image}
@@ -154,7 +166,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/product
                   <div className="flex justify-between gap-4 px-5 py-3 text-sm">
                     <dt className="text-muted">{t.terms}</dt>
                     <dd className="text-end font-medium text-forest">
-                      {site.incoterms.slice(0, 3).join(" / ")} · {site.paymentTerms.join(", ")}
+                      {site.incoterms.slice(0, 3).join(" / ")} · {dict.common.paymentTerms.join(", ")}
                     </dd>
                   </div>
                 </dl>

@@ -56,7 +56,7 @@ export function PhotoStories({
       onClick={() => setFilter(key)}
       aria-pressed={filter === key}
       className={cn(
-        "h-10 rounded-full border px-4 text-sm whitespace-nowrap transition-colors",
+        "h-11 rounded-full border px-4 text-sm whitespace-nowrap transition-colors",
         filter === key ? "border-forest bg-forest text-white" : "border-mist bg-white text-forest hover:border-forest/40",
       )}
     >

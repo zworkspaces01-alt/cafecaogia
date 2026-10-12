@@ -6,7 +6,7 @@ import { MotionMain } from "@/components/motion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { isRtl, locales, localeTags } from "@/i18n/config";
-import { localeAlternates } from "@/i18n/metadata";
+import { localeAlternates, openGraphBase } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content";
 import { getProducts } from "@/lib/products";
@@ -60,8 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: localeAlternates(locale, "/"),
     openGraph: {
       type: "website",
-      siteName: site.name,
-      locale: localeTags[locale],
+      ...openGraphBase(locale),
       images: [{ url: imageUrl(seo.ogImage.trim() || factoryPhotos.sacksSilos) }],
     },
     twitter: { card: "summary_large_image" },

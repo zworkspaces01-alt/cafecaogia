@@ -173,8 +173,8 @@ export const sampleProducts: Product[] = [
     summary: "The largest AFI whole — for premium gifting and luxury retail in the Middle East and East Asia.",
     description:
       "Cashew Kernels WW160 are whole white kernels graded to AFI at 140–160 kernels/lb (309–353/kg). The nuts are steamed, shelled, dried and peeled in Vietnam's southeastern cashew belt, then sorted by size and colour and vacuum-packed to keep their crunch and sweetness on long ocean voyages.",
-    image: photos.cashewWood,
-    gallery: [photos.cashewDish, photos.cashewApple],
+    image: factoryPhotos.cashewKernelsCloseup,
+    gallery: [factoryPhotos.cashewVacuumBags, factoryPhotos.cashewCartonsOpen],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "140–160 kernels/lb (309–353/kg)" },
@@ -196,8 +196,8 @@ export const sampleProducts: Product[] = [
     summary: "Extra-large whites for premium gift boxes and upscale retail.",
     description:
       "Cashew Kernels WW180 are whole white kernels graded to AFI at 160–180 kernels/lb (353–397/kg). The nuts are steamed, shelled, dried and peeled in Vietnam's southeastern cashew belt, then sorted by size and colour and vacuum-packed to keep their crunch and sweetness on long ocean voyages.",
-    image: photos.cashewBowlWhite,
-    gallery: [photos.cashewWood, photos.cashewApple],
+    image: factoryPhotos.cashewKernelsPile,
+    gallery: [factoryPhotos.cashewCartonsOpen, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "160–180 kernels/lb (353–397/kg)" },
@@ -219,8 +219,8 @@ export const sampleProducts: Product[] = [
     summary: "Large kernels at a sharper price than WW180 — size without the premium.",
     description:
       "Cashew Kernels WW210 are whole white kernels graded to AFI at 200–210 kernels/lb (441–463/kg). The nuts are steamed, shelled, dried and peeled in Vietnam's southeastern cashew belt, then sorted by size and colour and vacuum-packed to keep their crunch and sweetness on long ocean voyages.",
-    image: photos.cashewDish,
-    gallery: [photos.cashewHeap, photos.cashewApple],
+    image: factoryPhotos.cashewKernelsHeap,
+    gallery: [factoryPhotos.cashewVacuumBag, factoryPhotos.cashewPallets],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "200–210 kernels/lb (441–463/kg)" },
@@ -242,8 +242,8 @@ export const sampleProducts: Product[] = [
     summary: "The premium standard for retail packs and snacking in Japan, the US and Europe.",
     description:
       "Cashew Kernels WW240 are whole white kernels graded to AFI at 220–240 kernels/lb (485–529/kg). The nuts are steamed, shelled, dried and peeled in Vietnam's southeastern cashew belt, then sorted by size and colour and vacuum-packed to keep their crunch and sweetness on long ocean voyages.",
-    image: photos.cashewWood,
-    gallery: [photos.cashewApple, photos.cashewWhite],
+    image: factoryPhotos.cashewKernelsCloseup,
+    gallery: [factoryPhotos.cashewBagsPallet, factoryPhotos.cashewCartonsPacking],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "220–240 kernels/lb (485–529/kg)" },
@@ -265,8 +265,8 @@ export const sampleProducts: Product[] = [
     summary: "The world's most traded cashew grade — consistent size and colour for roasting and snacks.",
     description:
       "Cashew Kernels WW320 are whole white kernels graded to AFI at 300–320 kernels/lb (661–705/kg). The nuts are steamed, shelled, dried and peeled in Vietnam's southeastern cashew belt, then sorted by size and colour and vacuum-packed to keep their crunch and sweetness on long ocean voyages.",
-    image: photos.cashewRaw,
-    gallery: [photos.cashewHeap, photos.cashewBowlWhite],
+    image: factoryPhotos.cashewKernelsPile,
+    gallery: [factoryPhotos.cashewVacuumBags, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "300–320 kernels/lb (661–705/kg)" },
@@ -288,8 +288,8 @@ export const sampleProducts: Product[] = [
     summary: "Small, economical wholes for food manufacturing, trail mixes and baking.",
     description:
       "Cashew Kernels WW450 are whole white kernels graded to AFI at 400–450 kernels/lb (882–992/kg). The nuts are steamed, shelled, dried and peeled in Vietnam's southeastern cashew belt, then sorted by size and colour and vacuum-packed to keep their crunch and sweetness on long ocean voyages.",
-    image: photos.cashewHeap,
-    gallery: [photos.cashewRaw, photos.cashewSack],
+    image: factoryPhotos.cashewKernelsHeap,
+    gallery: [factoryPhotos.cashewCartonsOpen, factoryPhotos.cashewPallets],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "400–450 kernels/lb (882–992/kg)" },
@@ -311,8 +311,8 @@ export const sampleProducts: Product[] = [
     summary: "Large wholes with a light brown tint — the 180 size at a lower price than WW180.",
     description:
       "Scorched wholes pick up a slightly deeper colour during drying but keep the shape, crunch and taste of white wholes. Cashew Kernels SW180 are a cost-effective choice wherever the kernels will be roasted, coated or processed.",
-    image: photos.cashewPile,
-    gallery: [photos.cashewWood, photos.cashewSack],
+    image: factoryPhotos.cashewVacuumBag,
+    gallery: [factoryPhotos.cashewCartonsOpen, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "170–180 kernels/lb (375–397/kg)" },
@@ -334,8 +334,8 @@ export const sampleProducts: Product[] = [
     summary: "Light-brown wholes in the popular 240 size, priced below WW240.",
     description:
       "Scorched wholes pick up a slightly deeper colour during drying but keep the shape, crunch and taste of white wholes. Cashew Kernels SW240 are a cost-effective choice wherever the kernels will be roasted, coated or processed.",
-    image: photos.cashewPile,
-    gallery: [photos.cashewHeap, photos.cashewSack],
+    image: factoryPhotos.cashewVacuumBags,
+    gallery: [factoryPhotos.cashewBagsPallet, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "220–240 kernels/lb (485–529/kg)" },
@@ -357,8 +357,8 @@ export const sampleProducts: Product[] = [
     summary: "Economical 320-size wholes for granola, snacks, nut milks and butters.",
     description:
       "Scorched wholes pick up a slightly deeper colour during drying but keep the shape, crunch and taste of white wholes. Cashew Kernels SW320 are a cost-effective choice wherever the kernels will be roasted, coated or processed.",
-    image: photos.cashewSack,
-    gallery: [photos.cashewPile, photos.cashewRaw],
+    image: factoryPhotos.cashewCartonsOpen,
+    gallery: [factoryPhotos.cashewPallets, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "300–320 kernels/lb (661–705/kg)" },
@@ -380,8 +380,8 @@ export const sampleProducts: Product[] = [
     summary: "White 240 wholes with light surface marks — WW quality in the bag at a lower cost.",
     description:
       "Cashew Kernels LBW240 keep the white colour and whole shape of WW grades but show light surface marks that disappear in roasting or seasoning. They cut raw-material cost for roasters and snack brands without changing the eating experience.",
-    image: photos.cashewWhite,
-    gallery: [photos.cashewDish, photos.cashewHeap],
+    image: factoryPhotos.cashewBagsPallet,
+    gallery: [factoryPhotos.cashewCartonsPacking, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "220–240 kernels/lb (485–529/kg)" },
@@ -403,8 +403,8 @@ export const sampleProducts: Product[] = [
     summary: "320-size white wholes with light blemishes, ideal for OEM snacks and value retail.",
     description:
       "Cashew Kernels LBW320 keep the white colour and whole shape of WW grades but show light surface marks that disappear in roasting or seasoning. They cut raw-material cost for roasters and snack brands without changing the eating experience.",
-    image: photos.cashewDish,
-    gallery: [photos.cashewWhite, photos.cashewRaw],
+    image: factoryPhotos.cashewPallets,
+    gallery: [factoryPhotos.cashewVacuumBag, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "300–320 kernels/lb (661–705/kg)" },
@@ -426,8 +426,8 @@ export const sampleProducts: Product[] = [
     summary: "Darker whole kernels with spots — economical for chocolate coating and cashew milk.",
     description:
       "Dessert wholes range from deep yellow to amber and may carry brown spots or scorch marks. Whole and fully edible, Cashew Kernels DW320 are chosen where appearance is hidden — chocolate enrobing, nut milks, butters and food ingredients.",
-    image: photos.cashewSack,
-    gallery: [photos.cashewPile, photos.cashewRoastedRed],
+    image: factoryPhotos.cashewCartonsPacking,
+    gallery: [factoryPhotos.cashewVacuumBags, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "300–320 kernels/lb (661–705/kg)" },
@@ -449,8 +449,8 @@ export const sampleProducts: Product[] = [
     summary: "Smaller dessert wholes for large-scale food processing.",
     description:
       "Dessert wholes range from deep yellow to amber and may carry brown spots or scorch marks. Whole and fully edible, Cashew Kernels DW360 are chosen where appearance is hidden — chocolate enrobing, nut milks, butters and food ingredients.",
-    image: photos.cashewPile,
-    gallery: [photos.cashewSack, photos.cashewHeap],
+    image: factoryPhotos.cashewVacuumBag,
+    gallery: [factoryPhotos.cashewCartonsOpen, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Count", value: "340–360 kernels/lb (750–794/kg)" },
@@ -472,8 +472,8 @@ export const sampleProducts: Product[] = [
     summary: "Whole kernels with light surface spots — a budget grade for confectionery and coated nuts.",
     description:
       "SL kernels are whole and sound but show light-coloured spots from the shell. Once coated in chocolate, sugar or seasoning the spots vanish, which makes SL a smart way to lower cost in confectionery and snack production.",
-    image: photos.cashewHeap,
-    gallery: [photos.cashewSack, photos.cashewPile],
+    image: factoryPhotos.cashewVacuumBags,
+    gallery: [factoryPhotos.cashewBagsPallet, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Moisture", value: "5% max" },
@@ -495,8 +495,8 @@ export const sampleProducts: Product[] = [
     summary: "Whole kernels with darker spots — the most economical grade among wholes.",
     description:
       "SK1 kernels carry more pronounced dark or brown spots than SL, while staying whole and edible. They suit industrial users who grind, roast dark or coat the nuts and want whole-kernel yield at the lowest price.",
-    image: photos.cashewSack,
-    gallery: [photos.cashewHeap, photos.cashewPile],
+    image: factoryPhotos.cashewCartonsOpen,
+    gallery: [factoryPhotos.cashewPallets, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Moisture", value: "5% max" },
@@ -517,8 +517,8 @@ export const sampleProducts: Product[] = [
     summary: "Naturally split white kernels — the most popular broken grade for bakery and chocolate.",
     description:
       "Cashew White Splits (WS) come from kernels that break naturally during shelling and peeling. They are sieved to size, graded to AFI and packed exactly like wholes — the same flavour at a lower cost wherever shape doesn't matter.",
-    image: photos.cashewWhite,
-    gallery: [photos.cashewRaw, photos.cashewDish],
+    image: factoryPhotos.cashewBagsPallet,
+    gallery: [factoryPhotos.cashewCartonsPacking, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Size", value: "Kernel split lengthwise into two halves" },
@@ -540,8 +540,8 @@ export const sampleProducts: Product[] = [
     summary: "Large white pieces for roasted nut mixes, premium snacks and baking.",
     description:
       "Cashew Large White Pieces (LWP) come from kernels that break naturally during shelling and peeling. They are sieved to size, graded to AFI and packed exactly like wholes — the same flavour at a lower cost wherever shape doesn't matter.",
-    image: photos.cashewRaw,
-    gallery: [photos.cashewWhite, photos.cashewHeap],
+    image: factoryPhotos.cashewPallets,
+    gallery: [factoryPhotos.cashewVacuumBag, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Size", value: "About 2/3 of a kernel" },
@@ -563,8 +563,8 @@ export const sampleProducts: Product[] = [
     summary: "Large pieces for chocolate inclusions and toppings — the industry's volume grade.",
     description:
       "Cashew Large Pieces (LP) come from kernels that break naturally during shelling and peeling. They are sieved to size, graded to AFI and packed exactly like wholes — the same flavour at a lower cost wherever shape doesn't matter.",
-    image: photos.cashewHeap,
-    gallery: [photos.cashewRaw, photos.cashewSack],
+    image: factoryPhotos.cashewCartonsPacking,
+    gallery: [factoryPhotos.cashewVacuumBags, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Size", value: "About 2/3 of a kernel" },
@@ -586,8 +586,8 @@ export const sampleProducts: Product[] = [
     summary: "Small pieces for cashew butter, nut milk and plant-based cheese.",
     description:
       "Cashew Small Pieces (SP) come from kernels that break naturally during shelling and peeling. They are sieved to size, graded to AFI and packed exactly like wholes — the same flavour at a lower cost wherever shape doesn't matter.",
-    image: photos.cashewDish,
-    gallery: [photos.cashewHeap, photos.cashewWhite],
+    image: factoryPhotos.cashewVacuumBag,
+    gallery: [factoryPhotos.cashewCartonsOpen, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Size", value: "Up to 1/3 of a kernel" },
@@ -609,8 +609,8 @@ export const sampleProducts: Product[] = [
     summary: "Crosswise-broken white kernels for confectionery and bakery.",
     description:
       "Cashew White Butts (WB) come from kernels that break naturally during shelling and peeling. They are sieved to size, graded to AFI and packed exactly like wholes — the same flavour at a lower cost wherever shape doesn't matter.",
-    image: photos.cashewBowlWhite,
-    gallery: [photos.cashewDish, photos.cashewRaw],
+    image: factoryPhotos.cashewVacuumBags,
+    gallery: [factoryPhotos.cashewBagsPallet, factoryPhotos.cashewContainerNet],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Size", value: "Kernel broken crosswise (butt end)" },
@@ -632,8 +632,8 @@ export const sampleProducts: Product[] = [
     summary: "The most economical broken grade — for nut milk, ground chocolate and industrial confectionery.",
     description:
       "Cashew Baby Bits (BB) come from kernels that break naturally during shelling and peeling. They are sieved to size, graded to AFI and packed exactly like wholes — the same flavour at a lower cost wherever shape doesn't matter.",
-    image: photos.cashewSack,
-    gallery: [photos.cashewHeap, photos.cashewDish],
+    image: factoryPhotos.cashewCartonsOpen,
+    gallery: [factoryPhotos.cashewPallets, factoryPhotos.cashewContainerCartons],
     origin: "Southeast Vietnam (Binh Phuoc / Dong Nai)",
     specs: [
       { label: "Size", value: "Smallest pieces and granules" },

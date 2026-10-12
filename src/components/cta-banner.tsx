@@ -34,7 +34,8 @@ export async function CtaBanner() {
 
           <div data-reveal-stagger>
             <h2 className="text-4xl leading-[1.05] font-medium tracking-tight md:text-5xl">
-              {t.title}
+              {/* The space keeps the two lines apart in the text crawlers read ("…source from…"). */}
+              {t.title}{" "}
               <br />
               <em className="font-serif font-normal text-lime">{t.accent}</em>
             </h2>

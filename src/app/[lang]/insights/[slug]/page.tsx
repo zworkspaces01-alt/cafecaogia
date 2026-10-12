@@ -3,12 +3,13 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import { ArticleBody, readingMinutes } from "@/components/article-body";
+import { breadcrumbList, JsonLd, schemaIds } from "@/components/json-ld";
 import Link from "@/components/link";
 import { PostCard } from "@/components/post-card";
 import { ButtonLink, SectionHeading } from "@/components/ui";
 import { localeTags } from "@/i18n/config";
 import { format, formatDate } from "@/i18n/format";
-import { localeAlternates } from "@/i18n/metadata";
+import { localeAlternates, openGraphBase } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getPost, getPosts, getPostSlugs } from "@/lib/content";
 import { imageUrl } from "@/lib/image-url";
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/insights/[
     alternates: localeAlternates(locale, `/insights/${post.slug}`),
     openGraph: {
       type: "article",
+      ...openGraphBase(locale, `/insights/${post.slug}`),
       publishedTime: post.published_at,
       images: [{ url: imageUrl(post.cover ?? photos.hillside) }],
     },
@@ -51,25 +53,35 @@ export default async function InsightPage({ params }: PageProps<"/[lang]/insight
   ].slice(0, 3);
 
   const cover = post.cover ?? photos.hillside;
+  const pageUrl = `${site.url}/${locale}/insights/${post.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    description: post.excerpt,
-    image: imageUrl(cover),
-    datePublished: post.published_at,
-    inLanguage: localeTag,
-    mainEntityOfPage: `${site.url}/${locale}/insights/${post.slug}`,
-    author: { "@type": "Organization", name: site.name, url: site.url },
-    publisher: { "@type": "Organization", name: site.name, url: site.url },
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${pageUrl}#article`,
+        headline: post.title,
+        description: post.excerpt,
+        image: imageUrl(cover),
+        datePublished: post.published_at,
+        // Posts have no separate edit date yet.
+        dateModified: post.published_at,
+        inLanguage: localeTag,
+        mainEntityOfPage: pageUrl,
+        author: { "@id": schemaIds.organization },
+        publisher: { "@id": schemaIds.organization },
+      },
+      breadcrumbList([
+        { name: dict.nav.home, url: `${site.url}/${locale}` },
+        { name: dict.nav.insights, url: `${site.url}/${locale}/insights` },
+        { name: post.title, url: pageUrl },
+      ]),
+    ],
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
-      />
+      <JsonLd data={jsonLd} />
 
       <div className="bg-forest pt-28" />
 

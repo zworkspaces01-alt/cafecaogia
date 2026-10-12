@@ -51,9 +51,7 @@ export default async function CompanyProfilePage() {
                 <LogoMark className="size-14" />
                 <div>
                   <Wordmark className="h-6" />
-                  <p className="mt-1 text-xs tracking-[0.3em] text-muted uppercase" dir="ltr">
-                    Coffee · Cashew · Vietnam
-                  </p>
+                  <p className="mt-1 text-xs tracking-[0.3em] text-muted uppercase">{dict.footer.tagline}</p>
                 </div>
               </div>
               <div className="text-end">

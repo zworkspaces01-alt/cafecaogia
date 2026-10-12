@@ -10,7 +10,7 @@ import { PACE } from "@/components/motion";
 import { ButtonLink } from "@/components/ui";
 import { format } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries/en";
-import { factoryPhotos, photos } from "@/lib/site";
+import { factoryPhotos } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -22,7 +22,7 @@ const slides = [
   // Opens on the product itself: green coffee in gloved hands over a graded lot.
   { image: factoryPhotos.greenBeansGloves, primaryHref: "/contact", secondaryHref: "/products" },
   { image: factoryPhotos.dryingBeds, primaryHref: "/products?category=coffee", secondaryHref: "/contact" },
-  { image: photos.cashewWood, primaryHref: "/products?category=cashew", secondaryHref: "/contact" },
+  { image: factoryPhotos.cashewKernelsPile, primaryHref: "/products?category=cashew", secondaryHref: "/contact" },
   { image: factoryPhotos.containerLoading, primaryHref: "/contact", secondaryHref: "/process" },
 ];
 
@@ -139,6 +139,11 @@ export function Hero({ t, scrollLabel, foundingYear }: { t: Dictionary["hero"]; 
         { scale: 1, duration: SLIDE_SECONDS + 1.5, ease: "power1.out", overwrite: true },
       );
       gsap.set(panelIn, { autoAlpha: 1, overwrite: true });
+      if (first) {
+        // The first slide's text and the H1 are the LCP candidates: show them as served, no entrance.
+        gsap.set([...linesIn, ...fadesIn], { autoAlpha: 1, yPercent: 0, y: 0, overwrite: true });
+        return;
+      }
       gsap.fromTo(
         linesIn,
         { yPercent: 115, autoAlpha: 0 },
@@ -224,7 +229,7 @@ export function Hero({ t, scrollLabel, foundingYear }: { t: Dictionary["hero"]; 
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/75 via-ink/25 to-transparent rtl:bg-gradient-to-l" />
 
       <div className="container-page flex flex-1 flex-col justify-end pt-32 pb-12 md:pb-16">
-        <div className="grid max-w-2xl" aria-live={playing ? "off" : "polite"}>
+        <div className="grid max-w-2xl lg:max-w-4xl" aria-live={playing ? "off" : "polite"}>
           {slides.map((slide, i) => {
             const text = t.slides[i];
             // Only the first slide is a heading; the rest would otherwise lead the page outline.
@@ -250,7 +255,7 @@ export function Hero({ t, scrollLabel, foundingYear }: { t: Dictionary["hero"]; 
                       {text.title}
                     </span>
                   </span>{" "}
-                  <span className="block overflow-hidden pb-[0.1em]">
+                  <span className="-mb-[0.15em] block overflow-hidden pb-[0.25em]">
                     <span data-slide-line className="block">
                       {text.lead} <em className="font-serif font-normal">{text.accent}</em>
                     </span>

@@ -16,7 +16,7 @@ export async function IndustryPartners() {
     <>
       <PartnerMark
         partner={partner}
-        className="opacity-70 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0"
+        className="transition duration-300 group-hover:scale-105"
       />
       {/* Rows saved before migration 0010 have no kind yet. */}
       {(partner.kind === "bank" || partner.kind === "shipping") && <span className="text-xs text-muted">{t.kinds[partner.kind]}</span>}
@@ -41,7 +41,7 @@ export async function IndustryPartners() {
               <li
                 key={i}
                 aria-hidden={i >= partners.length || undefined}
-                className="group flex w-48 shrink-0 flex-col items-center justify-center gap-4 px-6 text-forest md:w-56"
+                className="group flex w-40 shrink-0 flex-col items-center justify-center gap-3 px-4 text-forest md:w-56 md:gap-4 md:px-6"
               >
                 {logo(partner)}
               </li>

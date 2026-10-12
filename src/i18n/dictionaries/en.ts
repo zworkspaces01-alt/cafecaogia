@@ -3,7 +3,7 @@
 
 export const en = {
   meta: {
-    title: "Cao Gia — Vietnamese Coffee & Cashew Exporter",
+    title: "Vietnam Green Coffee & Cashew Kernel Exporter | Cao Gia",
     description:
       "Cao Gia sources, processes and exports export-grade Robusta, Arabica and cashew kernels from Vietnam — traceable to the farm and consistent in every container.",
     keywords: [
@@ -24,6 +24,7 @@ export const en = {
     contact: "Contact",
   },
   common: {
+    paymentTerms: ["T/T", "L/C at sight", "CAD"],
     requestQuote: "Request a Quote",
     exploreProducts: "Explore Products",
     viewAllProducts: "View all products",
@@ -75,8 +76,8 @@ export const en = {
         label: "Vietnamese Harvest",
         alt: "Gloved hands holding green coffee beans above a lot spread on our warehouse floor",
         eyebrow: "Coffee & Cashew · Made in Vietnam",
-        title: "Vietnam's Harvest,",
-        lead: "Delivered to",
+        title: "Green Coffee & Cashew",
+        lead: "from Vietnam to",
         accent: "Your Port",
         description:
           "Cao Gia sources, processes and exports export-grade Robusta, Arabica and cashew kernels — traceable to the farm and consistent in every container.",
@@ -97,7 +98,7 @@ export const en = {
       },
       {
         label: "Cashew Kernels",
-        alt: "White whole cashew kernels on a wooden board",
+        alt: "A pile of raw white whole cashew kernels at our warehouse",
         eyebrow: "Cashew · Binh Phuoc",
         title: "Creamy Cashews,",
         lead: "Graded to",
@@ -152,7 +153,7 @@ export const en = {
     title: "Every Step,",
     accent: "Checked and Recorded",
     description:
-      "Four controlled steps between the farm and your warehouse — so every shipment arrives exactly as agreed in the contract.",
+      "Controlled steps between the farm and your warehouse — so every shipment arrives exactly as agreed in the contract.",
     tablistLabel: "Export process",
     steps: [
       {
@@ -348,6 +349,7 @@ export const en = {
     markets: ["United States", "European Union", "Japan", "South Korea", "Middle East", "Australia"],
   },
   footer: {
+    tagline: "Coffee · Cashew · Vietnam",
     description:
       "Cao Gia sources, processes and exports export-grade Robusta, Arabica and cashew kernels from Vietnam — traceable to the farm and consistent in every container.",
     coffee: "Coffee",
@@ -404,6 +406,7 @@ export const en = {
   },
   product: {
     metaTitle: "{name} — {category} from Vietnam",
+    metaDescription: "{summary} {grade} from {origin}. MOQ {moq}. FOB, CFR or CIF from Vietnam.",
     products: "Products",
     origin: "Origin",
     moq: "MOQ",
@@ -671,7 +674,7 @@ export const en = {
     points: [
       "Exporting from Vietnam since {year}",
       "{count} export grades of coffee and cashew",
-      "Sourced from Dak Lak, Lam Dong and Binh Phuoc",
+      "Sourced from Dak Lak, Gia Lai, Lam Dong, Binh Phuoc and Dong Nai",
       "Pre-shipment samples and SGS or Vinacontrol inspection on request",
     ],
     yearsLabel: "years exporting from Vietnam",
@@ -707,6 +710,7 @@ export const en = {
       warehouse: { title: "Warehouse & Grading", description: "Screen grading, bagging and stacking each lot on pallets before export." },
       grades: { title: "Grades & Samples", description: "A sample tray with its spec card for every grade we export, and the green beans up close." },
       roasting: { title: "Roasting & Packing", description: "Roasted coffee packed in one-way valve bags on our packing line." },
+      cashew: { title: "Cashew Kernels", description: "Raw whole kernels, vacuum packing in cartons and loading the container." },
       export: { title: "Export & Shipping", description: "Loading, lining and sealing every container." },
       visits: { title: "Buyer Visits", description: "Buyers who came to walk the warehouse and meet the team." },
     },
@@ -739,6 +743,17 @@ export const en = {
       containerLoading: "Loading jute sacks into a container by conveyor",
       containerSeal: "A bolt seal locking a loaded container",
       containerVacuumBags: "Lining a container loaded with vacuum-packed bags",
+      cashewKernelsCloseup: "Raw white whole cashew kernels up close",
+      cashewKernelsPile: "A pile of raw whole cashew kernels",
+      cashewKernelsHeap: "Raw cashew kernels spread for inspection",
+      cashewVacuumBags: "Vacuum-packed bags of cashew kernels on a pallet",
+      cashewVacuumBag: "A single vacuum-packed bag of cashew kernels",
+      cashewBagsPallet: "Vacuum-packed cashew bags stacked on a pallet",
+      cashewCartonsOpen: "Open export cartons with vacuum-packed cashew kernels",
+      cashewCartonsPacking: "Packing vacuum bags of cashew kernels into cartons",
+      cashewPallets: "Palletised vacuum bags of cashew kernels in the warehouse",
+      cashewContainerCartons: "Cartons of cashew kernels loaded in a container",
+      cashewContainerNet: "A loaded container of cashew cartons secured with a net",
     },
   },
   notFound: {

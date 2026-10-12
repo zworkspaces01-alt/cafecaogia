@@ -4,10 +4,23 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Filter pills over server-rendered product lists: every list stays in the HTML (for crawlers and
- * no-JS visitors the first one shows), the pills only switch which one is visible.
+ * Filter pills over one server-rendered product list. Each card is in the HTML once (so crawlers see
+ * one heading and one link per product) and lists the tabs it belongs to; the pills only hide the
+ * cards outside the active tab. Without JS the first tab's cards show.
  */
-export function ProductTabs({ label, tabs }: { label: string; tabs: { key: string; label: string; panel: ReactNode }[] }) {
+export function ProductTabs({
+  label,
+  tabs,
+  items,
+  listClassName,
+  itemClassName,
+}: {
+  label: string;
+  tabs: { key: string; label: string }[];
+  items: { key: string; tabs: string[]; node: ReactNode }[];
+  listClassName: string;
+  itemClassName: string;
+}) {
   const [active, setActive] = useState(tabs[0]?.key);
 
   return (
@@ -19,7 +32,7 @@ export function ProductTabs({ label, tabs }: { label: string; tabs: { key: strin
               key={tab.key}
               type="button"
               aria-pressed={tab.key === active}
-              aria-controls={`products-${tab.key}`}
+              aria-controls="featured-products"
               onClick={() => setActive(tab.key)}
               className={cn(
                 "inline-flex min-h-11 items-center rounded-full px-5 text-sm transition-colors",
@@ -31,11 +44,13 @@ export function ProductTabs({ label, tabs }: { label: string; tabs: { key: strin
           ))}
         </div>
       )}
-      {tabs.map((tab) => (
-        <div key={tab.key} id={`products-${tab.key}`} hidden={tab.key !== active} className="mt-8">
-          {tab.panel}
-        </div>
-      ))}
+      <ul id="featured-products" data-reveal-stagger className={cn("mt-8", listClassName)}>
+        {items.map((item) => (
+          <li key={item.key} hidden={!item.tabs.includes(active ?? "")} className={itemClassName}>
+            {item.node}
+          </li>
+        ))}
+      </ul>
     </>
   );
 }

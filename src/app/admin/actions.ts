@@ -7,6 +7,7 @@ import { getAuthClient, requireAdmin } from "@/lib/admin/auth";
 import { getEntity, type Entity, type Field } from "@/lib/admin/entities";
 import { CMS_CACHE_TAG } from "@/lib/supabase";
 import { analyticsKeys, analyticsTools } from "@/lib/analytics-ids";
+import { submitToIndexNow } from "@/lib/indexnow";
 import { site } from "@/lib/site";
 import {
   discoverTelegram,
@@ -147,6 +148,12 @@ export async function saveRecord(entityKey: string, id: string | null, values: R
   }
 
   refreshSite();
+  // Product and article pages (plus the lists that show them) are announced to IndexNow engines.
+  const section = entity.key === "products" ? "/products" : entity.key === "posts" ? "/insights" : null;
+  if (section && typeof row.slug === "string" && row.slug) {
+    const changed = [`${section}/${row.slug}`, section, "/"];
+    after(() => submitToIndexNow(changed));
+  }
   const title = escapeHtml(String(row[entity.titleField] ?? "") || "(chưa đặt tên)");
   notifyLater("content", `${id ? "✏️" : "➕"} ${who(user)} đã ${id ? "sửa" : "thêm"} ${entity.singular} <b>${title}</b>`, [
     { text: "Mở trong CMS", url: `${site.url}/admin/${entity.key}/${data.id}` },

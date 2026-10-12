@@ -15,3 +15,24 @@ export function JsonLd({ data }: { data: object }) {
     />
   );
 }
+
+/** BreadcrumbList from (name, absolute URL) pairs, home first. */
+export function breadcrumbList(items: { name: string; url: string }[]) {
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({ "@type": "ListItem", position: i + 1, name: item.name, item: item.url })),
+  };
+}
+
+/** A WebPage node (or subtype such as AboutPage) that belongs to the site and is about the organization. */
+export function webPage(type: string, url: string, name: string, inLanguage: string) {
+  return {
+    "@type": type,
+    "@id": `${url}#webpage`,
+    url,
+    name,
+    inLanguage,
+    isPartOf: { "@id": schemaIds.website },
+    about: { "@id": schemaIds.organization },
+  };
+}

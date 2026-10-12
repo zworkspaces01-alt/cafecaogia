@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { CtaBanner } from "@/components/cta-banner";
 import Link from "@/components/link";
+import { breadcrumbList, JsonLd, webPage } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
 import { ProductCard } from "@/components/product-card";
+import { localeTags } from "@/i18n/config";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getProducts } from "@/lib/products";
 import { pageMeta } from "@/lib/seo";
-import { factoryPhotos } from "@/lib/site";
+import { factoryPhotos, site } from "@/lib/site";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +27,7 @@ function parseCategory(value: string | string[] | undefined): Category | undefin
 
 export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/products">) {
   const category = parseCategory((await searchParams).category);
-  const [dict, products] = await Promise.all([getDictionary(), getProducts(category)]);
+  const [locale, dict, products] = await Promise.all([getLocale(), getDictionary(), getProducts(category)]);
   const t = dict.productsPage;
 
   const filters: { value?: Category; label: string }[] = [
@@ -34,8 +36,32 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
     { value: "cashew", label: dict.categories.cashew },
   ];
 
+  const pageUrl = `${site.url}/${locale}/products`;
+  const pageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        ...webPage("CollectionPage", pageUrl, t.metaTitle, localeTags[locale]),
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: products.map((product, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: product.name,
+            url: `${pageUrl}/${product.slug}`,
+          })),
+        },
+      },
+      breadcrumbList([
+        { name: dict.nav.home, url: `${site.url}/${locale}` },
+        { name: dict.nav.products, url: pageUrl },
+      ]),
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={pageJsonLd} />
       <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.forklift} />
 
       <section className="py-16 md:py-20">

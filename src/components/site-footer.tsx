@@ -54,7 +54,7 @@ export async function SiteFooter() {
     <footer className="bg-ink text-white print:hidden">
       <div className="container-page grid gap-12 py-16 lg:grid-cols-[1.3fr_2fr]">
         <div data-reveal className="max-w-sm">
-          <Logo label={dict.common.homeLabel} tagline="Coffee · Cashew · Vietnam" />
+          <Logo label={dict.common.homeLabel} tagline={dict.footer.tagline} />
           <p className="mt-5 text-sm leading-relaxed text-white/60">{dict.footer.description}</p>
           <ul className="mt-6 space-y-3 text-sm text-white/80">
             <li className="flex gap-3">
@@ -103,7 +103,7 @@ export async function SiteFooter() {
         <div data-reveal-stagger className="grid grid-cols-2 gap-8 sm:grid-cols-3">
           {columns.map((col) => (
             <div key={col.title}>
-              <h3 className="text-sm font-medium text-lime">{col.title}</h3>
+              <p className="text-sm font-medium text-lime">{col.title}</p>
               <ul className="mt-4 space-y-3 text-sm text-white/70">
                 {col.links.map((link) => (
                   <li key={link.href}>

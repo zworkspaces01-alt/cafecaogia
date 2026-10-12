@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { WhatsAppIcon } from "@/components/icons/whatsapp";
 import { Clock, Mail, MapPin } from "lucide-react";
 import { InquiryForm } from "@/components/inquiry-form";
+import { breadcrumbList, JsonLd, webPage } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
+import { localeTags } from "@/i18n/config";
 import { format } from "@/i18n/format";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
@@ -46,8 +48,21 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
     { icon: Clock, label: t.hours, value: t.hoursValue },
   ];
 
+  const pageUrl = `${site.url}/${locale}/contact`;
+  const pageJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      webPage("ContactPage", pageUrl, t.metaTitle, localeTags[locale]),
+      breadcrumbList([
+        { name: dict.nav.home, url: `${site.url}/${locale}` },
+        { name: dict.nav.contact, url: pageUrl },
+      ]),
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={pageJsonLd} />
       <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.sacksLiners} />
 
       <section className="py-16 md:py-24">
@@ -92,7 +107,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
                 {t.incoterms}: {site.incoterms.join(", ")}
               </p>
               <p>
-                {t.payment}: {site.paymentTerms.join(", ")}
+                {t.payment}: {dict.common.paymentTerms.join(", ")}
               </p>
             </div>
           </aside>
