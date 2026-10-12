@@ -337,6 +337,191 @@ export const en = {
     description: "Payments clear through an international bank, and our containers sail with the world's major shipping lines.",
     kinds: { bank: "Bank", shipping: "Shipping line" },
   },
+  // Commodity landing pages (/green-coffee, /cashew-kernels). Industry figures are cited in `sources`;
+  // Cao Gia's own terms come from the product data and `tradeTerms`.
+  hubs: {
+    labels: {
+      grade: "Grade",
+      spec: "Specification",
+      origin: "Origin",
+      moq: "Minimum order",
+      view: "View specs",
+      quote: "Request a quote",
+      termsTitle: "Trade terms",
+      faqTitle: "Buyer questions",
+      sourcesTitle: "Sources",
+      sourcesNote: "Industry figures above come from these public sources; check them for the latest updates.",
+    },
+    coffee: {
+      metaTitle: "Vietnam Green Coffee Exporter — Robusta & Arabica Grades",
+      metaDescription:
+        "Robusta S18, S16 and S13 from the Central Highlands and washed Arabica from Lam Dong and Son La. 19.2 MT per 20ft container, FOB, CFR or CIF, samples before shipment.",
+      eyebrow: "Green Coffee · Vietnam",
+      title: "Vietnamese Robusta & Arabica,",
+      accent: "Graded for Export",
+      description:
+        "Cao Gia ships green coffee to roasters and importers: natural Robusta from the Central Highlands and washed Arabica from Lam Dong and Son La, graded by screen size and sent with full export documents.",
+      gradesTitle: "Green Coffee",
+      gradesAccent: "Grades We Ship",
+      gradesDescription: "Every grade ships against a written specification and a pre-shipment sample you approve first.",
+      factsTitle: "Vietnam Coffee",
+      factsAccent: "in Numbers",
+      facts: [
+        { value: "~31.7M", label: "60-kg bags produced in 2025/26 (USDA FAS estimate)" },
+        { value: "~95%", label: "of Vietnam's coffee crop is Robusta (USDA, 2025/26)" },
+        { value: "No. 2", label: "coffee producer and exporter after Brazil, and the largest Robusta supplier" },
+        { value: "~730,000 ha", label: "of coffee land nationwide, over 90% of it in the Central Highlands" },
+      ],
+      originTitle: "Where Our",
+      originAccent: "Coffee Grows",
+      origins: [
+        {
+          title: "Robusta · Central Highlands",
+          body: "Dak Lak is the country's largest coffee province, with roughly 213,000 ha, and Lam Dong comes second at about 176,000 ha. Most Robusta is dry-processed (natural): cherries are sun-dried, hulled, then sorted by screen and density. Harvest runs from about October to January, peaking in November and December.",
+        },
+        {
+          title: "Arabica · Lam Dong & Son La",
+          body: "Arabica is a small share of the crop, grown at altitude around Cau Dat near Da Lat (Lam Dong) and in Son La in the north-west, where the planted area was about 26,000 ha at the end of 2025. We ship it fully washed.",
+        },
+        {
+          title: "New province names",
+          body: "Vietnam merged its provinces on 1 July 2025: former Dak Nong is now part of Lam Dong, and Binh Dinh is part of Gia Lai. Documents for lots from these areas show the new names.",
+        },
+      ],
+      guideTitle: "How Robusta",
+      guideAccent: "Is Graded",
+      guideIntro:
+        "Green coffee is sized on round-hole screens measured in 64ths of an inch. The Vietnamese standard TCVN 4193:2014 caps moisture at 12.5% and sets grades by defects and foreign matter.",
+      guideColumns: ["Screen", "Hole size", "Typical use"],
+      guideRows: [
+        ["S18", "7.14 mm", "Large beans for espresso blends and premium retail"],
+        ["S16", "6.35 mm", "The workhorse grade for commercial blends"],
+        ["S13", "5.16 mm", "Smaller beans for value blends and soluble coffee"],
+      ],
+      guideNote:
+        "In trade contracts, Grade 1 S16/S18 is commonly quoted at 12.5% moisture and about 2% black and broken beans, and Grade 2 S13 at 13% moisture and 5%. These are market conventions, not limits set by TCVN; each product page lists the limits we contract to.",
+      notes: [
+        {
+          title: "Packing & container load",
+          body: "A 20ft container holds 320 jute or PP bags of 60 kg, which is 19.2 MT net. One-tonne jumbo bags or a bulk liner are available on request.",
+        },
+        {
+          title: "EUDR for EU buyers",
+          body: "Coffee (HS 0901) is covered by the EU Deforestation Regulation. Under the December 2025 amendment it applies from 30 December 2026 for large and medium operators and from 30 June 2027 for micro and small ones. For EU-bound lots we supply plot geolocation (latitude and longitude to six decimals, polygons for plots over 4 ha) for your due-diligence statement.",
+        },
+      ],
+      faq: [
+        {
+          q: "What is the minimum order for green coffee?",
+          a: "One 20ft container per grade, which is 19.2 MT in 60 kg bags. Samples and trial orders can ship LCL.",
+        },
+        {
+          q: "When is new-crop Robusta available?",
+          a: "The Central Highlands harvest runs from about October to January, with most cherries picked in November and December. Ask our team for the current crop's availability and shipment months.",
+        },
+        {
+          q: "Which Incoterms and payment terms do you offer?",
+          a: "FOB, CFR or CIF from Vietnam's main ports, paid by T/T, L/C at sight or CAD.",
+        },
+        {
+          q: "Can I approve a sample before shipment?",
+          a: "Yes. We dispatch pre-shipment samples by courier within three business days, and SGS or Vinacontrol inspection can be added to any contract.",
+        },
+      ],
+      sources: [
+        { label: "USDA FAS Vietnam Coffee Annual 2026 (summary, Daily Coffee News)", url: "https://dailycoffeenews.com/2026/06/24/vietnam-coffee-report-production-rising-for-third-straight-year/" },
+        { label: "Viet Nam News: Viet Nam, world's No. 2 coffee producer", url: "https://vietnamnews.vn/economy/1781254/viet-nam-cements-status-as-world-s-no-2-coffee-producer-robusta-powerhouse.html" },
+        { label: "Ministry of Agriculture and Environment: coffee areas", url: "https://van.nongnghiepmoitruong.vn/developing-high-tech-and-sustainable-coffee-areas-d357791.html" },
+        { label: "Viet Nam News: Arabica in Son La", url: "https://vietnamnews.vn/economy/1779915/arabica-coffee-ambitions-brew-in-son-la.html" },
+        { label: "TCVN 4193:2014 green coffee (summary)", url: "https://hethongphapluat.com/tieu-chuan-viet-nam-tcvn-4193-2014-ve-ca-phe-nhan.html" },
+        { label: "Coffee Research: bean screen sizes", url: "https://coffeeresearch.org/coffee/beansize.htm" },
+        { label: "European Commission: EU Deforestation Regulation", url: "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en" },
+        { label: "Quan Doi Nhan Dan: provincial mergers", url: "https://en.qdnd.vn/politics/news/vietnam-unveils-administrative-overhaul-reducing-provincial-level-units-from-63-to-34-577115" },
+      ],
+    },
+    cashew: {
+      metaTitle: "Vietnam Cashew Kernel Exporter — WW240, WW320 & AFI Grades",
+      metaDescription:
+        "Whole, split and piece cashew kernels graded to AFI specifications, vacuum-packed in 50 lb cartons, about 15.9 MT (700 cartons) per 20ft. FOB, CFR or CIF from Vietnam.",
+      eyebrow: "Cashew Kernels · Vietnam",
+      title: "Vietnamese Cashew Kernels,",
+      accent: "Graded to AFI Specs",
+      description:
+        "Cao Gia supplies raw cashew kernels from Vietnam's processing belt in the south-east: white, scorched and blemished wholes, splits and pieces, vacuum-packed for export.",
+      gradesTitle: "Cashew",
+      gradesAccent: "Grades We Ship",
+      gradesDescription: "Wholes are sized by count per pound; splits and pieces by sieve. Every lot ships against a written specification.",
+      factsTitle: "Vietnam Cashew",
+      factsAccent: "in Numbers",
+      facts: [
+        { value: "US$5.2B", label: "of cashew kernel exports in 2025, a record (Vietnam Customs)" },
+        { value: "766,585 t", label: "of kernels exported in 2025, up 5.7% on 2024" },
+        { value: "No. 1", label: "cashew kernel exporter in the world" },
+        { value: "~3.1M t", label: "of raw nuts imported in 2025 to keep processing lines running" },
+      ],
+      originTitle: "Where Our",
+      originAccent: "Cashews Come From",
+      origins: [
+        {
+          title: "The south-eastern processing belt",
+          body: "Most of Vietnam's cashew growing and shelling is in the south-east. Former Binh Phuoc province, now part of Dong Nai since July 2025, has the largest growing area, and Dong Nai is the main processing centre.",
+        },
+        {
+          title: "Raw nuts from Vietnam and abroad",
+          body: "Vietnamese farms supply only a small part of what the factories shell, so processors also buy raw nuts from Cambodia, Côte d'Ivoire, Nigeria and Ghana. Kernels are shelled, peeled, graded and packed in Vietnam.",
+        },
+      ],
+      guideTitle: "How Cashew Kernels",
+      guideAccent: "Are Graded",
+      guideIntro:
+        "The AFI (Association of Food Industries) specification is the reference most buyers use. It grades wholes by how many kernels make a pound, and requires 3–5% moisture.",
+      guideColumns: ["Grade", "Kernels per lb", "Typical use"],
+      guideRows: [
+        ["W180", "140–180", "Extra-large wholes for gift packs"],
+        ["W210", "180–210", "Large wholes for premium retail"],
+        ["W240", "220–240", "Large wholes for retail and roasting"],
+        ["W320", "300–320", "The most traded grade, for retail and snacks"],
+        ["W450", "400–450", "Smaller wholes for value packs and ingredients"],
+      ],
+      guideNote:
+        "Beyond white wholes, AFI separates scorched wholes (SW), lightly blemished (LBW) and dessert wholes (DW), then butts, splits and pieces. Large pieces pass an 8.0 mm sieve and stay on 6.3 mm; small pieces stay on 2.8 mm; baby bits stay on 1.7 mm.",
+      notes: [
+        {
+          title: "Packing & container load",
+          body: "Kernels are packed in hermetic packs (vacuum or flushed with CO2 and nitrogen) inside 50 lb (22.68 kg) cartons: one vacuum bag or two 25 lb tins. A 20ft container takes about 700 cartons, close to 15.9 MT net.",
+        },
+        {
+          title: "No EUDR paperwork for cashew",
+          body: "Cashew nuts (HS 0801) are not among the commodities covered by the EU Deforestation Regulation, so EU buyers do not need geolocation data for cashew lots.",
+        },
+      ],
+      faq: [
+        {
+          q: "What is the minimum order for cashew kernels?",
+          a: "One 20ft container per grade, about 700 cartons or 15.9 MT. Mixed grades in one container can be discussed.",
+        },
+        {
+          q: "Which grade suits retail and which suits manufacturing?",
+          a: "W240 and W320 are the usual choice for retail packs and roasted snacks. Splits and pieces cost less and work well in bakery, confectionery and nut butters.",
+        },
+        {
+          q: "How are the kernels packed?",
+          a: "In 50 lb cartons holding one vacuum bag or two 25 lb tins, and we can pack under your private label.",
+        },
+        {
+          q: "Can I approve a sample before shipment?",
+          a: "Yes. Pre-shipment samples go out by courier within three business days.",
+        },
+      ],
+      sources: [
+        { label: "Viet Nam News: cashew exports pass US$5 billion", url: "https://vietnamnews.vn/economy/1764474/cashew-exports-surpass-5-billion-for-the-first-time.html" },
+        { label: "Viet Nam News: cashew industry and raw nut imports", url: "https://vietnamnews.vn/economy/1781975/cashew-industry-under-pressure-to-move-up-value-chain.html" },
+        { label: "AFI cashew kernel specifications (2023)", url: "https://afius.org/wp-content/uploads/2024/05/cashews.pdf" },
+        { label: "European Commission: EU Deforestation Regulation", url: "https://environment.ec.europa.eu/topics/forests/deforestation/regulation-deforestation-free-products_en" },
+        { label: "Quan Doi Nhan Dan: provincial mergers", url: "https://en.qdnd.vn/politics/news/vietnam-unveils-administrative-overhaul-reducing-provincial-level-units-from-63-to-34-577115" },
+      ],
+    },
+  },
   cta: {
     title: "Ready to source",
     accent: "from Vietnam?",
@@ -360,6 +545,7 @@ export const en = {
       roastedBlend: "Roasted & Ground 70/30",
       arabicaS18: "Arabica S18 Clean",
       allCoffee: "All coffee grades",
+      allCashew: "All cashew grades",
       w240: "Cashew WW240",
       w320: "Cashew WW320",
       splits: "White Splits (WS)",
@@ -421,6 +607,8 @@ export const en = {
     insightsAccent: "you buy",
   },
   about: {
+    businessLinesLabel: "Registered business lines",
+    businessLines: "Wholesale of agricultural raw materials (VSIC 4620) and food (4632), and import–export of the goods we trade (8299)",
     metaTitle: "About Us",
     metaDescription:
       "Cao Gia is a Vietnamese exporter of green coffee and cashew kernels, working directly with farmers in Dak Lak, Lam Dong and Binh Phuoc.",
@@ -674,7 +862,7 @@ export const en = {
     points: [
       "Exporting from Vietnam since {year}",
       "{count} export grades of coffee and cashew",
-      "Sourced from Dak Lak, Gia Lai, Lam Dong, Binh Phuoc and Dong Nai",
+      "Sourced from Dak Lak, Gia Lai, Lam Dong, Son La and Dong Nai",
       "Pre-shipment samples and SGS or Vinacontrol inspection on request",
     ],
     yearsLabel: "years exporting from Vietnam",

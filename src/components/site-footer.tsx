@@ -17,7 +17,7 @@ export async function SiteFooter() {
         { href: "/products/robusta-s18-clean", label: links.robustaS18 },
         { href: "/products/roasted-ground-blend-70-30", label: links.roastedBlend },
         { href: "/products/arabica-s18-clean", label: links.arabicaS18 },
-        { href: "/products?category=coffee", label: links.allCoffee },
+        { href: "/green-coffee", label: links.allCoffee },
       ],
     },
     {
@@ -27,6 +27,7 @@ export async function SiteFooter() {
         { href: "/products/cashew-ww320", label: links.w320 },
         { href: "/products/cashew-ws", label: links.splits },
         { href: "/products/roasted-salted-cashews", label: links.roasted },
+        { href: "/cashew-kernels", label: links.allCashew },
       ],
     },
     {

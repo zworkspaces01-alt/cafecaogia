@@ -6,6 +6,7 @@ import Link from "@/components/link";
 import type { Dictionary } from "@/i18n/dictionaries/en";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { hubPaths } from "@/lib/hubs";
 
 export type MenuProduct = { slug: string; name: string; grade: string; category: Category; image: string; featured: boolean };
 
@@ -108,7 +109,7 @@ export function MegaMenuPanel({
     })
     .filter((column) => column.items.length > 0);
   /** One labelled product list inside a category column. */
-  const renderGroup = (group: Group, g: number, category: string, col: number) => (
+  const renderGroup = (group: Group, g: number, category: Category, col: number) => (
     <>
       {group.label && (
         <p className="px-1.5 pb-1 text-[11px] font-medium tracking-[0.14em] text-muted uppercase">
@@ -146,7 +147,7 @@ export function MegaMenuPanel({
         {group.more > 0 && (
           <li>
             <Link
-              href={`/products?category=${category}`}
+              href={hubPaths[category]}
               onClick={onNavigate}
               className="group flex h-full items-center gap-3 rounded-xl p-1.5 text-sm font-medium text-leaf transition-colors hover:bg-sand hover:text-forest"
             >
@@ -173,7 +174,7 @@ export function MegaMenuPanel({
           {columns.map(({ category, title, icon: Icon, items, groups, span }, col) => (
             <div key={category} style={{ gridColumn: `span ${span}` }}>
               <Link
-                href={`/products?category=${category}`}
+                href={hubPaths[category]}
                 onClick={onNavigate}
                 className="flex items-center gap-2 border-b border-mist pb-3 text-xs font-medium tracking-[0.18em] text-moss uppercase hover:text-forest"
               >

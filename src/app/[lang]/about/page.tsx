@@ -36,6 +36,7 @@ export default async function AboutPage() {
     { label: dict.footer.company, value: `${company.legalName} (${company.legalNameVi})` },
     { label: dict.footer.enterpriseCode, value: company.enterpriseCode },
     { label: dict.stats.founded, value: String(company.foundingYear) },
+    { label: t.businessLinesLabel, value: t.businessLines },
     { label: dict.contact.office, value: `${address.street}, ${address.locality}, ${address.country}` },
   ];
 
