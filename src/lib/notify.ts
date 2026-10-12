@@ -41,16 +41,16 @@ export async function notifyInquiry(inquiry: Inquiry): Promise<boolean> {
   const filled = rows.filter((row): row is [string, string] => Boolean(row[1]));
 
   const html = `
-    <h2 style="font-family:sans-serif;color:#1d3518">New inquiry from ${escapeHtml(inquiry.name)}</h2>
+    <h2 style="font-family:sans-serif;color:#472a15">New inquiry from ${escapeHtml(inquiry.name)}</h2>
     <table style="font-family:sans-serif;font-size:14px;border-collapse:collapse">
       ${filled
         .map(
           ([label, value]) =>
-            `<tr><td style="padding:4px 16px 4px 0;color:#6b7465">${label}</td><td style="padding:4px 0">${escapeHtml(value)}</td></tr>`,
+            `<tr><td style="padding:4px 16px 4px 0;color:#6b5647">${label}</td><td style="padding:4px 0">${escapeHtml(value)}</td></tr>`,
         )
         .join("")}
     </table>
-    <p style="font-family:sans-serif;font-size:14px;white-space:pre-wrap;border-left:3px solid #d5f26b;padding-left:12px">${escapeHtml(inquiry.message)}</p>
+    <p style="font-family:sans-serif;font-size:14px;white-space:pre-wrap;border-left:3px solid #d19847;padding-left:12px">${escapeHtml(inquiry.message)}</p>
   `;
   const text = `${filled.map(([label, value]) => `${label}: ${value}`).join("\n")}\n\n${inquiry.message}`;
 

@@ -130,27 +130,28 @@ export const sampleTestimonials: TestimonialRow[] = [
   },
 ];
 
-const partner = (id: number, name: string, country: string, style: PartnerRow["style"]): PartnerRow => ({
+const partner = (id: number, name: string, country: string, kind: PartnerRow["kind"], logo: string | null = null): PartnerRow => ({
   id: `sample-partner-${id}`,
   name,
-  logo: null,
+  logo,
   country,
-  style,
+  style: "sans",
+  kind,
   url: null,
-  is_sample: true,
+  is_sample: false,
   published: true,
   sort_order: id * 10,
 });
 
+// The bank and shipping lines Cao Gia actually works with; logos live in /public/partners.
+// Maersk shows as a wordmark until the official container-line logo is added.
 export const samplePartners: PartnerRow[] = [
-  partner(1, "Kestrel Roastery", "🇩🇪", "serif"),
-  partner(2, "BRIGHTWATER", "🇳🇱", "sans"),
-  partner(3, "Mirabel Foods", "🇺🇸", "script"),
-  partner(4, "sable/street", "🇯🇵", "mono"),
-  partner(5, "Oakhaven", "🇬🇧", "serif"),
-  partner(6, "LUMEN NUT CO.", "🇦🇪", "sans"),
-  partner(7, "Altamira", "🇷🇺", "script"),
-  partner(8, "north&grain", "🇰🇷", "mono"),
+  partner(1, "HSBC", "🇬🇧", "bank", "/partners/hsbc.png"),
+  partner(2, "MAERSK", "🇩🇰", "shipping"),
+  partner(3, "CMA CGM", "🇫🇷", "shipping", "/partners/cma-cgm.png"),
+  partner(4, "COSCO SHIPPING", "🇨🇳", "shipping", "/partners/cosco-shipping.png"),
+  partner(5, "EVERGREEN", "🇹🇼", "shipping", "/partners/evergreen.png"),
+  partner(6, "ONE", "🇯🇵", "shipping", "/partners/one.png"),
 ];
 
 const cert = (

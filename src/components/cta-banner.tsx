@@ -39,6 +39,9 @@ export async function CtaBanner() {
               <em className="font-serif font-normal text-lime">{t.accent}</em>
             </h2>
             <p className="mt-5 max-w-xl text-white/75">{t.body}</p>
+            <p className="mt-5 max-w-xl text-sm text-white/60">
+              {t.marketsLabel} <span className="text-white/90">{t.markets.join(" · ")}</span>
+            </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/contact" arrow>
                 {dict.common.requestQuote}

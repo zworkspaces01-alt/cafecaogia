@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowDown, ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, Check, Pause, Play } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -19,7 +19,8 @@ const SLIDE_SECONDS = 8;
 
 // Visuals and links per slide; the text for each comes from the dictionary (hero.slides, same order).
 const slides = [
-  { image: factoryPhotos.sacksSilos, primaryHref: "/contact", secondaryHref: "/products" },
+  // Opens on the product itself: green coffee in gloved hands over a graded lot.
+  { image: factoryPhotos.greenBeansGloves, primaryHref: "/contact", secondaryHref: "/products" },
   { image: factoryPhotos.dryingBeds, primaryHref: "/products?category=coffee", secondaryHref: "/contact" },
   { image: photos.cashewWood, primaryHref: "/products?category=cashew", secondaryHref: "/contact" },
   { image: factoryPhotos.containerLoading, primaryHref: "/contact", secondaryHref: "/process" },
@@ -43,7 +44,7 @@ function useReducedMotion() {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: string }) {
+export function Hero({ t, scrollLabel, foundingYear }: { t: Dictionary["hero"]; scrollLabel: string; foundingYear: number }) {
   const root = useRef<HTMLElement>(null);
   const previous = useRef<number | null>(null);
   const progress = useRef<gsap.core.Tween | null>(null);
@@ -218,8 +219,9 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
           </div>
         ))}
       </div>
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/85 via-ink/35 to-ink/30" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/70 via-ink/20 to-transparent rtl:bg-gradient-to-l" />
+      {/* Light enough to keep the photo's own colours; the text side and the bottom bar get the depth. */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/80 via-ink/15 to-ink/35" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/75 via-ink/25 to-transparent rtl:bg-gradient-to-l" />
 
       <div className="container-page flex flex-1 flex-col justify-end pt-32 pb-12 md:pb-16">
         <div className="grid max-w-2xl" aria-live={playing ? "off" : "polite"}>
@@ -269,12 +271,21 @@ export function Hero({ t, scrollLabel }: { t: Dictionary["hero"]; scrollLabel: s
             );
           })}
         </div>
+
+        <ul className="mt-8 grid max-w-2xl gap-y-2 text-sm text-white/85 sm:mt-10 sm:flex sm:flex-wrap sm:gap-x-7 sm:gap-y-2.5">
+          {t.proof.map((item) => (
+            <li key={item} className="flex items-center gap-2">
+              <Check className="size-4 shrink-0 text-lime" aria-hidden />
+              {format(item, { year: foundingYear })}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div data-hero-fade className="border-t border-white/15">
         <div className="container-page flex items-center gap-6 py-5 text-sm">
           <a
-            href="#markets"
+            href="#featured"
             className="hidden shrink-0 items-center gap-2 tracking-[0.15em] text-white/80 uppercase hover:text-white sm:flex"
           >
             {scrollLabel} <ArrowDown className="size-4 animate-bounce" />

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { CheckCircle2, ClipboardCheck, Factory, Package, Ship, Sprout, Trees } from "lucide-react";
 import { CtaBanner } from "@/components/cta-banner";
+import { HarvestCalendar } from "@/components/home/harvest-calendar";
 import { PageHero } from "@/components/page-hero";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
@@ -92,6 +93,7 @@ export default async function ProcessPage() {
         </div>
       </section>
 
+      <HarvestCalendar />
       <CtaBanner />
     </>
   );

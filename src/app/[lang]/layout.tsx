@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Amiri, Geist, IBM_Plex_Sans_Arabic, Instrument_Serif, PT_Serif } from "next/font/google";
+import { Amiri, Cormorant_Garamond, Geist, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { Analytics } from "@/components/analytics";
 import { ContactDock } from "@/components/contact-dock";
 import { MotionMain } from "@/components/motion";
@@ -20,21 +20,15 @@ const geistSans = Geist({
   subsets: ["latin", "latin-ext", "cyrillic"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  weight: "400",
+// Display serif for headline accents; covers Latin and Cyrillic, so English and Russian share it.
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  weight: ["400", "500"],
   style: ["normal", "italic"],
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin", "latin-ext", "cyrillic"],
 });
 
 // Locale-specific faces: declared everywhere but only downloaded on pages that use them.
-const ptSerif = PT_Serif({
-  variable: "--font-pt-serif",
-  weight: "400",
-  style: ["normal", "italic"],
-  subsets: ["cyrillic", "latin"],
-  preload: false,
-});
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-arabic",
@@ -104,7 +98,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
     image,
     featured,
   }));
-  const fonts = [geistSans, instrumentSerif, ptSerif, plexArabic, amiri].map((f) => f.variable).join(" ");
+  const fonts = [geistSans, cormorant, plexArabic, amiri].map((f) => f.variable).join(" ");
 
   return (
     <html lang={localeTags[locale]} dir={isRtl(locale) ? "rtl" : "ltr"} className={fonts} suppressHydrationWarning>

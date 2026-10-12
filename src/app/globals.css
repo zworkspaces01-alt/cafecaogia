@@ -1,19 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #13210f;
-  --color-forest: #1d3518;
-  --color-leaf: #2e5a23;
-  --color-moss: #506b42;
-  --color-lime: #d5f26b;
-  --color-lime-deep: #b9dc45;
-  --color-sand: #f3f3ee;
-  --color-mist: #e7e9e1;
-  --color-muted: #5f6859;
-  --color-bean: #6a4428;
+  /*
+   * Coffee palette: dark coffee browns, cream surfaces and a gold accent; leaf is the medium coffee brown.
+   * The names are roles kept from the first (green) palette so the classes across the site stay put:
+   * ink/forest = darkest text and dark surfaces, lime = bright accent, sand/mist = light surfaces.
+   * All text pairs meet WCAG AA (muted on mist 5.4:1, leaf on sand 8:1, forest on lime 5.2:1).
+   */
+  --color-ink: #362417;
+  --color-forest: #472a15;
+  --color-leaf: #6b4124;
+  --color-moss: #885a3a;
+  --color-lime: #d19847;
+  --color-lime-deep: #e4c381;
+  --color-sand: #f8f5f2;
+  --color-mist: #ebe2d6;
+  --color-muted: #6b5647;
+  --color-bean: #ac5c39;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-serif: var(--font-cormorant), ui-serif, Georgia, serif;
 
   --animate-rise: rise 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-drop: drop 1.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -119,11 +125,7 @@
   }
 }
 
-/* Per-language typography. Instrument Serif has no Cyrillic or Arabic glyphs. */
-html[lang="ru"] {
-  --font-serif: var(--font-pt-serif), ui-serif, Georgia, serif;
-}
-
+/* Per-language typography. Cormorant Garamond has no Arabic glyphs. */
 html[lang="ar"] {
   --font-sans: var(--font-plex-arabic), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-amiri), var(--font-plex-arabic), serif;

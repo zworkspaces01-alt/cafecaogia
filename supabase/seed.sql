@@ -48,17 +48,15 @@ select * from (values
 ) as v(quote, name, role, company, country, flag, product_slug, since, rating, image, logo, translations, is_sample, published, sort_order)
 where not exists (select 1 from public.testimonials);
 
-insert into public.partners (name, logo, country, style, url, is_sample, published, sort_order)
+insert into public.partners (name, logo, country, style, kind, url, is_sample, published, sort_order)
 select * from (values
-  ('Kestrel Roastery', null, '🇩🇪', 'serif', null, true, true, 10),
-  ('BRIGHTWATER', null, '🇳🇱', 'sans', null, true, true, 20),
-  ('Mirabel Foods', null, '🇺🇸', 'script', null, true, true, 30),
-  ('sable/street', null, '🇯🇵', 'mono', null, true, true, 40),
-  ('Oakhaven', null, '🇬🇧', 'serif', null, true, true, 50),
-  ('LUMEN NUT CO.', null, '🇦🇪', 'sans', null, true, true, 60),
-  ('Altamira', null, '🇷🇺', 'script', null, true, true, 70),
-  ('north&grain', null, '🇰🇷', 'mono', null, true, true, 80)
-) as v(name, logo, country, style, url, is_sample, published, sort_order)
+  ('HSBC', '/partners/hsbc.png', '🇬🇧', 'sans', 'bank', null, false, true, 10),
+  ('MAERSK', null, '🇩🇰', 'sans', 'shipping', null, false, true, 20),
+  ('CMA CGM', '/partners/cma-cgm.png', '🇫🇷', 'sans', 'shipping', null, false, true, 30),
+  ('COSCO SHIPPING', '/partners/cosco-shipping.png', '🇨🇳', 'sans', 'shipping', null, false, true, 40),
+  ('EVERGREEN', '/partners/evergreen.png', '🇹🇼', 'sans', 'shipping', null, false, true, 50),
+  ('ONE', '/partners/one.png', '🇯🇵', 'sans', 'shipping', null, false, true, 60)
+) as v(name, logo, country, style, kind, url, is_sample, published, sort_order)
 where not exists (select 1 from public.partners);
 
 insert into public.certifications (name, issuer, year, scope, logo, file, translations, is_sample, published, sort_order)

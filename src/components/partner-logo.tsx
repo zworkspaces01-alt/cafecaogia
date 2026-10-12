@@ -3,10 +3,10 @@ import type { PartnerRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const wordmarkStyles: Record<PartnerRow["style"], string> = {
-  serif: "font-[family-name:var(--font-instrument-serif)] text-[1.55rem] tracking-tight",
+  serif: "font-[family-name:var(--font-cormorant)] text-[1.55rem] tracking-tight",
   sans: "font-[family-name:var(--font-geist-sans)] text-sm font-bold tracking-[0.22em]",
   mono: "font-mono text-base font-medium tracking-tight lowercase",
-  script: "font-[family-name:var(--font-instrument-serif)] text-[1.6rem] italic",
+  script: "font-[family-name:var(--font-cormorant)] text-[1.6rem] italic",
 };
 
 /** A partner's logo file, or a typographic wordmark when no file is available yet. */

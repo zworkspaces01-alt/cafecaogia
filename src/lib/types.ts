@@ -57,6 +57,8 @@ export type PartnerRow = Row & {
   logo: string | null;
   country: string;
   style: "serif" | "sans" | "mono" | "script";
+  /** Labels the logo in the closing "industry leaders" strip; "other" shows no label. */
+  kind: "bank" | "shipping" | "other";
   url: string | null;
 };
 

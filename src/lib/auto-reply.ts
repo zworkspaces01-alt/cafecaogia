@@ -40,9 +40,9 @@ export async function sendInquiryAutoReply(inquiry: Inquiry): Promise<boolean> {
   const html = (template: string, values: Record<string, string>) => format(escapeHtml(template), values);
   const name = escapeHtml(inquiry.name);
   const phone = whatsapp
-    ? `<a href="${escapeHtml(whatsappLink(whatsapp))}" dir="ltr" style="color:#2e5a23;white-space:nowrap">${escapeHtml(whatsapp)}</a>`
+    ? `<a href="${escapeHtml(whatsappLink(whatsapp))}" dir="ltr" style="color:#ac5c39;white-space:nowrap">${escapeHtml(whatsapp)}</a>`
     : "";
-  const siteLink = `<a href="${escapeHtml(site.url)}" style="color:#6b7465">${escapeHtml(host)}</a>`;
+  const siteLink = `<a href="${escapeHtml(site.url)}" style="color:#6b5647">${escapeHtml(host)}</a>`;
   const p = (content: string, extra = "") => `<p style="margin:0 0 16px;${extra}">${content}</p>`;
 
   const body = `<!doctype html>
@@ -50,18 +50,18 @@ export async function sendInquiryAutoReply(inquiry: Inquiry): Promise<boolean> {
 <body style="margin:0;padding:0;background:#f5f1e8">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f1e8;padding:24px 12px">
 <tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#1d3518;text-align:${side}">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#472a15;text-align:${side}">
 <tr><td style="padding:24px 28px 8px;text-align:${side}">
 <img src="${escapeHtml(`${site.url}/brand/cao-gia-logo.png`)}" width="110" height="90" alt="Cao Gia" style="display:inline-block;border:0;font-size:22px;font-weight:bold;color:#4a2410">
 </td></tr>
 <tr><td style="padding:28px 28px 12px;font-size:15px;line-height:1.6">
 ${p(html(t.greeting, { name }))}
 ${p(escapeHtml(t.body))}
-${product ? p(html(t.product, { product: `<strong>${escapeHtml(product.name)}</strong>` }), `border-${side}:3px solid #d5f26b;padding-${side}:12px`) : ""}
+${product ? p(html(t.product, { product: `<strong>${escapeHtml(product.name)}</strong>` }), `border-${side}:3px solid #d19847;padding-${side}:12px`) : ""}
 ${whatsapp ? p(html(t.urgent, { whatsapp: phone })) : ""}
 ${p(`${escapeHtml(t.signoff)}<br><strong>${escapeHtml(t.team)}</strong>`)}
 </td></tr>
-<tr><td style="padding:16px 28px 24px;border-top:1px solid #ece6d8;font-size:12px;line-height:1.5;color:#6b7465">
+<tr><td style="padding:16px 28px 24px;border-top:1px solid #eae2d7;font-size:12px;line-height:1.5;color:#6b5647">
 ${footerLine ? `${escapeHtml(footerLine)}<br>` : ""}${html(t.footer, { site: siteLink })}
 </td></tr>
 </table>

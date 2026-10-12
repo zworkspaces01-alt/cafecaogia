@@ -140,7 +140,7 @@ export const entities: Entity[] = [
     table: "partners",
     label: "Đối tác",
     singular: "đối tác",
-    description: "Logo đối tác hiển thị ở dải chạy và lưới logo.",
+    description: "Logo ngân hàng, hãng tàu… hiển thị ở dải logo chạy cuối trang chủ.",
     titleField: "name",
     subtitleField: "country",
     imageField: "logo",
@@ -149,6 +149,16 @@ export const entities: Entity[] = [
       { name: "name", label: "Tên đối tác", type: "text", required: true },
       { name: "logo", label: "Logo (PNG/SVG nền trong suốt)", type: "image", help: "Để trống sẽ hiển thị tên dạng chữ." },
       { name: "country", label: "Cờ quốc gia (emoji)", type: "text", placeholder: "🇩🇪" },
+      {
+        name: "kind",
+        label: "Loại đối tác",
+        type: "select",
+        options: [
+          { value: "bank", label: "Ngân hàng" },
+          { value: "shipping", label: "Hãng tàu" },
+          { value: "other", label: "Khác (không hiện nhãn)" },
+        ],
+      },
       {
         name: "style",
         label: "Kiểu chữ khi chưa có logo",
@@ -163,7 +173,7 @@ export const entities: Entity[] = [
       { name: "url", label: "Website", type: "text" },
       ...common,
     ],
-    defaults: { ...baseDefaults, style: "sans" },
+    defaults: { ...baseDefaults, style: "sans", kind: "other" },
   },
   {
     key: "certifications",

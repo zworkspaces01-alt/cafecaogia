@@ -45,8 +45,6 @@ export const nav = [
   { href: "/contact", key: "contact" },
 ] as const;
 
-export const markets = ["us", "eu", "jp", "kr", "me", "au"] as const;
-
 /**
  * Cao Gia's own photos (warehouse, drying yard, container loading), served from /public/photos.
  * Each has name.jpg (1200px, for share images) plus name-480/960/1600.webp picked by the image loader.

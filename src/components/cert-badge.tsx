@@ -24,13 +24,13 @@ export function CertBadge({ name, logo, className }: { name: string; logo: strin
 
   return (
     <svg viewBox="0 0 80 80" className={cn("size-28", className)} aria-hidden>
-      <circle cx="40" cy="40" r="38" fill="#f3ead8" />
-      <circle cx="40" cy="40" r="33" fill="none" stroke="#2e5a23" strokeWidth="1.5" strokeDasharray="2 2.5" />
-      <circle cx="40" cy="40" r="27" fill="#2e5a23" />
+      <circle cx="40" cy="40" r="38" fill="#f8f5f2" />
+      <circle cx="40" cy="40" r="33" fill="none" stroke="#ac5c39" strokeWidth="1.5" strokeDasharray="2 2.5" />
+      <circle cx="40" cy="40" r="27" fill="#ac5c39" />
       {[0, 60, 120, 180, 240, 300].map((deg) => (
-        <circle key={deg} cx={40 + 30.5 * Math.cos((deg * Math.PI) / 180)} cy={40 + 30.5 * Math.sin((deg * Math.PI) / 180)} r="1.2" fill="#b9dc45" />
+        <circle key={deg} cx={40 + 30.5 * Math.cos((deg * Math.PI) / 180)} cy={40 + 30.5 * Math.sin((deg * Math.PI) / 180)} r="1.2" fill="#e4c381" />
       ))}
-      <path d="M31 30.5l2.4 2.4 5-5" fill="none" stroke="#d5f26b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" transform="translate(4.6 -6)" />
+      <path d="M31 30.5l2.4 2.4 5-5" fill="none" stroke="#d19847" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" transform="translate(4.6 -6)" />
       <text
         textAnchor="middle"
         fill="#fff"

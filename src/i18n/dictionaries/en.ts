@@ -55,14 +55,6 @@ export const en = {
     samplesBody: "Pre-shipment samples dispatched within 3 business days.",
     samplesCta: "Request samples",
   },
-  markets: {
-    us: "United States",
-    eu: "European Union",
-    jp: "Japan",
-    kr: "South Korea",
-    me: "Middle East",
-    au: "Australia",
-  },
   stats: {
     founded: "Established",
     grades: "Export grades in our catalog",
@@ -81,7 +73,7 @@ export const en = {
     slides: [
       {
         label: "Vietnamese Harvest",
-        alt: "Tagged jute sacks of green coffee lined up in front of the grading silos at our warehouse",
+        alt: "Gloved hands holding green coffee beans above a lot spread on our warehouse floor",
         eyebrow: "Coffee & Cashew · Made in Vietnam",
         title: "Vietnam's Harvest,",
         lead: "Delivered to",
@@ -128,16 +120,8 @@ export const en = {
         secondary: "How We Work",
       },
     ],
-  },
-  trustStrip: {
-    trustedBy: "Export-ready for",
-    across: "key markets worldwide",
-  },
-  statement: {
-    eyebrow: "The Cao Gia Promise",
-    part1: "We connect smallholder farmers in Vietnam with roasters, importers and food brands worldwide",
-    part2: "by delivering",
-    part3: "export-grade coffee and cashews that respect the land and reward the people who grow them.",
+    // Proof points under the slides; {year} is the founding year from the CMS.
+    proof: ["Exporting since {year}", "19.2 MT per 20ft container", "SGS / Vinacontrol inspection on request", "Samples dispatched in 3 days"],
   },
   featured: {
     eyebrow: "Our Products",
@@ -163,35 +147,10 @@ export const en = {
     tailoredEmphasis: "We'll tailor an offer to your program.",
     tailoredCta: "Get a tailored offer",
   },
-  strengths: {
-    eyebrow: "About Cao Gia",
-    title: "Rooted in Vietnam,",
-    accent: "Trusted Worldwide",
-    description:
-      "We build long relationships with Vietnamese growers. Our job is simple: make Vietnam's best coffee and cashews easy and safe to buy, container after container.",
-    items: [
-      {
-        title: "Direct Farm Sourcing",
-        body: "We buy straight from partner farm households in Dak Lak, Lam Dong and Binh Phuoc — fewer middlemen, fairer prices for growers and full lot traceability for you.",
-      },
-      {
-        title: "Quality You Can Verify",
-        body: "Every lot is checked for moisture, screen size, defects and cup profile before it is bagged. Pre-shipment samples and third-party inspection (SGS, Vinacontrol) are available on request.",
-      },
-      {
-        title: "Flexible Export Terms",
-        body: "FOB, CFR or CIF with T/T, L/C or CAD payment. We support mixed containers, private labeling and forward contracts for long-term programs.",
-      },
-      {
-        title: "Reliable Logistics",
-        body: "Our team books space, prepares phytosanitary certificates, certificates of origin and fumigation, and tracks every container until it reaches your port.",
-      },
-    ],
-  },
   process: {
     eyebrow: "How We Work",
-    title: "From Cherry to Container,",
-    accent: "Simple and Transparent",
+    title: "Every Step,",
+    accent: "Checked and Recorded",
     description:
       "Four controlled steps between the farm and your warehouse — so every shipment arrives exactly as agreed in the contract.",
     tablistLabel: "Export process",
@@ -316,7 +275,6 @@ export const en = {
         products: ["Roasted & Ground 70/30", "Roasted salted cashews"],
       },
     ],
-    logosTitle: "Buyers who source with us",
     becomeTitle: "Become a",
     becomeAccent: "Cao Gia partner",
     becomeBody: "Start with samples and a trial shipment — scale up when the quality proves itself.",
@@ -371,6 +329,13 @@ export const en = {
       },
     ],
   },
+  industryPartners: {
+    eyebrow: "Partners",
+    title: "Working with",
+    accent: "Industry Leaders",
+    description: "Payments clear through an international bank, and our containers sail with the world's major shipping lines.",
+    kinds: { bank: "Bank", shipping: "Shipping line" },
+  },
   cta: {
     title: "Ready to source",
     accent: "from Vietnam?",
@@ -379,6 +344,8 @@ export const en = {
     languages: "English · Vietnamese",
     emailPerson: "Email {name}",
     whatsappPerson: "WhatsApp {name}",
+    marketsLabel: "Shipping to",
+    markets: ["United States", "European Union", "Japan", "South Korea", "Middle East", "Australia"],
   },
   footer: {
     description:
@@ -712,8 +679,8 @@ export const en = {
   },
   photoStories: {
     eyebrow: "Inside Cao Gia",
-    title: "From the Drying Yard",
-    accent: "to Your Container",
+    title: "See It",
+    accent: "Before You Buy",
     description: "Real photos from our drying yards, warehouse and loading bay — the people and checks behind every export lot.",
     all: "All",
     view: "View",
