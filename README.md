@@ -76,22 +76,50 @@ Quyền cấp chỉ cho phép **gửi** thư, không đọc được hộp thư.
 
 ## Deploy lên Cloudflare Workers
 
+Website chạy trên Worker `caogia` (OpenNext). Mỗi lần push lên `main`, Cloudflare Workers Builds (Git integration của Cloudflare) tự build và deploy.
+
+### Thiết lập một lần
+
 ```bash
 npx wrangler login
-npx wrangler r2 bucket create caogia-opennext-cache     # cache trang (chạy 1 lần)
-npx wrangler d1 create caogia-tag-cache                 # chép "database_id" vào wrangler.jsonc (chạy 1 lần)
-npx wrangler secret put SUPABASE_URL
-npx wrangler secret put SUPABASE_ANON_KEY
+npx wrangler r2 bucket create caogia-opennext-cache     # cache trang
+npx wrangler d1 create caogia-tag-cache                 # chép "database_id" vào wrangler.jsonc rồi commit
+# Secret của Worker (giá trị lấy từ .env.local / Vercel → Settings → Environment Variables cũ)
 npx wrangler secret put RESEND_API_KEY
+npx wrangler secret put INQUIRY_FROM_EMAIL
+npx wrangler secret put INQUIRY_NOTIFY_TO
 npx wrangler secret put CLOUDINARY_API_KEY
 npx wrangler secret put CLOUDINARY_API_SECRET
-npm run deploy
+npx wrangler secret put GMAIL_CLIENT_ID
+npx wrangler secret put GMAIL_CLIENT_SECRET
+npx wrangler secret put GMAIL_REFRESH_TOKEN
+npx wrangler secret put TELEGRAM_BOT_TOKEN
+npm run deploy                                          # lần deploy đầu, từ máy
 ```
 
-- Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc biến môi trường CI), vì Next nhúng chúng vào bundle. Riêng `NEXT_PUBLIC_SITE_URL`: bản build production bỏ qua giá trị `localhost` và dùng tên miền chính thức `https://cafecaogia.com` (khai báo trong `src/lib/site.ts`).
+Supabase không cần secret: URL và publishable key của project production có sẵn trong `src/lib/supabase-env.ts` (muốn đổi thì `wrangler secret put SUPABASE_URL` / `SUPABASE_ANON_KEY`).
+
+Cài đặt Workers Builds (Workers & Pages → `caogia` → Settings → Build):
+
+- **Build command:** `npx opennextjs-cloudflare build` — không dùng `npm run build` (chỉ ra bản Next thường, không có `.open-next/worker.js`).
+- **Deploy command:** `npx opennextjs-cloudflare deploy`
+- **Build variables:** `NEXT_PUBLIC_SITE_URL=https://www.cafecaogia.com`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dq6mmebqr` (Next nhúng lúc build).
+- Tên Worker phải là `caogia`, trùng `name` trong `wrangler.jsonc`.
+
+### Chuyển tên miền từ Vercel
+
+1. Cloudflare Dashboard → **Add a domain** → `cafecaogia.com` (gói Free). Kiểm tra các bản ghi DNS được quét về, nhất là bản ghi **MX/TXT của email** — phải giữ nguyên.
+2. Tại Tenten (nhà đăng ký tên miền), đổi nameserver sang 2 nameserver Cloudflare đưa ra. Chờ Cloudflare báo **Active**.
+3. Workers & Pages → `caogia` → Settings → **Domains & Routes** → Add → Custom domain: thêm `www.cafecaogia.com` và `cafecaogia.com` (Cloudflare tự thay bản ghi A/CNAME cũ trỏ về Vercel).
+4. Mở https://www.cafecaogia.com, kiểm tra trang, CMS và form báo giá. Ổn rồi thì tắt Git integration của project trên Vercel để không còn deploy song song.
+
+### Ghi chú
+
+- Tên miền chính là `https://www.cafecaogia.com` (giữ như trên Vercel để không đổi canonical); `cafecaogia.com` chuyển hướng 308 sang `www` (trong `next.config.ts`).
+- Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc Build variables của Workers Builds), vì Next nhúng chúng vào bundle. Riêng `NEXT_PUBLIC_SITE_URL`: bản build production bỏ qua giá trị `localhost` và dùng tên miền chính thức (khai báo trong `src/lib/site.ts`).
+- Build cần đọc được Supabase (các trang được dựng sẵn từ dữ liệu CMS) — nếu Supabase lỗi thì build/deploy thất bại, website đang chạy không bị ảnh hưởng.
 - `npm run preview` để chạy thử bản build trên runtime Workers ở local (lệnh này nạp sẵn cache trang tĩnh; chạy `wrangler dev` trực tiếp sẽ báo 404 cho các trang tĩnh).
 - Lưu trong CMS làm mới website ngay (R2 lưu trang, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi 1 giờ.
-- Gắn tên miền: Cloudflare Dashboard → Workers → `caogia` → Settings → Domains & Routes.
 
 ## CMS — trang quản trị `/admin`
 

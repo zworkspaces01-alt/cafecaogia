@@ -39,7 +39,7 @@ export default async function NotificationsPage() {
                   Cloudflare: <code>npx wrangler secret put TELEGRAM_BOT_TOKEN</code>
                 </li>
                 <li>
-                  Vercel: Settings → Environment Variables; chạy ở máy: thêm vào <code>.env.local</code>
+                  Chạy ở máy: thêm vào <code>.env.local</code>
                 </li>
               </ul>
             </li>

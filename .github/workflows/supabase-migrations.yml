@@ -1,6 +1,6 @@
 # Applies new files in supabase/migrations to the production database (project caogiacafe)
 # whenever they reach main. Needs repository secrets SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD.
-# The site tolerates a migration landing a little after the Vercel deploy (missing columns/tables
+# The site tolerates a migration landing a little after the Cloudflare deploy (missing columns/tables
 # are handled in code), so the two run independently.
 name: Supabase migrations
 

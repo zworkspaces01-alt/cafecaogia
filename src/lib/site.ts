@@ -2,7 +2,7 @@
 // (site_settings); translatable UI text lives in src/i18n/dictionaries.
 
 /** The official domain. */
-const PRODUCTION_URL = "https://cafecaogia.com";
+const PRODUCTION_URL = "https://www.cafecaogia.com";
 
 /**
  * Canonical origin for metadata, sitemap and hreflang. Tolerates a missing scheme, spaces or a

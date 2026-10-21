@@ -34,6 +34,13 @@ const nextConfig: NextConfig = {
   // Order matters: a saved choice (cookie) wins over the browser's Accept-Language.
   async redirects() {
     return [
+      // www is the canonical host (as it was on Vercel), so the bare domain forwards to it.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "cafecaogia.com" }],
+        destination: "https://www.cafecaogia.com/:path*",
+        permanent: true,
+      },
       {
         source: "/",
         has: [{ type: "cookie", key: "NEXT_LOCALE", value: "(?<locale>en|ru|ar)" }],
@@ -66,7 +73,7 @@ const nextConfig: NextConfig = {
 
 export default nextConfig;
 
-// Cloudflare bindings emulation for `next dev` only; not needed for builds (Vercel or Cloudflare).
-if (process.env.NODE_ENV === "development" && !process.env.VERCEL) {
+// Cloudflare bindings emulation for `next dev` only; not needed for builds.
+if (process.env.NODE_ENV === "development") {
   initOpenNextCloudflareForDev();
 }
