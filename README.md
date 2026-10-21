@@ -1,16 +1,18 @@
 # Cao Gia — Website xuất khẩu cà phê & hạt điều
 
-Next.js 16 (App Router, TypeScript, Tailwind CSS v4) · Supabase · Cloudinary · Cloudflare Workers (OpenNext).
+Next.js 16 (App Router, TypeScript, Tailwind CSS v4) · Cloudflare Workers (OpenNext) + D1 · Cloudinary.
 
 ## Chạy local
 
 ```bash
 npm install
-cp .env.example .env.local   # có thể để trống, site sẽ dùng dữ liệu mẫu
-npm run dev                  # http://localhost:3000
+cp .env.example .env.local      # điền AUTH_SECRET (chuỗi ngẫu nhiên ≥ 32 ký tự) để đăng nhập CMS
+npm run db:migrate:local        # tạo database D1 local (schema + nội dung khởi tạo)
+npm run admin:add -- ban@example.com --local   # tài khoản CMS local
+npm run dev                     # http://localhost:3000
 ```
 
-Khi chưa cấu hình Supabase, danh mục sản phẩm lấy từ `src/data/products.ts`, và form liên hệ chỉ ghi log ra console (ở chế độ dev).
+`next dev` dùng database D1 local trong `.wrangler/state` (không đụng database production). Chưa cấu hình email thì form liên hệ vẫn lưu vào D1 local và ghi log ra console.
 
 ## Cấu trúc
 
@@ -18,37 +20,34 @@ Khi chưa cấu hình Supabase, danh mục sản phẩm lấy từ `src/data/pro
 | --- | --- |
 | `src/app/[lang]/…` | Mọi trang, theo ngôn ngữ: `/en`, `/ru`, `/ar` |
 | `src/i18n/dictionaries/{en,ru,ar}.ts` | **Toàn bộ chữ trên website** — `en.ts` là bản gốc, TypeScript báo lỗi nếu bản dịch thiếu |
-| `src/data/product-translations.ts` | Bản dịch RU/AR của danh mục mẫu |
-| `src/app/actions.ts` | Server action: lưu yêu cầu báo giá vào Supabase + gửi email |
+| `src/app/actions.ts` | Server action: lưu yêu cầu báo giá vào D1 + gửi email/Telegram |
 | `src/lib/site.ts` | **Thông tin pháp lý, liên hệ, số liệu, ảnh** |
 | `src/components/logo.tsx`, `public/brand/` | Logo (SVG gốc, PNG nền sáng/tối, icon app) |
-| `src/lib/products.ts` | Đọc sản phẩm từ Supabase (hoặc dữ liệu mẫu) |
+| `src/lib/db.ts`, `src/lib/content.ts`, `src/lib/products.ts` | Truy vấn D1 (binding `DB`) |
 | `src/lib/cloudinary-loader.ts` | Loader cho `next/image` qua Cloudinary |
-| `supabase/` | Migration schema + seed |
+| `migrations/` | Schema D1 + nội dung khởi tạo (`wrangler d1 migrations`) |
 
 ## Đa ngôn ngữ (EN / RU / AR)
 
 - URL có tiền tố ngôn ngữ; `/` tự chuyển theo cookie `NEXT_LOCALE` (khi khách chọn trên navbar) rồi đến `Accept-Language` của trình duyệt. Link cũ không có ngôn ngữ (`/products`) chuyển về `/en/products`. Cấu hình trong `next.config.ts`.
 - Tiếng Ả Rập hiển thị RTL (`dir="rtl"`), dùng font IBM Plex Sans Arabic + Amiri; tiếng Nga dùng PT Serif cho chữ nghiêng.
 - Dùng `Link` từ `@/components/link` (không phải `next/link`) để link nội bộ tự giữ ngôn ngữ hiện tại.
-- Sản phẩm trên Supabase: bản dịch nằm ở cột `translations` (jsonb) — xem `supabase/migrations/0002_i18n.sql`.
+- Nội dung CMS: bản dịch RU/AR nằm ở cột `translations` (JSON) của từng bảng — xem `migrations/0001_init.sql`.
 
-## Supabase
+## Database (Cloudflare D1)
 
-1. Tạo project trên supabase.com.
-2. SQL Editor → chạy lần lượt `supabase/migrations/0001_init.sql`, `0002_i18n.sql`, rồi `supabase/seed.sql`.
-3. Lấy `Project URL` và publishable key (hoặc anon key) điền vào `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (tên cũ `SUPABASE_URL`, `SUPABASE_ANON_KEY` vẫn được chấp nhận). **Không** dùng khoá `service_role`/`secret`. Nếu không khai báo, website dùng URL + publishable key của project production ghi sẵn trong `src/lib/supabase-env.ts` (hai giá trị này công khai theo thiết kế của Supabase). Đặt `SUPABASE_DISABLED=1` để chạy bằng nội dung mẫu.
+Toàn bộ nội dung CMS, yêu cầu báo giá và tài khoản quản trị nằm trong D1 `caogia-db` (binding `DB`). Trước 10/2026 website dùng Supabase; dữ liệu khởi tạo trong `migrations/0002_seed.sql` được dựng lại từ các migration Supabase cũ (lịch sử git có đủ), nên **các chỉnh sửa làm trực tiếp trên CMS cũ và yêu cầu báo giá cũ không được chuyển sang**.
 
-RLS chỉ cho phép khách **đọc sản phẩm đã publish** và **gửi** (không đọc được) yêu cầu báo giá.
-Quản lý sản phẩm và xem yêu cầu báo giá trong Table Editor của Supabase (cột `status`: new → contacted → quoted → won/lost).
+- Thay đổi schema: thêm file `migrations/000N_ten.sql` (SQLite), chạy `npm run db:migrate:local` để thử, `npm run deploy` (hoặc Workers Builds) tự áp lên production.
+- Truy vấn nhanh production: `npx wrangler d1 execute DB --remote --command "select status, count(*) from inquiries group by status"`.
+- D1 không có RLS: mọi trang/actions công khai chỉ đọc bản ghi `published = 1`; mọi thao tác ghi của CMS đi qua `requireAdmin()`.
+- Sao lưu: D1 có Time Travel (khôi phục về thời điểm bất kỳ trong 7 ngày với gói Free, 30 ngày với gói Paid): `npx wrangler d1 time-travel restore caogia-db --timestamp=…`.
 
 Mỗi yêu cầu báo giá lưu kèm `locale` để đội sales trả lời đúng ngôn ngữ của khách.
 
 ## Email thông báo yêu cầu báo giá
 
-Tạo tài khoản [Resend](https://resend.com), xác minh tên miền gửi, rồi đặt `RESEND_API_KEY`, `INQUIRY_FROM_EMAIL`, `INQUIRY_NOTIFY_TO` (xem `.env.example`). Yêu cầu được coi là gửi thành công nếu lưu được vào Supabase **hoặc** gửi được email. Lưu ý: không thể dùng địa chỉ Gmail làm người gửi — cần tên miền riêng.
-
-Sửa dữ liệu mẫu trong `src/data/products.ts` thì chạy `npm run seed:generate` để sinh lại `seed.sql`.
+Tạo tài khoản [Resend](https://resend.com), xác minh tên miền gửi, rồi đặt `RESEND_API_KEY`, `INQUIRY_FROM_EMAIL`, `INQUIRY_NOTIFY_TO` (xem `.env.example`). Yêu cầu được coi là gửi thành công nếu lưu được vào database **hoặc** gửi được email. Lưu ý: không thể dùng địa chỉ Gmail làm người gửi — cần tên miền riêng.
 
 ## Email tự động cho khách
 
@@ -83,7 +82,9 @@ Website chạy trên Worker `caogia` (OpenNext). Mỗi lần push lên `main`, C
 ```bash
 npx wrangler login
 npx wrangler r2 bucket create caogia-opennext-cache     # cache trang
-npx wrangler d1 create caogia-tag-cache                 # chép "database_id" vào wrangler.jsonc rồi commit
+npx wrangler d1 create caogia-db                        # nội dung CMS — chép "database_id" vào wrangler.jsonc
+npx wrangler d1 create caogia-tag-cache                 # cache tag của Next — chép "database_id" vào wrangler.jsonc, rồi commit
+openssl rand -base64 48 | npx wrangler secret put AUTH_SECRET   # ký cookie đăng nhập CMS
 # Secret của Worker (giá trị lấy từ .env.local / Vercel → Settings → Environment Variables cũ)
 npx wrangler secret put RESEND_API_KEY
 npx wrangler secret put INQUIRY_FROM_EMAIL
@@ -94,15 +95,14 @@ npx wrangler secret put GMAIL_CLIENT_ID
 npx wrangler secret put GMAIL_CLIENT_SECRET
 npx wrangler secret put GMAIL_REFRESH_TOKEN
 npx wrangler secret put TELEGRAM_BOT_TOKEN
-npm run deploy                                          # lần deploy đầu, từ máy
+npm run deploy                                          # lần deploy đầu, từ máy (áp migration D1 rồi deploy)
+npm run admin:add -- email-cua-ban@example.com          # tài khoản CMS đầu tiên
 ```
-
-Supabase không cần secret: URL và publishable key của project production có sẵn trong `src/lib/supabase-env.ts` (muốn đổi thì `wrangler secret put SUPABASE_URL` / `SUPABASE_ANON_KEY`).
 
 Cài đặt Workers Builds (Workers & Pages → `caogia` → Settings → Build):
 
 - **Build command:** `npx opennextjs-cloudflare build` — không dùng `npm run build` (chỉ ra bản Next thường, không có `.open-next/worker.js`).
-- **Deploy command:** `npx opennextjs-cloudflare deploy`
+- **Deploy command:** `npx wrangler d1 migrations apply DB --remote && npx opennextjs-cloudflare deploy` (áp migration mới trong `migrations/` trước khi deploy)
 - **Build variables:** `NEXT_PUBLIC_SITE_URL=https://www.cafecaogia.com`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dq6mmebqr` (Next nhúng lúc build).
 - Tên Worker phải là `caogia`, trùng `name` trong `wrangler.jsonc`.
 
@@ -117,7 +117,7 @@ Cài đặt Workers Builds (Workers & Pages → `caogia` → Settings → Build)
 
 - Tên miền chính là `https://www.cafecaogia.com` (giữ như trên Vercel để không đổi canonical); `cafecaogia.com` chuyển hướng 308 sang `www` (trong `next.config.ts`).
 - Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc Build variables của Workers Builds), vì Next nhúng chúng vào bundle. Riêng `NEXT_PUBLIC_SITE_URL`: bản build production bỏ qua giá trị `localhost` và dùng tên miền chính thức (khai báo trong `src/lib/site.ts`).
-- Build cần đọc được Supabase (các trang được dựng sẵn từ dữ liệu CMS) — nếu Supabase lỗi thì build/deploy thất bại, website đang chạy không bị ảnh hưởng.
+- Build không đọc database: D1 chỉ truy cập được trong Worker, nên các trang được dựng ở lượt xem đầu tiên rồi lưu cache (ISR) — `generateStaticParams` trả về `[]`. `sitemap.xml` và `robots.txt` tạo theo từng request.
 - `npm run preview` để chạy thử bản build trên runtime Workers ở local (lệnh này nạp sẵn cache trang tĩnh; chạy `wrangler dev` trực tiếp sẽ báo 404 cho các trang tĩnh).
 - Lưu trong CMS làm mới website ngay (R2 lưu trang, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi 1 giờ.
 
@@ -130,19 +130,15 @@ Quản lý bằng tiếng Việt: **Sản phẩm, Đánh giá, Đối tác, Ch�
 - Bấm Lưu là website cập nhật ngay (không cần deploy lại).
 - **Nội dung mẫu:** dữ liệu khởi tạo có đánh dấu "Nội dung mẫu" (tên người, công ty đều tự đặt). Trang Tổng quan liệt kê những mục còn là mẫu — thay bằng thông tin thật rồi bỏ đánh dấu. Tắt "Hiển thị trên website" để ẩn một mục mà không xoá.
 
-### Cài đặt lần đầu
+### Tài khoản quản trị
 
-1. Supabase → SQL Editor: chạy lần lượt `supabase/migrations/0001_init.sql`, `0002_i18n.sql`, `0003_cms.sql`, rồi `supabase/seed.sql` (nội dung mẫu).
-2. Supabase → Authentication → Users → **Add user** (email + mật khẩu, chọn Auto Confirm).
-3. Cấp quyền quản trị cho email đó (SQL Editor):
-   ```sql
-   insert into public.admin_users (email) values ('email-cua-ban@example.com');
-   ```
-4. Mở `https://<tên-miền>/admin` và đăng nhập.
+Đăng nhập bằng email + mật khẩu. Mật khẩu lưu dạng băm PBKDF2 trong bảng `admin_users`, phiên đăng nhập là cookie ký bằng `AUTH_SECRET` (14 ngày).
 
-Chạy thử ở máy: `npx supabase start` (cần Docker) tạo database local với đủ migration + seed; dùng URL và `ANON_KEY` nó in ra cho `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+1. Đặt secret một lần: `openssl rand -base64 48 | npx wrangler secret put AUTH_SECRET` (đổi secret này = đăng xuất mọi người).
+2. Tạo tài khoản hoặc đặt lại mật khẩu: `npm run admin:add -- email-cua-ban@example.com` (hỏi mật khẩu, ghi vào D1 production; thêm `--local` cho database local).
+3. Mở `https://www.cafecaogia.com/admin` và đăng nhập.
 
-Sửa nội dung mẫu trong code (`src/data/samples.ts`, `src/data/products.ts`) thì chạy `npm run seed:generate` để sinh lại `supabase/seed.sql`.
+Xoá quyền: `npx wrangler d1 execute DB --remote --command "delete from admin_users where email = 'x@example.com'"` — phiên của người đó hết hiệu lực ngay.
 
 ### Thông báo Telegram
 
@@ -155,11 +151,9 @@ CMS → **Thông báo**: gửi thông báo vào từng topic của một nhóm T
 | Nội dung CMS | Ai thêm / sửa / xoá nội dung |
 | Hệ thống & cảnh báo | Lưu cài đặt, SEO, mã đo lường; yêu cầu báo giá không lưu được vào database |
 
-Token bot (từ @BotFather) đặt ở biến môi trường `TELEGRAM_BOT_TOKEN` — Cloudflare: `npx wrangler secret put TELEGRAM_BOT_TOKEN`. **Không** nhập token vào CMS: bảng `site_settings` đọc công khai. Nhóm và topic chọn trong CMS (nút “Dò nhóm & topic”, hoặc dán link topic). Telegram là kênh nhận yêu cầu báo giá thứ ba: yêu cầu được coi là gửi thành công nếu lưu vào database, gửi email **hoặc** gửi Telegram được.
+Token bot (từ @BotFather) đặt ở biến môi trường `TELEGRAM_BOT_TOKEN` — Cloudflare: `npx wrangler secret put TELEGRAM_BOT_TOKEN`. **Không** nhập token vào CMS: cài đặt CMS được đọc khi dựng trang công khai. Nhóm và topic chọn trong CMS (nút “Dò nhóm & topic”, hoặc dán link topic). Telegram là kênh nhận yêu cầu báo giá thứ ba: yêu cầu được coi là gửi thành công nếu lưu vào database, gửi email **hoặc** gửi Telegram được.
 
 ### SEO & phân tích
-
-Cần chạy `supabase/migrations/0006_seo_analytics.sql` (thêm tiêu đề/mô tả SEO cho sản phẩm và lưu nguồn khách hàng kèm yêu cầu báo giá). Website vẫn chạy nếu chưa chạy migration, chỉ là hai tính năng đó chưa hoạt động.
 
 - **CMS → SEO:** danh sách kiểm tra nhanh, bật/tắt lập chỉ mục (tắt = `noindex` + robots.txt chặn toàn bộ), mã xác minh Google / Bing / Yandex, ảnh chia sẻ mặc định, tiêu đề + mô tả từng trang theo từng ngôn ngữ (có xem trước kết quả Google). Tiêu đề/mô tả SEO của sản phẩm sửa trong từng sản phẩm.
 - **CMS → Phân tích:** báo cáo yêu cầu báo giá theo kênh (tìm kiếm, quảng cáo, mạng xã hội, trợ lý AI…), nguồn, trang vào đầu tiên, sản phẩm, ngôn ngữ; và ô nhập mã GA4, Google Tag Manager, Meta Pixel, Yandex Metrica, Microsoft Clarity, Cloudflare Web Analytics. Script chỉ nạp ở bản production.
@@ -176,7 +170,3 @@ Cần chạy `supabase/migrations/0006_seo_analytics.sql` (thêm tiêu đề/mô
 - [ ] Bổ sung ngành nghề bán buôn/xuất khẩu nông sản trong đăng ký doanh nghiệp
 - [ ] Kiểm tra thông số sản phẩm, điều kiện giao dịch, lịch mùa vụ, nội dung EUDR với thực tế
 - [ ] Nhờ người bản ngữ Nga / Ả Rập đọc lại bản dịch
-
-### Tiêu chuẩn Robusta (09/2026)
-
-Chạy `supabase/migrations/0007_robusta_standards.sql` để cập nhật database đang chạy theo tiêu chuẩn xuất khẩu mới: thông số Robusta loại 1 sàng 18 / sàng 16, loại 2 sàng 13, và thêm sản phẩm Robusta chế biến ướt special loại 1 (gắn nhãn “Mẫu” cho đến khi duyệt mô tả và ảnh). Chỉ ghi đè thông số và số lượng tối thiểu (kèm bản tiếng Nga, Ả Rập); các chỉnh sửa khác trong CMS được giữ. Chạy nhiều lần không sao.

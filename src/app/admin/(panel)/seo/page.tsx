@@ -6,6 +6,7 @@ import { locales } from "@/i18n/config";
 import { loadDictionary } from "@/i18n/dictionaries";
 import { requireAdmin } from "@/lib/admin/auth";
 import { DESCRIPTION_LIMIT, seoPages, TITLE_LIMIT } from "@/lib/admin/seo-pages";
+import { all, count, first } from "@/lib/db";
 import { mergeSettings } from "@/lib/settings";
 import { site } from "@/lib/site";
 import type { ProductTranslations, SiteSettings } from "@/lib/types";
@@ -41,9 +42,6 @@ async function metaDefaults(): Promise<SeoDefaults> {
 }
 
 function productChecks(products: ProductRow[]): Check[] {
-  if (products.length > 0 && !("seo_title" in products[0])) {
-    return [{ tone: "error", text: "Chưa chạy migration supabase/migrations/0006_seo_analytics.sql — chưa thể nhập tiêu đề/mô tả SEO cho sản phẩm và chưa lưu được nguồn khách hàng." }];
-  }
   const link = (p: ProductRow) => ({ label: p.name, href: `/admin/products/${p.id}` });
   const longDescription = products.filter((p) => !p.seo_description && p.summary.length > DESCRIPTION_LIMIT);
   const shortDescription = products.filter((p) => !p.seo_description && p.summary.length < 70);
@@ -75,15 +73,14 @@ const icons = { error: AlertTriangle, warn: AlertTriangle, info: Info, ok: Check
 const colors = { error: "text-red-600", warn: "text-amber-600", info: "text-sky-600", ok: "text-leaf" };
 
 export default async function SeoPage() {
-  const { supabase } = await requireAdmin();
-  const [{ data }, { data: products }, { count: samples }, defaults] = await Promise.all([
-    supabase.from("site_settings").select("data").eq("id", 1).maybeSingle(),
-    // "*" so the page still loads before migration 0006 adds the SEO columns.
-    supabase.from("products").select("*").eq("published", true).order("sort_order"),
-    supabase.from("testimonials").select("id", { count: "exact", head: true }).eq("is_sample", true),
+  await requireAdmin();
+  const [data, products, samples, defaults] = await Promise.all([
+    first<{ data: Partial<SiteSettings> }>("select data from site_settings where id = 1"),
+    all<ProductRow>("select * from products where published = 1 order by sort_order"),
+    count("select count(*) as n from testimonials where is_sample = 1"),
     metaDefaults(),
   ]);
-  const settings: SiteSettings = mergeSettings((data?.data ?? {}) as Partial<SiteSettings>);
+  const settings: SiteSettings = mergeSettings(data?.data ?? {});
   const { seo, analytics, socials } = settings;
 
   const overLimit = seoPages.flatMap((page) =>
@@ -115,13 +112,13 @@ export default async function SeoPage() {
       text: "Chưa có link mạng xã hội — Google dùng chúng (sameAs) để nhận diện thương hiệu.",
       href: "/admin/settings",
     },
-    (samples ?? 0) > 0 && {
+    samples > 0 && {
       tone: "warn",
       text: "Còn đánh giá khách hàng mẫu — nội dung giả làm giảm độ tin cậy (E-E-A-T).",
       href: "/admin/testimonials?filter=sample",
     },
     overLimit.length > 0 && { tone: "info", text: `Tiêu đề quá ${TITLE_LIMIT} ký tự: ${overLimit.join(", ")}.` },
-    ...productChecks((products ?? []) as ProductRow[]),
+    ...productChecks(products),
   ].filter(Boolean) as Check[];
 
   const order = { error: 0, warn: 1, info: 2, ok: 3 };

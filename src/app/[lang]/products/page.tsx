@@ -25,6 +25,9 @@ function parseCategory(value: string | string[] | undefined): Category | undefin
   return value === "coffee" || value === "cashew" ? value : undefined;
 }
 
+// Filters come from the query string, so this page renders per request rather than from the ISR cache.
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/products">) {
   const category = parseCategory((await searchParams).category);
   const [locale, dict, products] = await Promise.all([getLocale(), getDictionary(), getProducts(category)]);

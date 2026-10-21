@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
 import { AnalyticsForm } from "@/components/admin/analytics-form";
 import { PageTitle, Panel } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/admin/auth";
 import { channelLabels, channelOf, sourceLabel } from "@/lib/attribution";
+import { all as selectAll, first } from "@/lib/db";
 import { mergeSettings } from "@/lib/settings";
 import type { Attribution, SiteSettings } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -109,20 +109,18 @@ function periodBounds(days: number) {
 export default async function AnalyticsPage({ searchParams }: PageProps<"/admin/analytics">) {
   const requested = Number((await searchParams).days);
   const days = periods.find((p) => p === requested) ?? 90;
-  const { supabase } = await requireAdmin();
+  await requireAdmin();
 
   const { since, from, monthRanges } = periodBounds(days);
 
-  const query = (columns: string) =>
-    supabase.from("inquiries").select(columns).gte("created_at", from).order("created_at").limit(5000);
-  let result = await query("created_at, status, locale, product_slug, attribution");
-  const migrated = result.error?.code !== "42703";
-  if (!migrated) result = await query("created_at, status, locale, product_slug");
-  if (result.error) throw new Error(result.error.message);
-  const all = (result.data ?? []) as unknown as Lead[];
-
-  const { data: settingsRow } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
-  const { analytics } = mergeSettings((settingsRow?.data ?? {}) as Partial<SiteSettings>);
+  const [all, settingsRow] = await Promise.all([
+    selectAll<Lead>(
+      "select created_at, status, locale, product_slug, attribution from inquiries where created_at >= ? order by created_at limit 5000",
+      from,
+    ),
+    first<{ data: Partial<SiteSettings> }>("select data from site_settings where id = 1"),
+  ]);
+  const { analytics } = mergeSettings(settingsRow?.data ?? {});
 
   const time = (lead: Lead) => Date.parse(lead.created_at);
   const leads = all.filter((l) => time(l) >= since);
@@ -154,13 +152,6 @@ export default async function AnalyticsPage({ searchParams }: PageProps<"/admin/
           ))}
         </div>
       </PageTitle>
-
-      {!migrated && (
-        <p className="flex gap-2 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-          Chưa chạy migration supabase/migrations/0006_seo_analytics.sql — yêu cầu báo giá mới chưa được lưu nguồn truy cập.
-        </p>
-      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi

@@ -1,17 +1,16 @@
 import { LogoMark } from "@/components/logo";
 import { LoginForm } from "@/components/admin/login-form";
-import { describeSupabaseEnvProblems } from "@/lib/supabase-env";
+import { isAuthConfigured } from "@/lib/admin/auth";
 
 const notices: Record<string, string> = {
-  config: "Chưa cấu hình Supabase. Thêm NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY rồi khởi động lại.",
+  config: "Chưa cấu hình AUTH_SECRET (chuỗi ngẫu nhiên ≥ 32 ký tự). Xem README → Tài khoản quản trị.",
   forbidden: "Tài khoản này chưa được cấp quyền quản trị.",
 };
 
 export default async function LoginPage({ searchParams }: PageProps<"/admin/login">) {
   const { error } = await searchParams;
-  const notice = typeof error === "string" ? notices[error] : undefined;
-  // Live check (not tied to the query string): explains exactly which variable is missing or malformed.
-  const configProblems = describeSupabaseEnvProblems();
+  // The config notice is a live check, so it also shows when the link has no ?error.
+  const notice = !isAuthConfigured() ? notices.config : typeof error === "string" ? notices[error] : undefined;
 
   return (
     <main className="grid min-h-svh place-items-center bg-forest p-5">
@@ -24,13 +23,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
           </div>
         </div>
         {notice && <p className="mt-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">{notice}</p>}
-        {configProblems.length > 0 && (
-          <ul className="mt-3 list-disc space-y-1 rounded-xl bg-red-50 py-3 ps-8 pe-4 text-xs text-red-800">
-            {configProblems.map((p) => (
-              <li key={p}>{p}</li>
-            ))}
-          </ul>
-        )}
         <LoginForm />
       </div>
     </main>

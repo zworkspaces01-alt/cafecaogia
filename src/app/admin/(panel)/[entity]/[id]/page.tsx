@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { RecordForm } from "@/components/admin/record-form";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getEntity } from "@/lib/admin/entities";
+import { first } from "@/lib/db";
 
 export default async function EditRecordPage({ params }: PageProps<"/admin/[entity]/[id]">) {
   const { entity: key, id } = await params;
@@ -15,9 +16,9 @@ export default async function EditRecordPage({ params }: PageProps<"/admin/[enti
     return <RecordForm entityKey={entity.key} id={null} initial={{ ...dates, ...entity.defaults }} />;
   }
 
-  const { supabase } = await requireAdmin();
-  const { data, error } = await supabase.from(entity.table).select("*").eq("id", id).maybeSingle();
-  if (error || !data) notFound();
+  await requireAdmin();
+  const data = await first<Record<string, unknown>>(`select * from ${entity.table} where id = ?`, id);
+  if (!data) notFound();
 
   return <RecordForm entityKey={entity.key} id={id} initial={data} />;
 }

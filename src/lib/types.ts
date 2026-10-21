@@ -175,3 +175,21 @@ export type Attribution = {
   /** ISO timestamp of the visit that set this attribution. */
   at?: string;
 };
+
+/** A row of the `inquiries` table (quote requests from the contact form). */
+export type InquiryRow = {
+  id: string;
+  created_at: string;
+  name: string;
+  company: string | null;
+  email: string;
+  phone: string | null;
+  country: string | null;
+  product_slug: string | null;
+  quantity: string | null;
+  incoterm: string | null;
+  message: string;
+  status: "new" | "contacted" | "quoted" | "won" | "lost";
+  locale: "en" | "ru" | "ar";
+  attribution: Attribution | null;
+};

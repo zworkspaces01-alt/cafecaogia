@@ -5,6 +5,8 @@ import { Badge, PageTitle } from "@/components/admin/ui";
 import { WhatsAppIcon } from "@/components/icons/whatsapp";
 import { requireAdmin } from "@/lib/admin/auth";
 import { channelLabels, channelOf, sourceLabel } from "@/lib/attribution";
+import { all } from "@/lib/db";
+import type { InquiryRow } from "@/lib/types";
 
 const languageNames: Record<string, string> = { en: "Tiếng Anh", ru: "Tiếng Nga", ar: "Tiếng Ả Rập" };
 const statusLabels: Record<string, string> = {
@@ -17,12 +19,12 @@ const statusLabels: Record<string, string> = {
 
 export default async function InquiriesPage({ searchParams }: PageProps<"/admin/inquiries">) {
   const { status } = await searchParams;
-  const { supabase } = await requireAdmin();
+  await requireAdmin();
 
-  let query = supabase.from("inquiries").select("*").order("created_at", { ascending: false }).limit(200);
-  if (typeof status === "string" && statusLabels[status]) query = query.eq("status", status);
-  const { data: rows, error } = await query;
-  if (error) throw new Error(error.message);
+  const rows =
+    typeof status === "string" && statusLabels[status]
+      ? await all<InquiryRow>("select * from inquiries where status = ? order by created_at desc limit 200", status)
+      : await all<InquiryRow>("select * from inquiries order by created_at desc limit 200");
 
   return (
     <div className="space-y-6">

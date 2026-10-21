@@ -1,12 +1,10 @@
 import "server-only";
 
 import { cache } from "react";
-import { samplePosts } from "@/data/posts";
-import { defaultSettings, sampleCertifications, samplePartners, sampleTeam, sampleTestimonials } from "@/data/samples";
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
+import { all, first } from "@/lib/db";
 import { mergeSettings } from "@/lib/settings";
-import { getSupabase } from "@/lib/supabase";
 import type { CertificationRow, PartnerRow, PostRow, SiteSettings, TeamMemberRow, TestimonialRow } from "@/lib/types";
 
 type WithTranslations = { translations?: Record<string, Record<string, unknown> | undefined> | null };
@@ -21,13 +19,11 @@ function localize<T extends WithTranslations>(row: T, locale: Locale): Omit<T, "
   return { ...base, ...overrides };
 }
 
-/** Reads a published, ordered content table, falling back to the bundled starter content. */
-async function readTable<T>(table: string, fallback: T[]): Promise<T[]> {
-  const supabase = getSupabase();
-  if (!supabase) return fallback.filter((row) => (row as { published?: boolean }).published !== false);
-  const { data, error } = await supabase.from(table).select("*").eq("published", true).order("sort_order");
-  if (error) throw new Error(`Failed to load ${table}: ${error.message}`);
-  return data as T[];
+type ContentTable = "testimonials" | "partners" | "certifications" | "team_members";
+
+/** Reads a published content table in CMS order. */
+function readTable<T>(table: ContentTable): Promise<T[]> {
+  return all<T>(`select * from ${table} where published = 1 order by sort_order`);
 }
 
 export type Testimonial = Omit<TestimonialRow, "translations">;
@@ -37,30 +33,27 @@ export type TeamMember = Omit<TeamMemberRow, "translations">;
 export type Post = Omit<PostRow, "translations">;
 
 export const getSettings = cache(async (): Promise<SiteSettings> => {
-  const supabase = getSupabase();
-  if (!supabase) return defaultSettings;
-  const { data, error } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
-  if (error) throw new Error(`Failed to load site settings: ${error.message}`);
-  return mergeSettings((data?.data ?? {}) as Partial<SiteSettings>);
+  const row = await first<{ data: Partial<SiteSettings> }>("select data from site_settings where id = 1");
+  return mergeSettings(row?.data ?? {});
 });
 
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
-  const [locale, rows] = await Promise.all([getLocale(), readTable<TestimonialRow>("testimonials", sampleTestimonials)]);
+  const [locale, rows] = await Promise.all([getLocale(), readTable<TestimonialRow>("testimonials")]);
   return rows.map((row) => localize(row, locale));
 });
 
-export const getPartners = cache(async (): Promise<Partner[]> => readTable<PartnerRow>("partners", samplePartners));
+export const getPartners = cache(async (): Promise<Partner[]> => readTable<PartnerRow>("partners"));
 
 export const getCertifications = cache(async (): Promise<Certification[]> => {
   const [locale, rows] = await Promise.all([
     getLocale(),
-    readTable<CertificationRow>("certifications", sampleCertifications),
+    readTable<CertificationRow>("certifications"),
   ]);
   return rows.map((row) => localize(row, locale));
 });
 
 export const getTeam = cache(async (): Promise<TeamMember[]> => {
-  const [locale, rows] = await Promise.all([getLocale(), readTable<TeamMemberRow>("team_members", sampleTeam)]);
+  const [locale, rows] = await Promise.all([getLocale(), readTable<TeamMemberRow>("team_members")]);
   return rows.map((row) => localize(row, locale));
 });
 
@@ -78,28 +71,15 @@ export const whatsappLink = (number: string, text?: string) =>
 
 /** Locale-free check used by the sitemap (which has no [lang] segment). */
 export async function hasPublishedCeo(): Promise<boolean> {
-  return (await readTable<TeamMemberRow>("team_members", sampleTeam)).some((m) => m.is_ceo);
+  return (await readTable<TeamMemberRow>("team_members")).some((m) => m.is_ceo);
 }
 
 // ── Insights ────────────────────────────────────────────────────────────────
 
-/** Newest first. A missing `posts` table (migration 0005 not run yet) reads as "no posts" instead of breaking every page. */
-const readPosts = cache(async (): Promise<PostRow[]> => {
-  const supabase = getSupabase();
-  if (!supabase) return samplePosts.filter((post) => post.published);
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("published", true)
-    .order("published_at", { ascending: false })
-    .order("sort_order");
-  if (error?.code === "PGRST205" || error?.code === "42P01") {
-    console.warn("[posts] table not found — run supabase/migrations/0005_posts.sql");
-    return [];
-  }
-  if (error) throw new Error(`Failed to load posts: ${error.message}`);
-  return data as PostRow[];
-});
+/** Newest first. */
+const readPosts = cache(
+  (): Promise<PostRow[]> => all<PostRow>("select * from posts where published = 1 order by published_at desc, sort_order"),
+);
 
 export const getPosts = cache(async (): Promise<Post[]> => {
   const [locale, rows] = await Promise.all([getLocale(), readPosts()]);
@@ -115,7 +95,7 @@ export async function getPostsForProduct(slug: string): Promise<Post[]> {
   return (await getPosts()).filter((post) => post.product_slugs.includes(slug));
 }
 
-/** Locale-free, for generateStaticParams and the sitemap. */
+/** Locale-free, for the sitemap. */
 export async function getPostSlugs(): Promise<{ slug: string; published_at: string }[]> {
   return (await readPosts()).map(({ slug, published_at }) => ({ slug, published_at }));
 }

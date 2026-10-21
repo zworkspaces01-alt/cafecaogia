@@ -19,7 +19,7 @@ async function uploadToCloudinary(file: File, folder: string, kind: "image" | "a
   body.append("signature", sig.signature);
   body.append("folder", sig.folder);
   const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/${kind}/upload`, { method: "POST", body });
-  const json = await res.json();
+  const json = (await res.json()) as { secure_url?: string; error?: { message?: string } };
   if (!res.ok) throw new Error(json?.error?.message ?? "Tải lên thất bại.");
   return json.secure_url as string;
 }

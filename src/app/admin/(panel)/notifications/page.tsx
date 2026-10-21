@@ -1,6 +1,7 @@
 import { NotificationsForm } from "@/components/admin/notifications-form";
 import { PageTitle, Panel } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/admin/auth";
+import { first } from "@/lib/db";
 import { mergeSettings } from "@/lib/settings";
 import { isTelegramConfigured, telegramApi } from "@/lib/telegram";
 import type { SiteSettings } from "@/lib/types";
@@ -8,9 +9,9 @@ import type { SiteSettings } from "@/lib/types";
 export const metadata = { title: "Thông báo" };
 
 export default async function NotificationsPage() {
-  const { supabase } = await requireAdmin();
-  const { data } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
-  const { notifications } = mergeSettings((data?.data ?? {}) as Partial<SiteSettings>);
+  await requireAdmin();
+  const data = await first<{ data: Partial<SiteSettings> }>("select data from site_settings where id = 1");
+  const { notifications } = mergeSettings(data?.data ?? {});
 
   const me = isTelegramConfigured() ? await telegramApi<{ username: string }>("getMe") : null;
   const bot = me?.ok ? me.result.username : null;

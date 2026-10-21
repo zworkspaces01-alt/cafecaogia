@@ -13,13 +13,14 @@ import { localeAlternates, openGraphBase } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { imageUrl } from "@/lib/image-url";
 import { getPostsForProduct } from "@/lib/content";
-import { getProduct, getProductSlugs, getProducts } from "@/lib/products";
+import { getProduct, getProducts } from "@/lib/products";
 import { site } from "@/lib/site";
 
 export const revalidate = 3600;
 
-export async function generateStaticParams() {
-  return (await getProductSlugs()).map((slug) => ({ slug }));
+// Rendered on first visit, then cached (see [lang]/layout.tsx).
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/products/[slug]">): Promise<Metadata> {

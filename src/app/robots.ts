@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { getSettings } from "@/lib/content";
 import { site } from "@/lib/site";
 
-export const revalidate = 3600;
+// Built per request from D1, which isn't reachable during `next build`.
+export const dynamic = "force-dynamic";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const { seo } = await getSettings();

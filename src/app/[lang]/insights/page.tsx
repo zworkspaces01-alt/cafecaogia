@@ -26,6 +26,9 @@ function parseCategory(value: string | string[] | undefined): PostCategory | und
   return topics.find((topic) => topic === value);
 }
 
+// Filters come from the query string, so this page renders per request rather than from the ISR cache.
+export const dynamic = "force-dynamic";
+
 export default async function InsightsPage({ searchParams }: PageProps<"/[lang]/insights">) {
   const category = parseCategory((await searchParams).category);
   const [locale, dict, posts] = await Promise.all([getLocale(), getDictionary(), getPosts()]);

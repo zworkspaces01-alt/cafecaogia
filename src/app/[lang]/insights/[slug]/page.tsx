@@ -11,15 +11,16 @@ import { localeTags } from "@/i18n/config";
 import { format, formatDate } from "@/i18n/format";
 import { localeAlternates, openGraphBase } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
-import { getPost, getPosts, getPostSlugs } from "@/lib/content";
+import { getPost, getPosts } from "@/lib/content";
 import { imageUrl } from "@/lib/image-url";
 import { getProducts } from "@/lib/products";
 import { photos, site } from "@/lib/site";
 
 export const revalidate = 3600;
 
-export async function generateStaticParams() {
-  return (await getPostSlugs()).map(({ slug }) => ({ slug }));
+// Rendered on first visit, then cached (see [lang]/layout.tsx).
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/insights/[slug]">): Promise<Metadata> {

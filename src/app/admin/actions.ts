@@ -3,9 +3,10 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { getAuthClient, requireAdmin } from "@/lib/admin/auth";
+import { endSession, isAuthConfigured, requireAdmin, startSession } from "@/lib/admin/auth";
 import { getEntity, type Entity, type Field } from "@/lib/admin/entities";
-import { CMS_CACHE_TAG } from "@/lib/supabase";
+import { verifyPassword } from "@/lib/admin/password";
+import { CMS_CACHE_TAG, first, insert, isUniqueViolation, now, run, update } from "@/lib/db";
 import { analyticsKeys, analyticsTools } from "@/lib/analytics-ids";
 import { submitToIndexNow } from "@/lib/indexnow";
 import { site } from "@/lib/site";
@@ -36,26 +37,24 @@ export async function signIn(
   _prev: { error?: string; email?: string },
   form: FormData,
 ): Promise<{ error?: string; email?: string }> {
-  const supabase = await getAuthClient();
-  if (!supabase) return { error: "Chưa cấu hình Supabase (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)." };
+  if (!isAuthConfigured()) return { error: "Chưa cấu hình AUTH_SECRET (xem README → Tài khoản quản trị)." };
 
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const account = await first<{ email: string; password_hash: string }>(
+    "select email, password_hash from admin_users where email = ?",
+    email,
+  );
   // Echo the email back: React resets the form after each submission.
-  if (error) return { error: "Email hoặc mật khẩu không đúng.", email };
-
-  const { data: isAdmin } = await supabase.rpc("is_admin");
-  if (!isAdmin) {
-    await supabase.auth.signOut();
-    return { error: "Tài khoản này chưa được cấp quyền quản trị.", email };
+  if (!account || !(await verifyPassword(password, account.password_hash))) {
+    return { error: "Email hoặc mật khẩu không đúng.", email };
   }
+  await startSession(account.email);
   redirect("/admin");
 }
 
 export async function signOut() {
-  const supabase = await getAuthClient();
-  await supabase?.auth.signOut();
+  await endSession();
   redirect("/admin/login");
 }
 
@@ -129,7 +128,7 @@ const who = (user: { email?: string }) => escapeHtml(user.email ?? "Quản trị
 export async function saveRecord(entityKey: string, id: string | null, values: Record<string, unknown>): Promise<ActionResult> {
   const entity = getEntity(entityKey);
   if (!entity) return { ok: false, error: "Loại nội dung không hợp lệ." };
-  const { supabase, user } = await requireAdmin();
+  const { user } = await requireAdmin();
 
   let row: Record<string, unknown>;
   try {
@@ -138,13 +137,18 @@ export async function saveRecord(entityKey: string, id: string | null, values: R
     return { ok: false, error: (e as Error).message };
   }
 
-  const query = id
-    ? supabase.from(entity.table).update(row).eq("id", id).select("id").single()
-    : supabase.from(entity.table).insert(row).select("id").single();
-  const { data, error } = await query;
-  if (error) {
-    const duplicate = error.code === "23505";
-    return { ok: false, error: duplicate ? "Đường dẫn (slug) này đã tồn tại." : `Không lưu được: ${error.message}` };
+  let savedId: string;
+  try {
+    if (id) {
+      const { meta } = await update(entity.table, id, row);
+      if (!meta.changes) return { ok: false, error: "Không tìm thấy bản ghi này (có thể đã bị xoá)." };
+      savedId = id;
+    } else savedId = await insert(entity.table, row);
+  } catch (error) {
+    return {
+      ok: false,
+      error: isUniqueViolation(error) ? "Đường dẫn (slug) này đã tồn tại." : `Không lưu được: ${(error as Error).message}`,
+    };
   }
 
   refreshSite();
@@ -156,19 +160,23 @@ export async function saveRecord(entityKey: string, id: string | null, values: R
   }
   const title = escapeHtml(String(row[entity.titleField] ?? "") || "(chưa đặt tên)");
   notifyLater("content", `${id ? "✏️" : "➕"} ${who(user)} đã ${id ? "sửa" : "thêm"} ${entity.singular} <b>${title}</b>`, [
-    { text: "Mở trong CMS", url: `${site.url}/admin/${entity.key}/${data.id}` },
+    { text: "Mở trong CMS", url: `${site.url}/admin/${entity.key}/${savedId}` },
   ]);
-  return { ok: true, id: data.id as string };
+  return { ok: true, id: savedId };
 }
 
 export async function deleteRecord(entityKey: string, id: string): Promise<ActionResult> {
   const entity = getEntity(entityKey);
   if (!entity) return { ok: false, error: "Loại nội dung không hợp lệ." };
-  const { supabase, user } = await requireAdmin();
-  const { data, error } = await supabase.from(entity.table).delete().eq("id", id).select(entity.titleField).maybeSingle();
-  if (error) return { ok: false, error: `Không xoá được: ${error.message}` };
+  const { user } = await requireAdmin();
+  let data: Record<string, unknown> | null;
+  try {
+    data = await first(`delete from ${entity.table} where id = ? returning ${entity.titleField}`, id);
+  } catch (error) {
+    return { ok: false, error: `Không xoá được: ${(error as Error).message}` };
+  }
   refreshSite();
-  const title = escapeHtml(String((data as Record<string, unknown> | null)?.[entity.titleField] ?? "") || id);
+  const title = escapeHtml(String(data?.[entity.titleField] ?? "") || id);
   notifyLater("content", `🗑 ${who(user)} đã xoá ${entity.singular} <b>${title}</b>`);
   return { ok: true };
 }
@@ -187,14 +195,13 @@ const statusIcons: Record<string, string> = { new: "🔄", contacted: "📞", qu
 
 export async function setInquiryStatus(id: string, status: string): Promise<ActionResult> {
   if (!inquiryStatuses.includes(status)) return { ok: false, error: "Trạng thái không hợp lệ." };
-  const { supabase, user } = await requireAdmin();
-  const { data, error } = await supabase
-    .from("inquiries")
-    .update({ status })
-    .eq("id", id)
-    .select("name, company, product_slug")
-    .maybeSingle();
-  if (error) return { ok: false, error: error.message };
+  const { user } = await requireAdmin();
+  let data: { name: string; company: string | null; product_slug: string | null } | null;
+  try {
+    data = await first("update inquiries set status = ? where id = ? returning name, company, product_slug", status, id);
+  } catch (error) {
+    return { ok: false, error: (error as Error).message };
+  }
   revalidatePath("/admin", "layout");
   if (data) {
     const lead = [data.name, data.company].filter(Boolean).map(String).map(escapeHtml).join(" · ");
@@ -208,11 +215,18 @@ export async function setInquiryStatus(id: string, status: string): Promise<Acti
 
 /** Merges `patch` into the stored settings, so each admin screen only overwrites its own groups. */
 async function writeSettings(patch: Partial<SiteSettings>, what: string): Promise<ActionResult> {
-  const { supabase, user } = await requireAdmin();
-  const { data: current, error: readError } = await supabase.from("site_settings").select("data").eq("id", 1).maybeSingle();
-  if (readError) return { ok: false, error: `Không đọc được cài đặt: ${readError.message}` };
-  const { error } = await supabase.from("site_settings").upsert({ id: 1, data: { ...(current?.data ?? {}), ...patch } });
-  if (error) return { ok: false, error: `Không lưu được: ${error.message}` };
+  const { user } = await requireAdmin();
+  try {
+    const current = await first<{ data: Partial<SiteSettings> }>("select data from site_settings where id = 1");
+    await run(
+      `insert into site_settings (id, data, updated_at) values (1, ?, ?)
+       on conflict (id) do update set data = excluded.data, updated_at = excluded.updated_at`,
+      JSON.stringify({ ...(current?.data ?? {}), ...patch }),
+      now(),
+    );
+  } catch (error) {
+    return { ok: false, error: `Không lưu được: ${(error as Error).message}` };
+  }
   refreshSite();
   notifyLater("system", `⚙️ ${who(user)} đã lưu <b>${what}</b>`);
   return { ok: true };

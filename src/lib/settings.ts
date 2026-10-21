@@ -1,4 +1,4 @@
-import { defaultSettings } from "@/data/samples";
+import { defaultSettings } from "@/data/default-settings";
 import type { NotifyTopic, SiteSettings } from "@/lib/types";
 
 /** Fills in defaults group by group, so settings added after a save keep working. */

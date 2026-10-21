@@ -3,24 +3,30 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Inbox } from "lucide-react";
 import { Badge, PageTitle } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/admin/auth";
 import { entities } from "@/lib/admin/entities";
+import { all, count } from "@/lib/db";
+import type { InquiryRow } from "@/lib/types";
 
 export default async function DashboardPage() {
-  const { supabase } = await requireAdmin();
+  await requireAdmin();
 
   const counts = await Promise.all(
     entities.map(async (entity) => {
-      const [{ count: total }, { count: samples }, { data: sampleRows }] = await Promise.all([
-        supabase.from(entity.table).select("id", { count: "exact", head: true }),
-        supabase.from(entity.table).select("id", { count: "exact", head: true }).eq("is_sample", true),
-        supabase.from(entity.table).select(`id, ${entity.titleField}`).eq("is_sample", true).order("sort_order").limit(8),
+      const [total, samples, sampleRows] = await Promise.all([
+        count(`select count(*) as n from ${entity.table}`),
+        count(`select count(*) as n from ${entity.table} where is_sample = 1`),
+        all<Record<string, string>>(
+          `select id, ${entity.titleField} from ${entity.table} where is_sample = 1 order by sort_order limit 8`,
+        ),
       ]);
-      return { entity, total: total ?? 0, samples: samples ?? 0, sampleRows: (sampleRows ?? []) as unknown as Record<string, string>[] };
+      return { entity, total, samples, sampleRows };
     }),
   );
 
-  const [{ count: newInquiries }, { data: recent }] = await Promise.all([
-    supabase.from("inquiries").select("id", { count: "exact", head: true }).eq("status", "new"),
-    supabase.from("inquiries").select("id, created_at, name, company, country, product_slug, status").order("created_at", { ascending: false }).limit(5),
+  const [newInquiries, recent] = await Promise.all([
+    count("select count(*) as n from inquiries where status = 'new'"),
+    all<InquiryRow>(
+      "select id, created_at, name, company, country, product_slug, status from inquiries order by created_at desc limit 5",
+    ),
   ]);
 
   const totalSamples = counts.reduce((sum, c) => sum + c.samples, 0);

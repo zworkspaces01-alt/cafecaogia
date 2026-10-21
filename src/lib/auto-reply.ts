@@ -1,6 +1,6 @@
 import "server-only";
 
-import { defaultSettings } from "@/data/samples";
+import { defaultSettings } from "@/data/default-settings";
 import { isLocale } from "@/i18n/config";
 import { loadDictionary } from "@/i18n/dictionaries";
 import { format } from "@/i18n/format";

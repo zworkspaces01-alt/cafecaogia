@@ -21,6 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Filters come from the query string, so this page renders per request rather than from the ISR cache.
+export const dynamic = "force-dynamic";
+
 export default async function ContactPage({ searchParams }: PageProps<"/[lang]/contact">) {
   const { product: productParam, sample } = await searchParams;
   const [locale, dict, products, settings] = await Promise.all([

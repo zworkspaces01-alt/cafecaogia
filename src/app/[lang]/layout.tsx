@@ -5,7 +5,7 @@ import { ContactDock } from "@/components/contact-dock";
 import { MotionMain } from "@/components/motion";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { isRtl, locales, localeTags } from "@/i18n/config";
+import { isRtl, localeTags } from "@/i18n/config";
 import { localeAlternates, openGraphBase } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content";
@@ -44,9 +44,13 @@ const amiri = Amiri({
   preload: false,
 });
 
+// Pages render on their first visit and are then cached (ISR), because the CMS database (D1) is
+// only reachable inside the Worker, not during `next build`. Unknown languages 404 via getLocale().
 export function generateStaticParams() {
-  return locales.map((lang) => ({ lang }));
+  return [];
 }
+
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict, { seo }] = await Promise.all([getLocale(), getDictionary(), getSettings()]);

@@ -8,16 +8,16 @@
     "start": "next start",
     "lint": "eslint",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy": "opennextjs-cloudflare build && wrangler d1 migrations apply DB --remote && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-    "seed:generate": "tsx scripts/generate-seed.ts",
-    "gmail:auth": "tsx scripts/gmail-auth.ts"
+    "gmail:auth": "tsx scripts/gmail-auth.ts",
+    "db:migrate": "wrangler d1 migrations apply DB --remote",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "admin:add": "tsx scripts/add-admin.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.117.2",
     "clsx": "^2.1.1",
     "gsap": "^3.15.0",
     "lucide-react": "^1.48.0",

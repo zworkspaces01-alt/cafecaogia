@@ -5,10 +5,10 @@ import { isLocale } from "@/i18n/config";
 import { loadDictionary } from "@/i18n/dictionaries";
 import { parseAttribution } from "@/lib/attribution";
 import { sendInquiryAutoReply } from "@/lib/auto-reply";
+import { insert } from "@/lib/db";
 import { isGmailConfigured } from "@/lib/gmail";
 import { isEmailConfigured, notifyInquiry, type Inquiry } from "@/lib/notify";
 import { getProductSummary } from "@/lib/products";
-import { getSupabase } from "@/lib/supabase";
 import { escapeHtml, notifyInquiryTelegram, notifyTelegram } from "@/lib/telegram";
 
 export type InquiryState = {
@@ -49,20 +49,14 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
     return { status: "error", message: errors.check, fieldErrors };
   }
 
-  const supabase = getSupabase();
   let stored = false;
   let storeError = "";
-  if (supabase) {
-    let { error } = await supabase.from("inquiries").insert(inquiry);
-    if (error?.code === "PGRST204") {
-      // The attribution column arrives with migration 0006; save the inquiry without it until then.
-      console.warn("[inquiries] attribution column missing — run supabase/migrations/0006_seo_analytics.sql");
-      ({ error } = await supabase.from("inquiries").insert({ ...inquiry, attribution: undefined }));
-    }
-    if (error) {
-      console.error("Failed to save inquiry", error);
-      storeError = error.message;
-    } else stored = true;
+  try {
+    await insert("inquiries", inquiry);
+    stored = true;
+  } catch (error) {
+    console.error("Failed to save inquiry", error);
+    storeError = error instanceof Error ? error.message : String(error);
   }
 
   // Email and Telegram are independent channels: the inquiry counts as received if any of them works.
@@ -90,8 +84,8 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
     return { status: "success" };
   }
 
-  if (!supabase && !isEmailConfigured() && process.env.NODE_ENV !== "production") {
-    console.info("[dev] Inquiry (no Supabase or email configured):", inquiry);
+  if (!isEmailConfigured() && process.env.NODE_ENV !== "production") {
+    console.info("[dev] Inquiry (not stored, no email configured):", inquiry);
     return { status: "success" };
   }
 

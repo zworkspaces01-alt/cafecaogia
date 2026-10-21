@@ -21,6 +21,14 @@
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
   "d1_databases": [
     {
+      // CMS content, inquiries and admin accounts. Schema + seed: migrations/ (`npm run db:migrate`).
+      "binding": "DB",
+      "database_name": "caogia-db",
+      // Replace with the id printed by: npx wrangler d1 create caogia-db
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    },
+    {
       "binding": "NEXT_TAG_CACHE_D1",
       "database_name": "caogia-tag-cache",
       // Replace with the id printed by: npx wrangler d1 create caogia-tag-cache
@@ -33,7 +41,7 @@
       "bucket_name": "caogia-opennext-cache"
     }
   ],
-  // Public, non-secret values. Secrets (SUPABASE_*) go in via `wrangler secret put`.
+  // Public, non-secret values. Secrets (AUTH_SECRET, RESEND_API_KEY, …) go in via `wrangler secret put`.
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://www.cafecaogia.com",
     "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "dq6mmebqr",

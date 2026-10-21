@@ -5,18 +5,28 @@ import { Plus } from "lucide-react";
 import { Badge, PageTitle } from "@/components/admin/ui";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getEntity } from "@/lib/admin/entities";
+import { all } from "@/lib/db";
+
+type ListRow = Record<string, unknown> & {
+  id: string;
+  is_ceo?: boolean;
+  featured?: boolean;
+  is_sample?: boolean;
+  published?: boolean;
+  sort_order?: number;
+};
 
 export default async function EntityListPage({ params, searchParams }: PageProps<"/admin/[entity]">) {
   const entity = getEntity((await params).entity);
   if (!entity) notFound();
   const { filter } = await searchParams;
-  const { supabase } = await requireAdmin();
+  await requireAdmin();
 
   const order = entity.listOrder ?? { column: "sort_order", ascending: true };
-  let query = supabase.from(entity.table).select("*").order(order.column, { ascending: order.ascending }).order("created_at");
-  if (filter === "sample") query = query.eq("is_sample", true);
-  const { data: rows, error } = await query;
-  if (error) throw new Error(error.message);
+  const rows = await all<ListRow>(
+    `select * from ${entity.table} ${filter === "sample" ? "where is_sample = 1" : ""}
+     order by ${order.column} ${order.ascending ? "asc" : "desc"}, created_at`,
+  );
 
   return (
     <div className="space-y-6">

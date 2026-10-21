@@ -16,7 +16,7 @@ export const INDEXNOW_KEY = "6396105613a1887da5d4edd86d6c877f";
  */
 export async function submitToIndexNow(paths: string[]) {
   const { hostname } = new URL(site.url);
-  if (process.env.NODE_ENV !== "production" || hostname === "localhost" || hostname.endsWith(".vercel.app")) return;
+  if (process.env.NODE_ENV !== "production" || hostname === "localhost" || hostname.endsWith(".workers.dev")) return;
 
   const urlList = paths.flatMap((path) => locales.map((locale) => `${site.url}/${locale}${path === "/" ? "" : path}`));
   try {

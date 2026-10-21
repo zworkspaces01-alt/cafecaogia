@@ -1,50 +1,32 @@
 import "server-only";
 
-import type { PostgrestError } from "@supabase/supabase-js";
-import { productTranslations } from "@/data/product-translations";
-import { sampleProducts } from "@/data/products";
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
-import { getSupabase } from "@/lib/supabase";
+import { all, first } from "@/lib/db";
 import type { Category, Product, ProductTranslations } from "@/lib/types";
 
-const baseColumns =
-  "slug, name, category, grade, summary, description, image, gallery, origin, specs, packaging, moq, featured, translations";
-const columns = `${baseColumns}, seo_title, seo_description`;
-
-/** Runs a products query, retrying without the SEO columns until migration 0006 has been run. */
-async function withColumns<T>(run: (columns: string) => PromiseLike<{ data: T; error: PostgrestError | null }>) {
-  const result = await run(columns);
-  if (result.error?.code !== "42703") return result;
-  console.warn("[products] SEO columns missing — run supabase/migrations/0006_seo_analytics.sql");
-  return run(baseColumns);
-}
+const columns =
+  "slug, name, category, grade, summary, description, image, gallery, origin, specs, packaging, moq, featured, translations, seo_title, seo_description";
 
 type ProductRow = Product & { translations?: ProductTranslations | null };
 
 function localize(product: ProductRow, locale: Locale): Product {
   const { translations, ...base } = product;
   if (locale === "en") return base;
-  const text = (translations ?? productTranslations[product.slug])?.[locale];
+  const text = translations?.[locale];
   // SEO copy is per language: without a translation, fall back to the localized name, not the English title.
   return { ...base, seo_title: "", seo_description: "", ...text };
 }
 
 /** Products in the current page language (from the `[lang]` segment). */
 export async function getProducts(category?: Category): Promise<Product[]> {
-  const locale = await getLocale();
-  const supabase = getSupabase();
-  if (!supabase) {
-    const rows = category ? sampleProducts.filter((p) => p.category === category) : sampleProducts;
-    return rows.map((p) => localize(p, locale));
-  }
-
-  const { data, error } = await withColumns((columns) => {
-    const query = supabase.from("products").select(columns).eq("published", true).order("sort_order");
-    return category ? query.eq("category", category) : query;
-  });
-  if (error) throw new Error(`Failed to load products: ${error.message}`);
-  return (data as unknown as ProductRow[]).map((p) => localize(p, locale));
+  const [locale, rows] = await Promise.all([
+    getLocale(),
+    category
+      ? all<ProductRow>(`select ${columns} from products where published = 1 and category = ? order by sort_order`, category)
+      : all<ProductRow>(`select ${columns} from products where published = 1 order by sort_order`),
+  ]);
+  return rows.map((p) => localize(p, locale));
 }
 
 /** Featured products first, topped up with the rest so the home grid always fills two rows of three. */
@@ -54,36 +36,22 @@ export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  const locale = await getLocale();
-  const supabase = getSupabase();
-  if (!supabase) {
-    const product = sampleProducts.find((p) => p.slug === slug);
-    return product ? localize(product, locale) : null;
-  }
-
-  const { data, error } = await withColumns((columns) =>
-    supabase.from("products").select(columns).eq("published", true).eq("slug", slug).maybeSingle(),
-  );
-  if (error) throw new Error(`Failed to load product "${slug}": ${error.message}`);
-  return data ? localize(data as unknown as ProductRow, locale) : null;
+  const [locale, row] = await Promise.all([
+    getLocale(),
+    first<ProductRow>(`select ${columns} from products where published = 1 and slug = ?`, slug),
+  ]);
+  return row ? localize(row, locale) : null;
 }
 
-/** Slugs only, locale-independent — for generateStaticParams and the sitemap. */
+/** Slugs only, locale-independent — for the sitemap. */
 export async function getProductSlugs(): Promise<string[]> {
-  const supabase = getSupabase();
-  if (!supabase) return sampleProducts.map((p) => p.slug);
-  const { data, error } = await supabase.from("products").select("slug").eq("published", true);
-  if (error) throw new Error(`Failed to load product slugs: ${error.message}`);
-  return data.map((row) => row.slug as string);
+  return (await all<{ slug: string }>("select slug from products where published = 1")).map((row) => row.slug);
 }
 
-/** Last edit of each published product, for the sitemap's lastmod. Empty on sample data. */
+/** Last edit of each published product, for the sitemap's lastmod. */
 export async function getProductUpdates(): Promise<Record<string, string>> {
-  const supabase = getSupabase();
-  if (!supabase) return {};
-  const { data, error } = await supabase.from("products").select("slug, updated_at").eq("published", true);
-  if (error) throw new Error(`Failed to load product dates: ${error.message}`);
-  return Object.fromEntries(data.map((row) => [row.slug as string, row.updated_at as string]));
+  const rows = await all<{ slug: string; updated_at: string }>("select slug, updated_at from products where published = 1");
+  return Object.fromEntries(rows.map((row) => [row.slug, row.updated_at]));
 }
 
 /**
@@ -91,14 +59,11 @@ export async function getProductUpdates(): Promise<Record<string, string>> {
  * The name is English unless a locale is passed.
  */
 export async function getProductSummary(slug: string, locale: Locale = "en"): Promise<Pick<Product, "name" | "category"> | null> {
-  const supabase = getSupabase();
-  let row: Pick<ProductRow, "slug" | "name" | "category" | "translations"> | null;
-  if (!supabase) row = sampleProducts.find((p) => p.slug === slug) ?? null;
-  else {
-    const { data } = await supabase.from("products").select("slug, name, category, translations").eq("slug", slug).maybeSingle();
-    row = data;
-  }
+  const row = await first<Pick<ProductRow, "slug" | "name" | "category" | "translations">>(
+    "select slug, name, category, translations from products where slug = ?",
+    slug,
+  );
   if (!row) return null;
-  const name = locale === "en" ? "" : (row.translations ?? productTranslations[row.slug])?.[locale]?.name;
+  const name = locale === "en" ? "" : row.translations?.[locale]?.name;
   return { name: name || row.name, category: row.category };
 }
