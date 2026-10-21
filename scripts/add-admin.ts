@@ -16,36 +16,47 @@ if (!email || !/^[^\s@']+@[^\s@']+\.[^\s@']+$/.test(email)) {
   process.exit(1);
 }
 
+// One interface for every question; its line iterator buffers input, so piped lines aren't lost.
+const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: process.stdin.isTTY });
+const lines = rl[Symbol.asyncIterator]();
+const output = rl as unknown as { _writeToOutput: (s: string) => void };
+const write = output._writeToOutput.bind(rl);
+let muted = false;
+// Hide what is typed while a password is being entered.
+output._writeToOutput = (s) => (muted ? undefined : write(s));
+
 /** Reads a line without echoing it to the terminal. */
-function askHidden(question: string): Promise<string> {
-  const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-  const output = rl as unknown as { _writeToOutput: (s: string) => void };
-  const write = output._writeToOutput.bind(rl);
-  let muted = false;
-  output._writeToOutput = (s) => (muted ? undefined : write(s));
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      process.stdout.write("\n");
-      resolve(answer);
-    });
-    muted = true;
-  });
+async function askHidden(question: string): Promise<string> {
+  process.stdout.write(question);
+  muted = true;
+  const { value } = await lines.next();
+  muted = false;
+  process.stdout.write("\n");
+  return value ?? "";
 }
 
-const password = await askHidden(`Password for ${email}: `);
-if (password.length < 10) {
-  console.error("Use at least 10 characters.");
-  process.exit(1);
-}
-if ((await askHidden("Repeat password: ")) !== password) {
-  console.error("Passwords don't match.");
-  process.exit(1);
+async function main() {
+  const password = await askHidden(`Password for ${email}: `);
+  if (password.length < 10) {
+    console.error("Use at least 10 characters.");
+    process.exit(1);
+  }
+  if ((await askHidden("Repeat password: ")) !== password) {
+    console.error("Passwords don't match.");
+    process.exit(1);
+  }
+
+  const hash = await hashPassword(password);
+  // Email is validated above (no quotes) and the hash is base64, so both are safe as SQL literals.
+  const sql = `insert into admin_users (email, password_hash) values ('${email}', '${hash}')
+    on conflict (email) do update set password_hash = excluded.password_hash`;
+  execFileSync("npx", ["wrangler", "d1", "execute", "DB", target, "--command", sql], { stdio: "inherit" });
+  console.log(`✓ ${email} can sign in at /admin (${target === "--local" ? "local" : "production"} database).`);
 }
 
-const hash = await hashPassword(password);
-// Email is validated above (no quotes) and the hash is base64, so both are safe as SQL literals.
-const sql = `insert into admin_users (email, password_hash) values ('${email}', '${hash}')
-  on conflict (email) do update set password_hash = excluded.password_hash`;
-execFileSync("npx", ["wrangler", "d1", "execute", "DB", target, "--command", sql], { stdio: "inherit" });
-console.log(`✓ ${email} can sign in at /admin (${target === "--local" ? "local" : "production"} database).`);
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(() => rl.close());
