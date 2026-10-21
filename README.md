@@ -81,7 +81,7 @@ Website chạy trên Worker `cafecaogia` (OpenNext). Mỗi lần push lên `main
 
 ```bash
 npx wrangler login
-npx wrangler r2 bucket create caogia-opennext-cache     # cache trang
+npx wrangler kv namespace create caogia-opennext-cache  # cache trang — chép "id" vào kv_namespaces trong wrangler.jsonc
 npx wrangler d1 create caogia-db                        # nội dung CMS — chép "database_id" vào wrangler.jsonc
 npx wrangler d1 create caogia-tag-cache                 # cache tag của Next — chép "database_id" vào wrangler.jsonc, rồi commit
 openssl rand -base64 48 | npx wrangler secret put AUTH_SECRET   # ký cookie đăng nhập CMS
@@ -119,7 +119,8 @@ Cài đặt Workers Builds (Workers & Pages → `cafecaogia` → Settings → Bu
 - Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc Build variables của Workers Builds), vì Next nhúng chúng vào bundle. Riêng `NEXT_PUBLIC_SITE_URL`: bản build production bỏ qua giá trị `localhost` và dùng tên miền chính thức (khai báo trong `src/lib/site.ts`).
 - Build không đọc database: D1 chỉ truy cập được trong Worker, nên các trang được dựng ở lượt xem đầu tiên rồi lưu cache (ISR) — `generateStaticParams` trả về `[]`. `sitemap.xml` và `robots.txt` tạo theo từng request.
 - `npm run preview` để chạy thử bản build trên runtime Workers ở local (lệnh này nạp sẵn cache trang tĩnh; chạy `wrangler dev` trực tiếp sẽ báo 404 cho các trang tĩnh).
-- Lưu trong CMS làm mới website ngay (R2 lưu trang, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi 1 giờ.
+- Lưu trong CMS làm mới website ngay (KV lưu trang đã dựng, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi ngày — không để ngắn hơn khi còn ở gói Workers Free, vì mỗi lần dựng lại là một lượt ghi KV (giới hạn 1.000 lượt/ngày).
+- Ảnh vẫn ở Cloudinary nên website không cần R2.
 
 ## CMS — trang quản trị `/admin`
 

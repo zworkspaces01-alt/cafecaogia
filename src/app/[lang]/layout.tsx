@@ -50,7 +50,9 @@ export function generateStaticParams() {
   return [];
 }
 
-export const revalidate = 3600;
+// CMS saves refresh pages immediately; this daily refresh is only a safety net. Kept long because
+// every regeneration is a write to the KV page cache (1,000 writes/day on the Workers Free plan).
+export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict, { seo }] = await Promise.all([getLocale(), getDictionary(), getSettings()]);

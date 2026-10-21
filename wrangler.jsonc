@@ -33,10 +33,11 @@
       "database_id": "d23219db-3fa4-43ad-a635-9ac27ea02a09"
     }
   ],
-  "r2_buckets": [
+  // Rendered pages (ISR). Images stay on Cloudinary, so no R2 is needed.
+  "kv_namespaces": [
     {
-      "binding": "NEXT_INC_CACHE_R2_BUCKET",
-      "bucket_name": "caogia-opennext-cache"
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "48755a8639e64af894dbfc988b21d25c"
     }
   ],
   // Public, non-secret values. Secrets (AUTH_SECRET, RESEND_API_KEY, …) go in via `wrangler secret put`.
