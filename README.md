@@ -75,7 +75,7 @@ Quyền cấp chỉ cho phép **gửi** thư, không đọc được hộp thư.
 
 ## Deploy lên Cloudflare Workers
 
-Website chạy trên Worker `caogia` (OpenNext). Mỗi lần push lên `main`, Cloudflare Workers Builds (Git integration của Cloudflare) tự build và deploy.
+Website chạy trên Worker `cafecaogia` (OpenNext). Mỗi lần push lên `main`, Cloudflare Workers Builds (Git integration của Cloudflare) tự build và deploy.
 
 ### Thiết lập một lần
 
@@ -99,18 +99,18 @@ npm run deploy                                          # lần deploy đầu, t
 npm run admin:add -- email-cua-ban@example.com          # tài khoản CMS đầu tiên
 ```
 
-Cài đặt Workers Builds (Workers & Pages → `caogia` → Settings → Build):
+Cài đặt Workers Builds (Workers & Pages → `cafecaogia` → Settings → Build):
 
 - **Build command:** `npx opennextjs-cloudflare build` — không dùng `npm run build` (chỉ ra bản Next thường, không có `.open-next/worker.js`).
 - **Deploy command:** `npx wrangler d1 migrations apply DB --remote && npx opennextjs-cloudflare deploy` (áp migration mới trong `migrations/` trước khi deploy)
 - **Build variables:** `NEXT_PUBLIC_SITE_URL=https://www.cafecaogia.com`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dq6mmebqr` (Next nhúng lúc build).
-- Tên Worker phải là `caogia`, trùng `name` trong `wrangler.jsonc`.
+- Tên Worker phải là `cafecaogia`, trùng `name` trong `wrangler.jsonc`.
 
 ### Chuyển tên miền từ Vercel
 
 1. Cloudflare Dashboard → **Add a domain** → `cafecaogia.com` (gói Free). Kiểm tra các bản ghi DNS được quét về, nhất là bản ghi **MX/TXT của email** — phải giữ nguyên.
 2. Tại Tenten (nhà đăng ký tên miền), đổi nameserver sang 2 nameserver Cloudflare đưa ra. Chờ Cloudflare báo **Active**.
-3. Workers & Pages → `caogia` → Settings → **Domains & Routes** → Add → Custom domain: thêm `www.cafecaogia.com` và `cafecaogia.com` (Cloudflare tự thay bản ghi A/CNAME cũ trỏ về Vercel).
+3. Workers & Pages → `cafecaogia` → Settings → **Domains & Routes** → Add → Custom domain: thêm `www.cafecaogia.com` và `cafecaogia.com` (Cloudflare tự thay bản ghi A/CNAME cũ trỏ về Vercel).
 4. Mở https://www.cafecaogia.com, kiểm tra trang, CMS và form báo giá. Ổn rồi thì tắt Git integration của project trên Vercel để không còn deploy song song.
 
 ### Ghi chú
