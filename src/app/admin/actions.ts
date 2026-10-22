@@ -8,6 +8,7 @@ import { getEntity, type Entity, type Field } from "@/lib/admin/entities";
 import { verifyPassword } from "@/lib/admin/password";
 import { CMS_CACHE_TAG, first, insert, isUniqueViolation, now, run, update } from "@/lib/db";
 import { analyticsKeys, analyticsTools } from "@/lib/analytics-ids";
+import { cloudName } from "@/lib/cloudinary-loader";
 import { submitToIndexNow } from "@/lib/indexnow";
 import { site } from "@/lib/site";
 import {
@@ -336,10 +337,9 @@ export type UploadSignature =
 /** Signs a direct browser → Cloudinary upload so the API secret never leaves the server. */
 export async function signUpload(folder: string): Promise<UploadSignature> {
   await requireAdmin();
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const secret = process.env.CLOUDINARY_API_SECRET;
-  if (!cloudName || !apiKey || !secret) {
+  if (!apiKey || !secret) {
     return { ok: false, error: "Chưa cấu hình Cloudinary — hãy dán đường dẫn ảnh thay vì tải lên." };
   }
 

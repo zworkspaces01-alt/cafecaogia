@@ -2,7 +2,11 @@
 
 import type { ImageLoaderProps } from "next/image";
 
-const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+/**
+ * The account images are served from. Public (it's in every image URL), so the production account is
+ * the fallback when the build has no NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME (e.g. Workers Builds).
+ */
+export const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dq6mmebqr";
 
 /** Widths pre-rendered for each photo in /public/photos (name-480.webp, name-960.webp, name-1600.webp). */
 const PHOTO_WIDTHS = [480, 960, 1600];
