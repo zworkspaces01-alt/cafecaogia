@@ -3,13 +3,14 @@ import { ButtonLink, SectionHeading } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
 import type { Category, Product } from "@/lib/types";
 import { ProductTabs } from "./product-tabs";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 /** Six cards per tab, featured grades first. */
 const pick = (products: Product[]) => [...products.filter((p) => p.featured), ...products.filter((p) => !p.featured)].slice(0, 6);
 
-export async function FeaturedProducts({ products }: { products: Product[] }) {
+export async function FeaturedProducts({ products, t: text }: { products: Product[]; t?: Dictionary["featured"] }) {
   const dict = await getDictionary();
-  const t = dict.featured;
+  const t = text ?? dict.featured;
 
   const categories: Category[] = ["coffee", "cashew"];
   const groups = [

@@ -3,9 +3,11 @@ import { CertBadge } from "@/components/cert-badge";
 import { SectionHeading } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
 import { getCertifications } from "@/lib/content";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
-export async function Compliance() {
-  const [{ compliance: t }, certifications] = await Promise.all([getDictionary(), getCertifications()]);
+export async function Compliance({ t: text }: { t?: Dictionary["compliance"] } = {}) {
+  const [dict, certifications] = await Promise.all([getDictionary(), getCertifications()]);
+  const t = text ?? dict.compliance;
 
   return (
     <section className="bg-forest py-20 text-white md:py-28">

@@ -3,6 +3,7 @@ import { SectionHeading } from "@/components/ui";
 import { localeTags } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { cn } from "@/lib/utils";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 type Phase = "harvest" | "newCrop";
 
@@ -20,9 +21,9 @@ const phaseStyle: Record<Phase, string> = {
   newCrop: "bg-leaf/25",
 };
 
-export async function HarvestCalendar() {
+export async function HarvestCalendar({ t: text }: { t?: Dictionary["harvest"] } = {}) {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
-  const t = dict.harvest;
+  const t = text ?? dict.harvest;
   const current = new Date().getMonth();
   const monthFormat = new Intl.DateTimeFormat(localeTags[locale], { month: "short" });
   const months = Array.from({ length: 12 }, (_, i) => monthFormat.format(new Date(2026, i, 15)));

@@ -4,11 +4,20 @@ import { ButtonLink, SectionHeading } from "@/components/ui";
 import { format } from "@/i18n/format";
 import { getDictionary } from "@/i18n/server";
 import { buyerVisitPhotos, factoryPhotos } from "@/lib/site";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 /** Homepage introduction: a staggered collage of our own photos beside who we are, in numbers. */
-export async function AboutIntro({ foundingYear, gradeCount }: { foundingYear: number; gradeCount: number }) {
+export async function AboutIntro({
+  foundingYear,
+  gradeCount,
+  t: text,
+}: {
+  foundingYear: number;
+  gradeCount: number;
+  t?: Dictionary["homeAbout"];
+}) {
   const dict = await getDictionary();
-  const t = dict.homeAbout;
+  const t = text ?? dict.homeAbout;
   const years = Math.max(1, new Date().getUTCFullYear() - foundingYear);
   const values = { year: foundingYear, count: gradeCount };
 

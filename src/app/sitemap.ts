@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { locales, localeTags } from "@/i18n/config";
 import { getPostSlugs, hasPublishedCeo } from "@/lib/content";
+import { listCustomPages } from "@/lib/pages";
 import { getProductSlugs, getProductUpdates } from "@/lib/products";
 import { site } from "@/lib/site";
 
@@ -8,11 +9,12 @@ import { site } from "@/lib/site";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [slugs, ceo, posts, productUpdates] = await Promise.all([
+  const [slugs, ceo, posts, productUpdates, customPages] = await Promise.all([
     getProductSlugs(),
     hasPublishedCeo(),
     getPostSlugs(),
     getProductUpdates(),
+    listCustomPages(),
   ]);
   const paths = [
     "",
@@ -28,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...slugs.map((slug) => `/products/${slug}`),
     ...(posts.length ? ["/insights"] : []),
     ...posts.map((post) => `/insights/${post.slug}`),
+    ...customPages.map((page) => `/${page.slug}`),
   ];
   // Only real edit dates: products (updated_at), articles (published_at) and the insights index (its
   // newest article). Other static pages get none. All normalised to ISO 8601.
@@ -37,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...Object.entries(productUpdates).map(([slug, date]) => [`/products/${slug}`, iso(date)] as [string, string]),
     ...posts.map((post) => [`/insights/${post.slug}`, iso(post.published_at)] as [string, string]),
     ...(newestPost ? [["/insights", iso(newestPost)] as [string, string]] : []),
+    ...customPages.map((page) => [`/${page.slug}`, iso(page.updated_at)] as [string, string]),
   ]);
 
   return paths.flatMap((path) =>

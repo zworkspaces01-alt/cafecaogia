@@ -24,7 +24,7 @@ export function Process({
   stats: { value: string; label: string }[];
 }) {
   const [active, setActive] = useState(2);
-  const steps = t.steps.map((text, i) => ({ ...text, ...visuals[i] }));
+  const steps = t.steps.map((text, i) => ({ ...text, ...visuals[i % visuals.length] }));
   const step = steps[active];
 
   return (

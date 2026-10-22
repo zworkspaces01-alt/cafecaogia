@@ -11,6 +11,7 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content";
 import { getProducts } from "@/lib/products";
 import { imageUrl } from "@/lib/image-url";
+import { systemPageSeo } from "@/lib/pages";
 import { pageMeta } from "@/lib/seo";
 import { factoryPhotos, site } from "@/lib/site";
 import "../globals.css";
@@ -56,7 +57,11 @@ export const revalidate = 86400;
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict, { seo }] = await Promise.all([getLocale(), getDictionary(), getSettings()]);
-  const home = await pageMeta("home", { title: dict.meta.title, description: dict.meta.description });
+  const [defaults, custom] = await Promise.all([
+    pageMeta("home", { title: dict.meta.title, description: dict.meta.description }),
+    systemPageSeo("home", locale),
+  ]);
+  const home = { title: custom.title ?? defaults.title, description: custom.description ?? defaults.description };
   const { google, bing, yandex } = seo.verification;
   return {
     metadataBase: new URL(site.url),

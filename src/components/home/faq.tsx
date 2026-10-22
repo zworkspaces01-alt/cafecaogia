@@ -1,12 +1,23 @@
 import { Plus } from "lucide-react";
 import Link from "@/components/link";
-import { SectionHeading } from "@/components/ui";
+import { ButtonLink, SectionHeading } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
 import { getSettings } from "@/lib/content";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
-/** `surface` keeps section backgrounds alternating when a neighbouring section is hidden. */
-export async function Faq({ surface = "white" }: { surface?: "white" | "sand" }) {
-  const [{ faq: t }, settings] = await Promise.all([getDictionary(), getSettings()]);
+/**
+ * `surface` keeps section backgrounds alternating when a neighbouring section is hidden. With `cta`
+ * set, a quote button replaces the "can't find your answer?" line (as on the commodity pages).
+ */
+export async function Faq({
+  surface = "white",
+  t: text,
+}: {
+  surface?: "white" | "sand";
+  t?: Dictionary["faq"] & { cta?: string };
+}) {
+  const [dict, settings] = await Promise.all([getDictionary(), getSettings()]);
+  const t: Dictionary["faq"] & { cta?: string } = text ?? dict.faq;
   const email = settings.contact.email;
 
   const faqJsonLd = {
@@ -28,17 +39,25 @@ export async function Faq({ surface = "white" }: { surface?: "white" | "sand" })
       <div className="container-page grid gap-12 lg:grid-cols-[1fr_1.5fr]">
         <div>
           <SectionHeading eyebrow={t.eyebrow} title={t.title} accent={t.accent} />
-          <p data-reveal className="mt-6 max-w-sm text-[15px] leading-relaxed text-muted">
-            {t.cantFind}{" "}
-            <a href={`mailto:${email}`} className="text-forest underline underline-offset-4">
-              {email}
-            </a>{" "}
-            {t.or}{" "}
-            <Link href="/contact" className="text-forest underline underline-offset-4">
-              {t.sendRequirements}
-            </Link>
-            .
-          </p>
+          {t.cta ? (
+            <div data-reveal className="mt-8">
+              <ButtonLink href="/contact" variant="dark" arrow>
+                {t.cta}
+              </ButtonLink>
+            </div>
+          ) : (
+            <p data-reveal className="mt-6 max-w-sm text-[15px] leading-relaxed text-muted">
+              {t.cantFind}{" "}
+              <a href={`mailto:${email}`} className="text-forest underline underline-offset-4">
+                {email}
+              </a>{" "}
+              {t.or}{" "}
+              <Link href="/contact" className="text-forest underline underline-offset-4">
+                {t.sendRequirements}
+              </Link>
+              .
+            </p>
+          )}
         </div>
 
         <div data-reveal-stagger className="divide-y divide-mist border-y border-mist">

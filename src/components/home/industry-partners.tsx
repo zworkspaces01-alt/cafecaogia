@@ -2,14 +2,16 @@ import { PartnerMark } from "@/components/partner-logo";
 import { SectionHeading } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
 import { getPartners, type Partner } from "@/lib/content";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 /**
  * Closing logo wall: the bank and shipping lines behind every Cao Gia shipment (edited in the
  * admin under "Đối tác"), as an endless strip that pauses on hover. Visitors who prefer reduced
  * motion get a static grid instead.
  */
-export async function IndustryPartners() {
-  const [{ industryPartners: t }, partners] = await Promise.all([getDictionary(), getPartners()]);
+export async function IndustryPartners({ t: text }: { t?: Dictionary["industryPartners"] } = {}) {
+  const [dict, partners] = await Promise.all([getDictionary(), getPartners()]);
+  const t = text ?? dict.industryPartners;
   if (partners.length === 0) return null;
 
   const logo = (partner: Partner) => (

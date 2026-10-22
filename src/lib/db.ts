@@ -12,7 +12,7 @@ export function getDb(): D1Database {
 
 // D1 stores booleans as 0/1 and arrays/objects as JSON text. Column names are unique in meaning
 // across tables, so one list each covers the whole schema (migrations/0001_init.sql).
-const JSON_COLUMNS = new Set(["gallery", "specs", "translations", "bio", "product_slugs", "data", "attribution"]);
+const JSON_COLUMNS = new Set(["gallery", "specs", "translations", "bio", "product_slugs", "data", "attribution", "blocks", "seo"]);
 const BOOL_COLUMNS = new Set(["featured", "published", "is_sample", "is_ceo"]);
 
 export type Row = Record<string, unknown>;

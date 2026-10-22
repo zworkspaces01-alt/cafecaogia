@@ -6,6 +6,7 @@ import { format } from "@/i18n/format";
 import { getDictionary } from "@/i18n/server";
 import { getContacts, getSettings, whatsappLink } from "@/lib/content";
 import { factoryPhotos } from "@/lib/site";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 const initials = (name: string) =>
   name
@@ -15,9 +16,9 @@ const initials = (name: string) =>
     .join("")
     .slice(0, 2);
 
-export async function CtaBanner() {
+export async function CtaBanner({ t: text }: { t?: Dictionary["cta"] } = {}) {
   const [dict, contacts, settings] = await Promise.all([getDictionary(), getContacts(), getSettings()]);
-  const t = dict.cta;
+  const t = text ?? dict.cta;
   const email = settings.contact.email;
 
   return (

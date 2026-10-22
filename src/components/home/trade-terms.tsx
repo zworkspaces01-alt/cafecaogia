@@ -1,11 +1,12 @@
 import { Anchor, CalendarClock, Container, CreditCard, PackageCheck, Scale } from "lucide-react";
 import { ButtonLink, SectionHeading } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
 const icons = [Scale, Container, CalendarClock, Anchor, CreditCard, PackageCheck];
 
-export async function TradeTerms() {
-  const { tradeTerms: t } = await getDictionary();
+export async function TradeTerms({ t: text }: { t?: Dictionary["tradeTerms"] } = {}) {
+  const t = text ?? (await getDictionary()).tradeTerms;
 
   return (
     <section className="py-20 md:py-28">

@@ -2,9 +2,13 @@ import Image from "next/image";
 import { ButtonLink, SectionHeading } from "@/components/ui";
 import { partnerSegmentImages } from "@/data/partners";
 import { getDictionary } from "@/i18n/server";
+import type { Dictionary } from "@/i18n/dictionaries/en";
 
-export async function Partners() {
-  const { partners: t } = await getDictionary();
+type Segment = Dictionary["partners"]["segments"][number] & { image?: string };
+
+/** `t.segments[i].image` (set in the page builder) overrides the default photo for that segment. */
+export async function Partners({ t: text }: { t?: Omit<Dictionary["partners"], "segments"> & { segments: Segment[] } } = {}) {
+  const t = text ?? (await getDictionary()).partners;
 
   return (
     <section className="bg-white py-20 md:py-28">
@@ -21,7 +25,7 @@ export async function Partners() {
             <li key={segment.title} className="group flex flex-col overflow-hidden rounded-3xl bg-sand">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src={partnerSegmentImages[i]}
+                  src={(segment as Segment).image || partnerSegmentImages[i % partnerSegmentImages.length]}
                   alt=""
                   fill
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"

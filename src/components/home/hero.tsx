@@ -17,8 +17,9 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const SLIDE_SECONDS = 8;
 
-// Visuals and links per slide; the text for each comes from the dictionary (hero.slides, same order).
-const slides = [
+// Default visuals and links per slide (same order as hero.slides); a page-builder block can set its
+// own `image`, `primaryHref` and `secondaryHref` on each slide.
+const defaultSlides = [
   // Opens on the product itself: green coffee in gloved hands over a graded lot.
   { image: factoryPhotos.greenBeansGloves, primaryHref: "/contact", secondaryHref: "/products" },
   { image: factoryPhotos.dryingBeds, primaryHref: "/products?category=coffee", secondaryHref: "/contact" },
@@ -44,7 +45,18 @@ function useReducedMotion() {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
+type SlideVisual = { image?: string; primaryHref?: string; secondaryHref?: string };
+
 export function Hero({ t, scrollLabel, foundingYear }: { t: Dictionary["hero"]; scrollLabel: string; foundingYear: number }) {
+  const slides = t.slides.map((text, i) => {
+    const fallback = defaultSlides[i % defaultSlides.length];
+    const own = text as SlideVisual;
+    return {
+      image: own.image || fallback.image,
+      primaryHref: own.primaryHref || fallback.primaryHref,
+      secondaryHref: own.secondaryHref || fallback.secondaryHref,
+    };
+  });
   const root = useRef<HTMLElement>(null);
   const previous = useRef<number | null>(null);
   const progress = useRef<gsap.core.Tween | null>(null);
@@ -60,7 +72,7 @@ export function Hero({ t, scrollLabel, foundingYear }: { t: Dictionary["hero"]; 
   const playing = !paused && inView;
   const playingRef = useRef(playing);
 
-  const go = useCallback((i: number) => setIndex((i + slides.length) % slides.length), []);
+  const go = useCallback((i: number) => setIndex((i + slides.length) % slides.length), [slides.length]);
 
   // Parallax on the whole background stack + pause autoplay while the hero is off screen.
   useGSAP(

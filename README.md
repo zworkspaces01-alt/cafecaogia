@@ -131,6 +131,17 @@ Quản lý bằng tiếng Việt: **Sản phẩm, Đánh giá, Đối tác, Ch�
 - Bấm Lưu là website cập nhật ngay (không cần deploy lại).
 - **Nội dung mẫu:** dữ liệu khởi tạo có đánh dấu "Nội dung mẫu" (tên người, công ty đều tự đặt). Trang Tổng quan liệt kê những mục còn là mẫu — thay bằng thông tin thật rồi bỏ đánh dấu. Tắt "Hiển thị trên website" để ẩn một mục mà không xoá.
 
+### Trang (page builder)
+
+CMS → **Trang**: mỗi trang là danh sách khối (hero, thẻ, FAQ, bảng số liệu, nút báo giá…) có nội dung EN/RU/AR.
+
+- **Trang hệ thống** (Trang chủ, Giới thiệu, Quy trình, Cà phê nhân, Hạt điều): chưa sửa thì hiển thị bố cục mặc định lấy từ `src/i18n/dictionaries`. Lần sửa đầu tiên sẽ lưu bố cục đó vào D1.
+- **Trang tự tạo**: nằm ở `/{lang}/{slug}`, ẩn cho tới lần xuất bản đầu tiên; không được trùng các đường dẫn đã có (`reservedSlugs` trong `src/lib/blocks/types.ts`).
+- Kéo thả để sắp xếp, ẩn/hiện từng khối, sửa nội dung theo từng ngôn ngữ. Mọi thay đổi tự lưu thành **bản nháp**, khách vẫn thấy bản đã xuất bản.
+- Khung xem trước bên phải là `/{lang}/preview/{trang}`: hiển thị bản nháp trong giao diện thật, chỉ admin mở được, không được lập chỉ mục.
+- **Xuất bản** cập nhật website ngay và lưu vào lịch sử phiên bản; có thể khôi phục một phiên bản cũ hoặc bố cục mặc định vào bản nháp.
+- Bảng D1: `pages`, `page_drafts`, `page_versions` (`migrations/0003_page_builder.sql`).
+
 ### Tài khoản quản trị
 
 Đăng nhập bằng email + mật khẩu. Mật khẩu lưu dạng băm PBKDF2 trong bảng `admin_users`, phiên đăng nhập là cookie ký bằng `AUTH_SECRET` (14 ngày).

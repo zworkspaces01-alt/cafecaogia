@@ -66,6 +66,13 @@ async function sessionEmail(): Promise<string | null> {
   }
 }
 
+/** Email of the signed-in admin, or null — for code that must not redirect (Draft Mode previews). */
+export async function currentAdmin(): Promise<string | null> {
+  const email = await sessionEmail();
+  if (!email) return null;
+  return (await first<{ email: string }>("select email from admin_users where email = ?", email))?.email ?? null;
+}
+
 /** Returns the signed-in admin, or redirects to the login page. */
 export async function requireAdmin(): Promise<{ user: { email: string } }> {
   if (!isAuthConfigured()) redirect("/admin/login?error=config");
