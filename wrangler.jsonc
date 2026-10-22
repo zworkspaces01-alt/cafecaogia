@@ -2,6 +2,11 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "cafecaogia",
+  // The site's domains (custom domains on the cafecaogia.com zone). The bare domain redirects to www in next.config.ts.
+  "routes": [
+    { "pattern": "www.cafecaogia.com", "custom_domain": true },
+    { "pattern": "cafecaogia.com", "custom_domain": true }
+  ],
   // Keep the *.workers.dev address too, for checks that bypass the custom domains.
   "workers_dev": true,
   "compatibility_date": "2026-09-01",

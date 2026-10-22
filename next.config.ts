@@ -34,11 +34,19 @@ const nextConfig: NextConfig = {
   // Order matters: a saved choice (cookie) wins over the browser's Accept-Language.
   async redirects() {
     return [
-      // www is the canonical host (as it was on Vercel), so the bare domain forwards to it.
+      // www is the canonical host (as it was on Vercel), so the bare domain forwards to it. `value` is a
+      // regex, hence the anchors (unanchored it matches www too and loops). The root has its own rule:
+      // OpenNext leaves an empty `:path*` unfilled in the destination.
       {
-        source: "/:path*",
-        has: [{ type: "host", value: "cafecaogia.com" }],
-        destination: "https://www.cafecaogia.com/:path*",
+        source: "/",
+        has: [{ type: "host", value: "^cafecaogia\\.com$" }],
+        destination: "https://www.cafecaogia.com/",
+        permanent: true,
+      },
+      {
+        source: "/:path+",
+        has: [{ type: "host", value: "^cafecaogia\\.com$" }],
+        destination: "https://www.cafecaogia.com/:path+",
         permanent: true,
       },
       {
