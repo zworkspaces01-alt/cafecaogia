@@ -3,9 +3,11 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { first } from "@/lib/db";
+import { can, isRole, permissionsOf, type Permission, type Role } from "@/lib/admin/roles";
 
 // CMS sessions are a signed cookie "<email b64url>.<expiry>.<HMAC-SHA256>", keyed by the AUTH_SECRET
-// secret. Every admin request also re-checks admin_users, so deleting an account ends its sessions.
+// secret. Every admin request also re-checks admin_users, so deleting or locking an account ends its
+// sessions, and so does a later `sessions_from` (password, role or access changed).
 
 const COOKIE = "cg_admin";
 const MAX_AGE = 60 * 60 * 24 * 14; // 14 days
@@ -47,8 +49,8 @@ export async function endSession() {
   (await cookies()).delete(COOKIE);
 }
 
-/** Email of the signed-in editor, or null when the cookie is missing, expired or forged. */
-async function sessionEmail(): Promise<string | null> {
+/** Email and start time (unix seconds) of the session in the cookie, or null when missing, expired or forged. */
+async function readSession(): Promise<{ email: string; issued: number } | null> {
   if (!isAuthConfigured()) return null;
   const value = (await cookies()).get(COOKIE)?.value;
   const [email, expires, signature] = value?.split(".") ?? [];
@@ -60,25 +62,52 @@ async function sessionEmail(): Promise<string | null> {
       fromBase64Url(signature),
       encoder.encode(`${email}.${expires}`),
     );
-    return valid ? new TextDecoder().decode(fromBase64Url(email)) : null;
+    return valid ? { email: new TextDecoder().decode(fromBase64Url(email)), issued: Number(expires) - MAX_AGE } : null;
   } catch {
     return null;
   }
 }
 
-/** Email of the signed-in admin, or null — for code that must not redirect (Draft Mode previews). */
-export async function currentAdmin(): Promise<string | null> {
-  const email = await sessionEmail();
-  if (!email) return null;
-  return (await first<{ email: string }>("select email from admin_users where email = ?", email))?.email ?? null;
+export type AdminUser = { email: string; name: string; role: Role; permissions: Permission[] };
+
+type Account = { email: string; name: string; role: string; disabled: boolean; sessions_from: string | null };
+
+/** The account behind the session, if it still exists, isn't locked and the session isn't revoked. */
+async function sessionAccount(): Promise<AdminUser | "forbidden" | null> {
+  const session = await readSession();
+  if (!session) return null;
+  const account = await first<Account>("select email, name, role, disabled, sessions_from from admin_users where email = ?", session.email);
+  if (!account || account.disabled) return "forbidden";
+  // Changing a password, role or access sets sessions_from; older sessions end there.
+  if (account.sessions_from && session.issued < Math.floor(Date.parse(account.sessions_from) / 1000)) return null;
+  const role: Role = isRole(account.role) ? account.role : "editor";
+  return { email: account.email, name: account.name || account.email.split("@")[0], role, permissions: permissionsOf(role) };
+}
+
+/** The signed-in admin, or null — for code that must not redirect (Draft Mode previews). */
+export async function currentAdmin(): Promise<AdminUser | null> {
+  const account = await sessionAccount();
+  return typeof account === "object" ? account : null;
 }
 
 /** Returns the signed-in admin, or redirects to the login page. */
-export async function requireAdmin(): Promise<{ user: { email: string } }> {
+export async function requireAdmin(): Promise<{ user: AdminUser }> {
   if (!isAuthConfigured()) redirect("/admin/login?error=config");
-  const email = await sessionEmail();
-  if (!email) redirect("/admin/login");
-  const admin = await first<{ email: string }>("select email from admin_users where email = ?", email);
-  if (!admin) redirect("/admin/login?error=forbidden");
-  return { user: { email: admin.email } };
+  const account = await sessionAccount();
+  if (!account) redirect("/admin/login");
+  if (account === "forbidden") redirect("/admin/login?error=forbidden");
+  return { user: account };
+}
+
+/** For Studio screens: the signed-in admin if their role allows `permission`, else back to the Studio home. */
+export async function requirePermission(permission: Permission): Promise<{ user: AdminUser }> {
+  const session = await requireAdmin();
+  if (!can(session.user.role, permission)) redirect(session.user.permissions.includes("content.read") ? "/admin" : "/admin/inquiries");
+  return session;
+}
+
+/** For server actions: the signed-in admin if allowed, else a failed result to return as is. */
+export async function allowed(permission: Permission): Promise<{ ok: true; user: AdminUser } | { ok: false; error: string }> {
+  const { user } = await requireAdmin();
+  return can(user.role, permission) ? { ok: true, user } : { ok: false, error: "Tài khoản của bạn không có quyền làm việc này." };
 }

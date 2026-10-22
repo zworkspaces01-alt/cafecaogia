@@ -3,6 +3,7 @@ import "server-only";
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
 import { all, first } from "@/lib/db";
+import { draftRows, showingDrafts } from "@/lib/preview";
 import type { Category, Product, ProductTranslations } from "@/lib/types";
 
 const columns =
@@ -18,14 +19,17 @@ function localize(product: ProductRow, locale: Locale): Product {
   return { ...base, seo_title: "", seo_description: "", ...text };
 }
 
+/** Published rows; in the Studio preview, with the drafts applied (lib/preview.ts). */
+async function readProducts(category?: Category): Promise<ProductRow[]> {
+  if (showingDrafts()) return (await draftRows<ProductRow>("products")).filter((p) => !category || p.category === category);
+  return category
+    ? all<ProductRow>(`select ${columns} from products where published = 1 and category = ? order by sort_order`, category)
+    : all<ProductRow>(`select ${columns} from products where published = 1 order by sort_order`);
+}
+
 /** Products in the current page language (from the `[lang]` segment). */
 export async function getProducts(category?: Category): Promise<Product[]> {
-  const [locale, rows] = await Promise.all([
-    getLocale(),
-    category
-      ? all<ProductRow>(`select ${columns} from products where published = 1 and category = ? order by sort_order`, category)
-      : all<ProductRow>(`select ${columns} from products where published = 1 order by sort_order`),
-  ]);
+  const [locale, rows] = await Promise.all([getLocale(), readProducts(category)]);
   return rows.map((p) => localize(p, locale));
 }
 
@@ -38,7 +42,9 @@ export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
 export async function getProduct(slug: string): Promise<Product | null> {
   const [locale, row] = await Promise.all([
     getLocale(),
-    first<ProductRow>(`select ${columns} from products where published = 1 and slug = ?`, slug),
+    showingDrafts()
+      ? readProducts().then((rows) => rows.find((p) => p.slug === slug) ?? null)
+      : first<ProductRow>(`select ${columns} from products where published = 1 and slug = ?`, slug),
   ]);
   return row ? localize(row, locale) : null;
 }

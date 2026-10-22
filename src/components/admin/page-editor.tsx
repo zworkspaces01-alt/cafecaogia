@@ -5,43 +5,32 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import {
   ArrowDown,
-  ArrowLeft,
   ArrowUp,
   Copy,
-  ExternalLink,
   Eye,
   EyeOff,
   GripVertical,
   History,
-  Loader2,
-  Monitor,
+  List,
   MousePointerClick,
   Plus,
-  Redo2,
-  RefreshCw,
   RotateCcw,
   Settings2,
-  Smartphone,
-  Tablet,
   Trash2,
-  Undo2,
   X,
 } from "lucide-react";
-import {
-  deletePage,
-  discardPageDraft,
-  publishPage,
-  restorePageVersion,
-  savePageDraft,
-  updatePageSettings,
-} from "@/app/admin/pages-actions";
+import { deletePage, discardPageDraft, restorePageVersion, savePageDraft, updatePageSettings } from "@/app/admin/pages-actions";
 import { BlockForm, IconButton } from "@/components/admin/block-fields";
+import { SaveBadge, StudioToolbar, UndoRedo, WideScreenNotice, useStudio, type SaveState } from "@/components/admin/studio";
+import { StudioPreview, langNames, type PreviewHandle } from "@/components/admin/studio-preview";
+import { useEditorKeys, useLeaveWarning } from "@/components/admin/use-editor";
 import { inputClass } from "@/components/admin/ui";
 import { locales, type Locale } from "@/i18n/config";
 import { moveBlock } from "@/lib/blocks/edit";
 import { newBlockId } from "@/lib/blocks/resolve";
 import { blockGroups, blockSchema, blocksFor } from "@/lib/blocks/schema";
 import type { Block, PageSeo } from "@/lib/blocks/types";
+import { formatTime } from "@/lib/admin/format";
 import { cn } from "@/lib/utils";
 
 export type EditorVersion = { id: string; published_at: string; published_by: string; note: string };
@@ -64,16 +53,8 @@ type Props = {
   pages: { ref: string; label: string }[];
 };
 
-type SaveState = "idle" | "pending" | "saving" | "saved" | "error";
 type Snapshot = { blocks: Block[]; seo: PageSeo };
-type Device = "desktop" | "tablet" | "mobile";
 
-const langNames: Record<Locale, string> = { en: "EN", ru: "RU", ar: "AR" };
-const time = (iso: string) => new Date(iso).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
-/** Real widths the preview renders at; it is scaled down to fit the panel, so layouts aren't squeezed. */
-const deviceWidths: Record<Device, number> = { desktop: 1440, tablet: 820, mobile: 390 };
-const deviceIcons = { desktop: Monitor, tablet: Tablet, mobile: Smartphone };
-const deviceNames: Record<Device, string> = { desktop: "Máy tính", tablet: "Máy tính bảng", mobile: "Điện thoại" };
 const SAVE_DELAY = 800;
 /** Edits closer together than this become one undo step, so typing isn't undone a letter at a time. */
 const MERGE_MS = 600;
@@ -96,27 +77,23 @@ function startsUndoStep(lastEdit: { at: number }) {
   return fresh;
 }
 
-const isTyping = (target: EventTarget | null) =>
-  target instanceof HTMLElement && (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
-
 export function PageEditor(props: Props) {
   const router = useRouter();
+  const studio = useStudio();
+  const canPublish = studio.can("content.publish");
   const [blocks, setBlocks] = useState(props.initialBlocks);
   const [seo, setSeo] = useState<PageSeo>(props.initialSeo);
   const [selected, setSelected] = useState<string | null>(null);
   const [lang, setLang] = useState<Locale>("en");
   const [previewLang, setPreviewLang] = useState<Locale>("en");
-  const [device, setDevice] = useState<Device>("desktop");
   const [save, setSave] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(props.hasDraft);
   const [palette, setPalette] = useState<{ at: number } | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [publishOpen, setPublishOpen] = useState(false);
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [busy, startTransition] = useTransition();
   const [undoState, setUndoState] = useState({ canUndo: false, canRedo: false });
-  const iframe = useRef<HTMLIFrameElement>(null);
   const edits = useRef(0);
   const latest = useRef<Snapshot>({ blocks, seo });
   const past = useRef<Snapshot[]>([]);
@@ -124,18 +101,9 @@ export function PageEditor(props: Props) {
   const lastEdit = useRef({ at: 0 });
 
   // Draft preview inside the real site layout (src/app/[lang]/preview/[ref]); reloaded after each save.
-  const previewSrc = `/${previewLang}/preview/${props.pageRef}`;
-  const reloadPreview = useCallback(() => {
-    try {
-      iframe.current?.contentWindow?.location.reload();
-    } catch {
-      if (iframe.current) iframe.current.src = previewSrc;
-    }
-  }, [previewSrc]);
-
-  const toPreview = useCallback((message: Record<string, unknown>) => {
-    iframe.current?.contentWindow?.postMessage({ source: "cg-editor", ...message }, window.location.origin);
-  }, []);
+  // On (re)load it outlines the selected block again, without scrolling.
+  const preview = useRef<PreviewHandle>(null);
+  const reloadPreview = useCallback(() => preview.current?.reload(), []);
 
   const markEdited = () => {
     edits.current += 1;
@@ -198,12 +166,13 @@ export function PageEditor(props: Props) {
       setSave("saved");
       setError(null);
       reloadPreview();
+      studio.refreshChanges();
       return true;
     }
     setSave("error");
     setError(result.error);
     return false;
-  }, [props.pageRef, reloadPreview]);
+  }, [props.pageRef, reloadPreview, studio]);
 
   useEffect(() => {
     if (save !== "pending") return;
@@ -211,59 +180,36 @@ export function PageEditor(props: Props) {
     return () => clearTimeout(timer);
   }, [save, blocks, seo, saveDraft]);
 
-  // Keyboard: ⌘Z / ⇧⌘Z / ⌘Y undo and redo (left to the browser while typing in a field), ⌘S saves now.
-  const keys = useRef({ undo, redo, saveDraft });
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey)) return;
-      const key = event.key.toLowerCase();
-      if (key === "s") {
-        event.preventDefault();
-        void keys.current.saveDraft();
-      } else if ((key === "z" || key === "y") && !isTyping(event.target)) {
-        event.preventDefault();
-        if (key === "y" || event.shiftKey) keys.current.redo();
-        else keys.current.undo();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
+  useEditorKeys({ undo: () => undo(), redo: () => redo(), save: () => void saveDraft() });
   // Warn before leaving with an edit that hasn't reached the server yet.
-  useEffect(() => {
-    if (save !== "pending" && save !== "saving" && save !== "error") return;
-    const onUnload = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener("beforeunload", onUnload);
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [save]);
+  useLeaveWarning(save === "pending" || save === "saving" || save === "error");
 
-  // Preview → editor: a click on a block selects it; on (re)load, re-highlight the selection.
-  const selectedRef = useRef(selected);
+  // The Studio's Publish saves what is waiting first, and tells the editor what it published or threw away.
+  const flush = useRef(async () => true);
+  const { registerFlush, subscribe } = studio;
+  useEffect(() => registerFlush(() => flush.current()), [registerFlush]);
   useEffect(() => {
-    const onMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || event.data?.source !== "cg-preview") return;
-      if (event.data.type === "select" && typeof event.data.id === "string") setSelected(event.data.id);
-      if (event.data.type === "ready" && selectedRef.current && selectedRef.current !== PAGE_SETTINGS) {
-        toPreview({ type: "focus", id: selectedRef.current, scroll: false });
-      }
-    };
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, [toPreview]);
+    const key = `page:${props.pageRef}`;
+    const off = [
+      subscribe("published", (keys) => keys.includes(key) && setDirty(false)),
+      subscribe("discarded", (keys) => keys.includes(key) && window.location.reload()),
+    ];
+    return () => off.forEach((f) => f());
+  }, [subscribe, props.pageRef]);
 
   // Handlers and timers read the latest state through these refs.
   useLayoutEffect(() => {
     latest.current = { blocks, seo };
-    selectedRef.current = selected;
-    keys.current = { undo, redo, saveDraft };
+    flush.current = async () => (save === "pending" || save === "error" ? saveDraft() : true);
   });
 
   /** Selecting from the list scrolls the preview to the block. */
   const pick = (id: string | null) => {
     setSelected(id);
-    if (id && id !== PAGE_SETTINGS) toPreview({ type: "focus", id, scroll: true });
+    if (id && id !== PAGE_SETTINGS) preview.current?.focus({ id }, true);
   };
+  /** A click on a block in the preview selects it. */
+  const onPreviewSelect = useCallback((id: string) => setSelected(id), []);
 
   const run = (action: () => Promise<{ ok: true } | { ok: false; error: string }>, after?: () => void) =>
     startTransition(async () => {
@@ -273,20 +219,6 @@ export function PageEditor(props: Props) {
       after?.();
     });
 
-  const publish = (note: string) =>
-    startTransition(async () => {
-      if (save === "pending" || save === "error") {
-        const saved = await saveDraft();
-        if (!saved) return;
-      }
-      const result = await publishPage(props.pageRef, note);
-      if (!result.ok) return setError(result.error);
-      setError(null);
-      setDirty(false);
-      setPublishOpen(false);
-      reloadPreview();
-      router.refresh();
-    });
   const discard = () => {
     if (!confirm("Bỏ toàn bộ thay đổi chưa xuất bản và quay về bản đang chạy trên website?")) return;
     run(() => discardPageDraft(props.pageRef), () => window.location.reload());
@@ -301,6 +233,7 @@ export function PageEditor(props: Props) {
       setHistoryOpen(false);
       setSave("saved");
       reloadPreview();
+      studio.refreshChanges();
     });
 
   const addBlock = (type: string, at: number) => {
@@ -317,72 +250,29 @@ export function PageEditor(props: Props) {
   // A new block goes after the selected one, like VSAP Studio; otherwise at the end.
   const insertAt = selectedIndex >= 0 ? selectedIndex + 1 : blocks.length;
 
-  const status =
-    save === "pending" || save === "saving"
-      ? { text: "Đang lưu…", tone: "text-muted" }
-      : save === "error"
-        ? { text: "Lưu lỗi", tone: "text-red-600" }
-        : dirty
-          ? { text: "Đã lưu nháp — chưa xuất bản", tone: "text-amber-700" }
-          : { text: "Khớp với website", tone: "text-leaf" };
-
   return (
-    <div className="flex h-svh flex-col bg-sand">
-      {/* Studio needs room for three columns. */}
-      <div className="grid flex-1 place-items-center p-8 text-center lg:hidden">
-        <p className="max-w-sm text-sm text-muted">Trình sửa trang cần màn hình rộng hơn (từ 1024px). Hãy mở trên máy tính.</p>
-      </div>
-
-      {/* Top bar */}
-      <header className="hidden flex-wrap items-center gap-3 border-b border-mist bg-white px-4 py-2.5 lg:flex">
-        <Link href="/admin/pages" className="grid size-9 place-items-center rounded-lg text-muted hover:bg-sand hover:text-forest" aria-label="Danh sách trang">
-          <ArrowLeft className="size-5" />
-        </Link>
-        <div className="min-w-0">
-          <select
-            aria-label="Chọn trang để sửa"
-            value={props.pageRef}
-            onChange={(e) => router.push(`/admin/pages/${e.target.value}`)}
-            className="max-w-64 truncate rounded-lg bg-transparent py-1 pe-6 font-semibold text-forest hover:bg-sand"
-          >
-            {props.pages.some((p) => p.ref === props.pageRef) ? null : <option value={props.pageRef}>{props.title}</option>}
-            {props.pages.map((p) => (
-              <option key={p.ref} value={p.ref}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-          <p className="ps-1 text-xs text-muted" dir="ltr">
-            /{"{lang}"}
-            {props.path || ""}
-          </p>
-        </div>
-        <span className={cn("flex items-center gap-1.5 text-xs font-medium", status.tone)}>
-          {(save === "saving" || save === "pending") && <Loader2 className="size-3.5 animate-spin" />}
-          {status.text}
-        </span>
-        <div className="ms-auto flex items-center gap-2">
-          <div className="flex items-center">
-            <IconButton label="Hoàn tác (⌘Z)" disabled={!undoState.canUndo} onClick={undo}>
-              <Undo2 className="size-4" />
-            </IconButton>
-            <IconButton label="Làm lại (⇧⌘Z)" disabled={!undoState.canRedo} onClick={redo}>
-              <Redo2 className="size-4" />
-            </IconButton>
-          </div>
-          <div className="relative">
-            <button type="button" onClick={() => setHistoryOpen((o) => !o)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-mist px-3 text-sm text-forest hover:bg-sand">
-              <History className="size-4" /> Lịch sử
-            </button>
-            {historyOpen && (
-              <div className="absolute end-0 top-11 z-30 w-80 rounded-2xl border border-mist bg-white p-2 shadow-xl">
-                <p className="px-2 py-1.5 text-xs text-muted">Chọn một phiên bản để nạp vào bản nháp (website chưa đổi cho tới khi xuất bản).</p>
+    <>
+      <StudioToolbar>
+        <SaveBadge state={save} error={error} dirty={dirty} />
+        <UndoRedo canUndo={undoState.canUndo} canRedo={undoState.canRedo} onUndo={undo} onRedo={redo} />
+        <span className="mx-1 h-6 w-px bg-mist" />
+        <div className="relative">
+          <button type="button" onClick={() => setHistoryOpen((o) => !o)} className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted hover:bg-sand hover:text-forest">
+            <History className="size-4" /> Phiên bản
+          </button>
+          {historyOpen && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setHistoryOpen(false)} />
+              <div className="absolute start-0 top-11 z-40 w-80 rounded-2xl border border-mist bg-white p-2 shadow-xl">
+                <p className="px-2 py-1.5 text-xs text-muted">
+                  {canPublish ? "Chọn một phiên bản để nạp vào bản nháp (website chưa đổi cho tới khi xuất bản)." : "Các lần xuất bản trang này. Biên tập chính khôi phục được."}
+                </p>
                 <ul className="max-h-80 overflow-y-auto">
                   {props.versions.map((v) => (
                     <li key={v.id}>
-                      <button type="button" disabled={busy} onClick={() => restore(v.id)} className="w-full rounded-xl px-2 py-2 text-start text-sm hover:bg-sand">
+                      <button type="button" disabled={busy || !canPublish} onClick={() => restore(v.id)} className="w-full rounded-xl px-2 py-2 text-start text-sm enabled:hover:bg-sand">
                         <span className="flex items-center justify-between gap-2">
-                          <span className="text-forest">{time(v.published_at)}</span>
+                          <span className="text-forest">{formatTime(v.published_at)}</span>
                           <span className="truncate text-xs text-muted">{v.published_by}</span>
                         </span>
                         {v.note && <span className="mt-0.5 block truncate text-xs text-muted">{v.note}</span>}
@@ -390,7 +280,7 @@ export function PageEditor(props: Props) {
                     </li>
                   ))}
                   {props.versions.length === 0 && <li className="px-2 py-2 text-sm text-muted">Chưa có phiên bản nào được xuất bản.</li>}
-                  {props.system && (
+                  {props.system && canPublish && (
                     <li className="mt-1 border-t border-mist pt-1">
                       <button type="button" disabled={busy} onClick={() => restore("default")} className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-start text-sm text-forest hover:bg-sand">
                         <RotateCcw className="size-4" /> Bố cục mặc định của website
@@ -399,28 +289,49 @@ export function PageEditor(props: Props) {
                   )}
                 </ul>
               </div>
-            )}
-          </div>
-          {dirty && (
-            <button type="button" disabled={busy} onClick={discard} className="inline-flex h-9 items-center rounded-full border border-mist px-3 text-sm text-forest hover:bg-sand disabled:opacity-50">
-              Huỷ thay đổi
-            </button>
+            </>
           )}
-          <button
-            type="button"
-            disabled={busy || save === "saving" || !dirty}
-            onClick={() => setPublishOpen(true)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-forest px-4 text-sm font-medium text-white hover:bg-ink disabled:opacity-40"
-          >
-            Xuất bản
-          </button>
         </div>
-        {error && <p className="w-full text-sm text-red-600">{error}</p>}
-      </header>
+        {dirty && canPublish && (
+          <button type="button" disabled={busy} onClick={discard} className="rounded-lg px-3 py-2 text-sm text-muted hover:bg-sand hover:text-forest disabled:opacity-50">
+            Bỏ thay đổi trang này
+          </button>
+        )}
+        {error && save !== "error" && <span className="truncate text-xs text-red-600">{error}</span>}
+      </StudioToolbar>
+      <WideScreenNotice what="Trình sửa trang" />
 
-      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[260px_400px_1fr]">
+      <div className="hidden min-h-0 flex-1 lg:grid lg:grid-cols-[240px_360px_1fr] xl:grid-cols-[260px_400px_1fr]">
         {/* Column 1: the page's blocks */}
         <aside className="flex min-h-0 flex-col border-e border-mist bg-white">
+          <div className="border-b border-mist p-3">
+            <span className="flex items-center justify-between">
+              <span className="text-[11px] font-medium tracking-wider text-muted uppercase">Trang đang sửa</span>
+              <Link href="/admin/pages" className="inline-flex items-center gap-1 text-xs text-leaf hover:underline">
+                <List className="size-3.5" /> Tất cả trang
+              </Link>
+            </span>
+            <select
+              aria-label="Chọn trang để sửa"
+              value={props.pageRef}
+              onChange={async (e) => {
+                const next = e.target.value;
+                if (save === "pending" || save === "error") await saveDraft();
+                router.push(`/admin/pages/${next}`);
+              }}
+              className={cn(inputClass, "mt-1 py-2")}
+            >
+              {props.pages.some((p) => p.ref === props.pageRef) ? null : <option value={props.pageRef}>{props.title}</option>}
+              {props.pages.map((p) => (
+                <option key={p.ref} value={p.ref}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 ps-1 text-xs text-muted" dir="ltr">
+              {props.path === "" ? "/{lang} — mọi trang" : `/{lang}${props.path}`}
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => pick(PAGE_SETTINGS)}
@@ -551,140 +462,18 @@ export function PageEditor(props: Props) {
         </section>
 
         {/* Column 3: the real page with the draft */}
-        <Preview
-          iframeRef={iframe}
-          src={previewSrc}
-          device={device}
-          onDevice={setDevice}
+        <StudioPreview
+          ref={preview}
+          src={`/preview/${props.pageRef}`}
+          focus={selected && selected !== PAGE_SETTINGS ? { id: selected } : null}
           lang={previewLang}
           onLang={setPreviewLang}
-          onReload={reloadPreview}
+          onSelect={onPreviewSelect}
         />
       </div>
 
       {palette && <Palette pageRef={props.pageRef} onPick={(type) => addBlock(type, palette.at)} onClose={() => setPalette(null)} />}
-      {publishOpen && <PublishDialog busy={busy} onPublish={publish} onClose={() => setPublishOpen(false)} />}
-    </div>
-  );
-}
-
-function Preview({
-  iframeRef,
-  src,
-  device,
-  onDevice,
-  lang,
-  onLang,
-  onReload,
-}: {
-  iframeRef: React.RefObject<HTMLIFrameElement | null>;
-  src: string;
-  device: Device;
-  onDevice: (device: Device) => void;
-  lang: Locale;
-  onLang: (lang: Locale) => void;
-  onReload: () => void;
-}) {
-  const frame = useRef<HTMLDivElement>(null);
-  const [box, setBox] = useState({ width: 0, height: 0 });
-  useEffect(() => {
-    const el = frame.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setBox({ width: entry.contentRect.width, height: entry.contentRect.height }));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-  const width = deviceWidths[device];
-  const scale = box.width ? Math.min(1, box.width / width) : 1;
-
-  return (
-    <section className="flex min-h-0 flex-col">
-      <div className="flex items-center gap-2 border-b border-mist bg-white px-4 py-2">
-        <span className="text-xs text-muted">Xem trước:</span>
-        {locales.map((l) => (
-          <button
-            key={l}
-            type="button"
-            onClick={() => onLang(l)}
-            className={cn("rounded-full px-3 py-1 text-xs font-medium", lang === l ? "bg-forest text-white" : "bg-sand text-forest hover:bg-mist")}
-          >
-            {langNames[l]}
-          </button>
-        ))}
-        <div className="ms-3 flex rounded-full bg-sand p-0.5">
-          {(Object.keys(deviceWidths) as Device[]).map((d) => {
-            const Icon = deviceIcons[d];
-            return (
-              <button
-                key={d}
-                type="button"
-                onClick={() => onDevice(d)}
-                aria-label={deviceNames[d]}
-                title={`${deviceNames[d]} (${deviceWidths[d]}px)`}
-                className={cn("grid size-8 place-items-center rounded-full", device === d ? "bg-white text-forest shadow" : "text-muted")}
-              >
-                <Icon className="size-4" />
-              </button>
-            );
-          })}
-        </div>
-        <span className="text-xs text-muted tabular-nums">
-          {width}px{scale < 1 ? ` · ${Math.round(scale * 100)}%` : ""}
-        </span>
-        <IconButton label="Tải lại xem trước" onClick={onReload}>
-          <RefreshCw className="size-4" />
-        </IconButton>
-        <a href={src} target="_blank" rel="noopener" className="ms-auto inline-flex items-center gap-1 text-xs text-muted hover:text-forest">
-          Mở bản nháp ở tab mới <ExternalLink className="size-3.5" />
-        </a>
-      </div>
-      <div className="min-h-0 flex-1 p-4">
-        <div ref={frame} className="relative h-full w-full overflow-hidden">
-          {/* Rendered at the device's real width, then scaled to fit, so the layout is the real one. */}
-          <div className="mx-auto" style={{ width: width * scale, height: box.height }}>
-            <iframe
-              ref={iframeRef}
-              key={src}
-              src={src}
-              title="Xem trước trang"
-              className="origin-top-left rounded-xl border border-mist bg-white shadow-sm"
-              style={{ width, height: box.height / scale, transform: `scale(${scale})` }}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function PublishDialog({ busy, onPublish, onClose }: { busy: boolean; onPublish: (note: string) => void; onClose: () => void }) {
-  const [note, setNote] = useState("");
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={onClose}>
-      <form
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={(e) => {
-          e.preventDefault();
-          onPublish(note);
-        }}
-      >
-        <h2 className="text-lg font-semibold text-forest">Xuất bản lên website</h2>
-        <p className="mt-1 text-sm text-muted">Khách sẽ thấy ngay bản nháp này. Phiên bản được lưu vào Lịch sử để khôi phục khi cần.</p>
-        <label className="mt-4 block">
-          <span className="mb-1.5 block text-xs font-medium text-forest">Ghi chú (không bắt buộc)</span>
-          <input className={inputClass} value={note} maxLength={200} autoFocus placeholder="Ví dụ: đổi ảnh hero, thêm FAQ" onChange={(e) => setNote(e.target.value)} />
-        </label>
-        <div className="mt-5 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="inline-flex h-10 items-center rounded-full border border-mist px-4 text-sm text-forest hover:bg-sand">
-            Huỷ
-          </button>
-          <button type="submit" disabled={busy} className="inline-flex h-10 items-center gap-1.5 rounded-full bg-forest px-5 text-sm font-medium text-white hover:bg-ink disabled:opacity-50">
-            {busy && <Loader2 className="size-4 animate-spin" />} Xuất bản
-          </button>
-        </div>
-      </form>
-    </div>
+    </>
   );
 }
 

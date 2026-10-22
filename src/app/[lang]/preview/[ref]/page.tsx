@@ -13,10 +13,12 @@ import { chromeFromBlocks } from "@/lib/chrome";
 import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content";
 import { loadDraft, loadSystemPage } from "@/lib/pages";
 import { getProducts } from "@/lib/products";
+import { showDrafts } from "@/lib/preview";
 import { site } from "@/lib/site";
 
-// The page builder's live preview: a page's working draft inside the real site layout. Rendered per
-// request (never cached) and only for signed-in admins; everyone else gets a 404.
+// The Studio's live preview: a page's working draft inside the real site layout, with every pending
+// record draft (products, posts, testimonials…) applied too — the website as it will be after Publish.
+// Rendered per request (never cached) and only for signed-in editors; everyone else gets a 404.
 //  - templates (product-template, post-template) render with a sample product / article; `?item=<slug>`
 //    picks which one;
 //  - the site layout ("layout") renders its draft header, footer and contact buttons around the
@@ -27,7 +29,8 @@ export const metadata: Metadata = { title: "Xem trước", robots: { index: fals
 
 export default async function PreviewPage({ params, searchParams }: PageProps<"/[lang]/preview/[ref]">) {
   const [{ ref }, { item }, locale, admin] = await Promise.all([params, searchParams, getLocale(), currentAdmin()]);
-  if (!admin) notFound();
+  if (!admin?.permissions.includes("content.read")) notFound();
+  showDrafts();
   const draft = await loadDraft(ref);
   if (!draft) notFound();
 

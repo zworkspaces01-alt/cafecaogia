@@ -82,7 +82,7 @@ export async function notifyTelegram(topic: NotifyTopic, html: string, buttons?:
 
 const languageNames: Record<string, string> = { en: "tiếng Anh", ru: "tiếng Nga", ar: "tiếng Ả Rập" };
 
-export async function notifyInquiryTelegram(inquiry: Inquiry, product: { name: string; category: Category } | null) {
+export async function notifyInquiryTelegram(inquiry: Inquiry, product: { name: string; category: Category } | null, id: string | null = null) {
   const a = inquiry.attribution;
   const lines = [
     "🆕 <b>Yêu cầu báo giá mới</b>",
@@ -99,7 +99,7 @@ export async function notifyInquiryTelegram(inquiry: Inquiry, product: { name: s
   const topic: NotifyTopic =
     product?.category === "coffee" ? "inquiryCoffee" : product?.category === "cashew" ? "inquiryCashew" : "inquiry";
   return notifyTelegram(topic, lines.filter((l): l is string => typeof l === "string").join("\n"), [
-    { text: "📋 Mở trong CMS", url: `${site.url}/admin/inquiries?status=new` },
+    { text: "📋 Mở trong CMS", url: `${site.url}/admin/inquiries${id ? `?id=${id}` : "?status=new"}` },
     ...(phone && phone.length >= 8 ? [{ text: "💬 WhatsApp", url: `https://wa.me/${phone}` }] : []),
   ]);
 }

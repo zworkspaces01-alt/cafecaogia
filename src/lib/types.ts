@@ -192,4 +192,6 @@ export type InquiryRow = {
   status: "new" | "contacted" | "quoted" | "won" | "lost";
   locale: "en" | "ru" | "ar";
   attribution: Attribution | null;
+  /** The sales team's internal note (never sent to the customer). */
+  note: string;
 };

@@ -40,7 +40,7 @@ Toàn bộ nội dung CMS, yêu cầu báo giá và tài khoản quản trị n�
 
 - Thay đổi schema: thêm file `migrations/000N_ten.sql` (SQLite), chạy `npm run db:migrate:local` để thử, `npm run deploy` (hoặc Workers Builds) tự áp lên production.
 - Truy vấn nhanh production: `npx wrangler d1 execute DB --remote --command "select status, count(*) from inquiries group by status"`.
-- D1 không có RLS: mọi trang/actions công khai chỉ đọc bản ghi `published = 1`; mọi thao tác ghi của CMS đi qua `requireAdmin()`.
+- D1 không có RLS: mọi trang/actions công khai chỉ đọc bản ghi `published = 1`; mọi thao tác ghi của CMS đi qua `requireAdmin()` / `allowed()` (theo vai trò).
 - Sao lưu: D1 có Time Travel (khôi phục về thời điểm bất kỳ trong 7 ngày với gói Free, 30 ngày với gói Paid): `npx wrangler d1 time-travel restore caogia-db --timestamp=…`.
 
 Mỗi yêu cầu báo giá lưu kèm `locale` để đội sales trả lời đúng ngôn ngữ của khách.
@@ -119,40 +119,59 @@ Cài đặt Workers Builds (Workers & Pages → `cafecaogia` → Settings → Bu
 - Biến public (`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`) nằm trong `vars` của `wrangler.jsonc` **và** phải có lúc build (trong `.env.local` hoặc Build variables của Workers Builds), vì Next nhúng chúng vào bundle. Riêng `NEXT_PUBLIC_SITE_URL`: bản build production bỏ qua giá trị `localhost` và dùng tên miền chính thức (khai báo trong `src/lib/site.ts`).
 - Build không đọc database: D1 chỉ truy cập được trong Worker, nên các trang được dựng ở lượt xem đầu tiên rồi lưu cache (ISR) — `generateStaticParams` trả về `[]`. `sitemap.xml` và `robots.txt` tạo theo từng request.
 - `npm run preview` để chạy thử bản build trên runtime Workers ở local (lệnh này nạp sẵn cache trang tĩnh; chạy `wrangler dev` trực tiếp sẽ báo 404 cho các trang tĩnh).
-- Lưu trong CMS làm mới website ngay (KV lưu trang đã dựng, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi ngày — không để ngắn hơn khi còn ở gói Workers Free, vì mỗi lần dựng lại là một lượt ghi KV (giới hạn 1.000 lượt/ngày).
+- Xuất bản (hoặc lưu cài đặt) trong CMS làm mới website ngay (KV lưu trang đã dựng, D1 lưu tag cache, Durable Object làm hàng đợi dựng lại trang). Ngoài ra trang tự làm mới mỗi ngày — không để ngắn hơn khi còn ở gói Workers Free, vì mỗi lần dựng lại là một lượt ghi KV (giới hạn 1.000 lượt/ngày).
 - Ảnh vẫn ở Cloudinary nên website không cần R2.
 
-## CMS — trang quản trị `/admin`
+## CMS — Cao Gia Studio (`/admin`)
 
-Quản lý bằng tiếng Việt: **Sản phẩm, Đánh giá, Đối tác, Chứng nhận, Đội ngũ & CEO, Cài đặt công ty** (pháp nhân, liên hệ, WhatsApp, mạng xã hội, hiệp hội, số liệu) và **Yêu cầu báo giá** (lọc theo trạng thái, trả lời nhanh qua email/WhatsApp).
+Dựng theo mô hình VSAP Studio: một khung chung gồm **thanh trên** (trạng thái lưu, hoàn tác/làm lại, nút **Xuất bản**, tài khoản) và **cột biểu tượng** bên trái để chuyển mục. Quản lý bằng tiếng Việt, nội dung 3 ngôn ngữ.
 
-- Nội dung có 3 ngôn ngữ: nhập bản tiếng Anh, rồi chuyển tab Tiếng Nga / Tiếng Ả Rập để dịch; để trống thì website dùng bản tiếng Anh.
-- Ảnh và PDF tải thẳng lên Cloudinary từ form (cần `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`), hoặc dán đường dẫn.
-- Bấm Lưu là website cập nhật ngay (không cần deploy lại).
-- **Nội dung mẫu:** dữ liệu khởi tạo có đánh dấu "Nội dung mẫu" (tên người, công ty đều tự đặt). Trang Tổng quan liệt kê những mục còn là mẫu — thay bằng thông tin thật rồi bỏ đánh dấu. Tắt "Hiển thị trên website" để ẩn một mục mà không xoá.
+| Mục | Nội dung |
+| --- | --- |
+| Tổng quan | Số liệu, nội dung mẫu cần thay, yêu cầu báo giá gần đây |
+| Trang | Page builder 3 cột (xem bên dưới) |
+| Sản phẩm, Bài viết, Đánh giá, Đối tác, Chứng nhận, Đội ngũ | 3 cột: danh sách (kéo thả để sắp xếp, tìm kiếm) · form của mục đang chọn (EN/RU/AR) · xem trước trang thật có bản nháp |
+| Thư viện ảnh | Ảnh/PDF tải lên Cloudinary (thư mục `caogia/`): kéo thả để tải, chép link, xoá. Mọi ô ảnh có nút “Thư viện” để chọn ảnh có sẵn |
+| Lịch sử | 50 lần xuất bản gần nhất; **Hoàn tác** nạp lại trạng thái trước lần đó vào bản nháp |
+| Báo giá | Hộp thư 2 cột: lọc theo trạng thái, tìm kiếm, ghi chú nội bộ, trả lời email/WhatsApp, xuất CSV (mở bằng Excel). Huy hiệu đỏ = số yêu cầu mới |
+| Công ty, SEO, Phân tích | Cài đặt — lưu là áp dụng ngay (không qua bản nháp) |
+| Tài khoản, Nhật ký, Thông báo | Chỉ Quản trị |
+
+- **Bản nháp → Xuất bản.** Mọi chỉnh sửa trang và bản ghi tự lưu thành bản nháp (⌘S lưu ngay; ⌘Z / ⇧⌘Z hoàn tác / làm lại), khách vẫn thấy bản đang chạy. Nút **Xuất bản** ở thanh trên hiện số thay đổi đang chờ; bấm vào để xem danh sách, bỏ chọn mục chưa muốn đưa lên, ghi chú, rồi xuất bản (hoặc bỏ các thay đổi đã chọn). Lần xuất bản đó được lưu vào Lịch sử, báo vào Telegram (topic Nội dung) và gửi IndexNow cho sản phẩm/bài viết.
+- Mục mới chỉ có trong bản nháp cho tới lần xuất bản đầu; xoá một mục = đánh dấu “Sẽ xoá”, website chỉ xoá khi xuất bản. Thiếu trường bắt buộc hay trùng đường dẫn (slug) thì form báo trước và Xuất bản từ chối mục đó.
+- Khung xem trước là `/{lang}/preview/{trang}` (chỉ người đăng nhập mở được, không lập chỉ mục): trang thật với **mọi** bản nháp cùng lúc — trang, sản phẩm, bài viết, đánh giá… (`src/lib/preview.ts`). Có chế độ máy tính 1440px / máy tính bảng 820px / điện thoại 390px.
+- Studio cần màn hình ≥ 1024px cho các trình sửa 3 cột; hộp thư Báo giá dùng được trên điện thoại.
+- Nội dung có 3 ngôn ngữ: nhập bản tiếng Anh, rồi chuyển EN / RU / AR để dịch; để trống thì website dùng bản tiếng Anh.
+- **Nội dung mẫu:** dữ liệu khởi tạo có đánh dấu "Nội dung mẫu". Trang Tổng quan liệt kê những mục còn là mẫu — thay bằng thông tin thật rồi bỏ đánh dấu. Tắt "Hiển thị trên website" để ẩn một mục mà không xoá.
+- Bảng D1: `record_drafts` (nháp của bản ghi), `releases` (lịch sử xuất bản), `audit_log`, cột `role`/`name`/`disabled`/`sessions_from` của `admin_users`, cột `note` của `inquiries` — `migrations/0005_studio.sql`.
 
 ### Trang (page builder)
 
-CMS → **Trang**: mỗi trang là danh sách khối (hero, thẻ, FAQ, bảng số liệu, nút báo giá…) có nội dung EN/RU/AR.
+Mỗi trang là danh sách khối (hero, thẻ, FAQ, bảng số liệu, nút báo giá…) có nội dung EN/RU/AR.
 
-- **Trang hệ thống** (Trang chủ, Giới thiệu, Quy trình, Cà phê nhân, Hạt điều): chưa sửa thì hiển thị bố cục mặc định lấy từ `src/i18n/dictionaries`. Lần sửa đầu tiên sẽ lưu bố cục đó vào D1.
-- **Trang tự tạo**: nằm ở `/{lang}/{slug}`, ẩn cho tới lần xuất bản đầu tiên; không được trùng các đường dẫn đã có (`reservedSlugs` trong `src/lib/blocks/types.ts`).
-- Trình sửa có 3 cột (cần màn hình ≥ 1024px): **danh sách khối** (kéo thả để sắp xếp, ẩn/hiện) · **nội dung khối đang chọn** theo từng ngôn ngữ · **xem trước** trang thật. Ô tên trang ở góc trái để chuyển nhanh sang trang khác.
-- Bấm vào một khối trong khung xem trước để chọn nó; chọn khối trong danh sách thì khung xem trước cuộn tới. Xem trước theo máy tính (1440px), máy tính bảng (820px), điện thoại (390px) — hiển thị đúng bề rộng rồi thu nhỏ cho vừa.
-- Mọi thay đổi tự lưu thành **bản nháp** (⌘S để lưu ngay), khách vẫn thấy bản đã xuất bản. ⌘Z / ⇧⌘Z để hoàn tác / làm lại. Trạng thái: *Đang lưu… / Đã lưu nháp — chưa xuất bản / Khớp với website*.
-- Khung xem trước là `/{lang}/preview/{trang}`: bản nháp trong giao diện thật, chỉ admin mở được, không được lập chỉ mục.
-- **Xuất bản** (kèm ghi chú tuỳ chọn) cập nhật website ngay và lưu vào lịch sử; có thể khôi phục một phiên bản cũ hoặc bố cục mặc định vào bản nháp.
+- **Trang hệ thống** (Trang chủ, Giới thiệu, Quy trình, …, mẫu trang sản phẩm/bài viết, header & footer): chưa sửa thì hiển thị bố cục mặc định lấy từ `src/i18n/dictionaries`.
+- **Trang tự tạo** (Trang › Tất cả trang): nằm ở `/{lang}/{slug}`, ẩn cho tới lần xuất bản đầu tiên; không được trùng các đường dẫn đã có (`reservedSlugs` trong `src/lib/blocks/types.ts`).
+- 3 cột: **danh sách khối** (ô “Trang đang sửa” để chuyển trang; kéo thả để sắp xếp, ẩn/hiện) · **nội dung khối đang chọn** theo từng ngôn ngữ, hoặc *Cài đặt trang & SEO* · **xem trước**. Bấm vào một khối trong khung xem trước để chọn nó; chọn khối trong danh sách thì khung xem trước cuộn tới.
+- Nút **Phiên bản** trên thanh trên: nạp một lần xuất bản cũ của trang (hoặc bố cục mặc định) vào bản nháp. *Bỏ thay đổi trang này* quay về bản đang chạy.
 - Bảng D1: `pages`, `page_drafts`, `page_versions` (`migrations/0003_page_builder.sql`, ghi chú xuất bản: `0004`).
 
-### Tài khoản quản trị
+### Tài khoản & phân quyền
 
 Đăng nhập bằng email + mật khẩu. Mật khẩu lưu dạng băm PBKDF2 trong bảng `admin_users`, phiên đăng nhập là cookie ký bằng `AUTH_SECRET` (14 ngày).
 
-1. Đặt secret một lần: `openssl rand -base64 48 | npx wrangler secret put AUTH_SECRET` (đổi secret này = đăng xuất mọi người).
-2. Tạo tài khoản hoặc đặt lại mật khẩu: `npm run admin:add -- email-cua-ban@example.com` (hỏi mật khẩu, ghi vào D1 production; thêm `--local` cho database local).
-3. Mở `https://www.cafecaogia.com/admin` và đăng nhập.
+| Vai trò | Được làm |
+| --- | --- |
+| Quản trị | Mọi thứ, kể cả tài khoản, thông báo Telegram, nhật ký |
+| Biên tập chính | Sửa và xuất bản nội dung, hoàn tác/khôi phục, xoá ảnh, cài đặt Công ty / SEO / Phân tích, xử lý báo giá |
+| Biên tập viên | Sửa bản nháp, tải ảnh; không xuất bản |
+| Kinh doanh | Chỉ hộp thư Báo giá |
 
-Xoá quyền: `npx wrangler d1 execute DB --remote --command "delete from admin_users where email = 'x@example.com'"` — phiên của người đó hết hiệu lực ngay.
+Quyền được kiểm tra ở từng server action (`src/lib/admin/roles.ts`, `allowed()` trong `src/lib/admin/auth.ts`); giao diện chỉ ẩn những nút không dùng được.
+
+1. Đặt secret một lần: `openssl rand -base64 48 | npx wrangler secret put AUTH_SECRET` (đổi secret này = đăng xuất mọi người).
+2. Tài khoản đầu tiên (vai trò Quản trị) hoặc đặt lại mật khẩu khi bị khoá ngoài: `npm run admin:add -- email-cua-ban@example.com` (hỏi mật khẩu, ghi vào D1 production; thêm `--local` cho database local).
+3. Các tài khoản khác tạo trong Studio › **Tài khoản**: chọn vai trò, khoá/mở khoá, đặt lại mật khẩu. Đổi vai trò, khoá hay đổi mật khẩu sẽ đăng xuất người đó ngay. Luôn phải còn ít nhất một Quản trị đang hoạt động; không tự đổi vai trò hay tự khoá được. Ai cũng tự đổi mật khẩu được (menu tài khoản góc phải).
+4. Studio › **Nhật ký** ghi đăng nhập (cả sai mật khẩu), xuất bản, bỏ nháp, hoàn tác, cài đặt, tài khoản, xử lý báo giá. Sai mật khẩu 8 lần trong 15 phút sẽ khoá tạm email đó.
 
 ### Thông báo Telegram
 

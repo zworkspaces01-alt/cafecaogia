@@ -2,27 +2,13 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { FileText, ImagePlus, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
-import { signUpload } from "@/app/admin/actions";
+import { FileText, ImagePlus, Images, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
+import { MediaPicker } from "@/components/admin/media-library";
+import { uploadToCloudinary } from "@/components/admin/upload";
 import { inputClass } from "@/components/admin/ui";
 import { cn } from "@/lib/utils";
 
 type Spec = { label: string; value: string };
-
-async function uploadToCloudinary(file: File, folder: string, kind: "image" | "auto") {
-  const sig = await signUpload(folder);
-  if (!sig.ok) throw new Error(sig.error);
-  const body = new FormData();
-  body.append("file", file);
-  body.append("api_key", sig.apiKey);
-  body.append("timestamp", String(sig.timestamp));
-  body.append("signature", sig.signature);
-  body.append("folder", sig.folder);
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/${kind}/upload`, { method: "POST", body });
-  const json = (await res.json()) as { secure_url?: string; error?: { message?: string } };
-  if (!res.ok) throw new Error(json?.error?.message ?? "Tải lên thất bại.");
-  return json.secure_url as string;
-}
 
 function useUpload(folder: string, kind: "image" | "auto", onDone: (url: string) => void) {
   const [busy, setBusy] = useState(false);
@@ -55,9 +41,11 @@ export function ImageInput({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { busy, error, upload } = useUpload(folder, "image", onChange);
+  const [picking, setPicking] = useState(false);
 
   return (
     <div className="space-y-2">
+      {picking && <MediaPicker onPick={onChange} onClose={() => setPicking(false)} />}
       <div
         className={cn(
           "relative overflow-hidden rounded-2xl border border-dashed border-mist bg-sand",
@@ -100,9 +88,19 @@ export function ImageInput({
           />
           <button
             type="button"
+            onClick={() => setPicking(true)}
+            className="grid size-11 shrink-0 place-items-center rounded-xl border border-mist bg-white text-forest hover:bg-sand"
+            aria-label="Chọn từ thư viện ảnh"
+            title="Chọn từ thư viện ảnh"
+          >
+            <Images className="size-4" />
+          </button>
+          <button
+            type="button"
             onClick={() => fileRef.current?.click()}
             className="grid size-11 shrink-0 place-items-center rounded-xl border border-mist bg-white text-forest hover:bg-sand"
             aria-label="Tải ảnh lên"
+            title="Tải ảnh lên"
           >
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
           </button>

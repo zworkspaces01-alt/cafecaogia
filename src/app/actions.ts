@@ -51,8 +51,9 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
 
   let stored = false;
   let storeError = "";
+  let id: string | null = null;
   try {
-    await insert("inquiries", inquiry);
+    id = await insert("inquiries", inquiry);
     stored = true;
   } catch (error) {
     console.error("Failed to save inquiry", error);
@@ -61,7 +62,7 @@ export async function submitInquiry(_prev: InquiryState, form: FormData): Promis
 
   // Email and Telegram are independent channels: the inquiry counts as received if any of them works.
   const product = inquiry.product_slug ? await getProductSummary(inquiry.product_slug).catch(() => null) : null;
-  const [emailed, telegrammed] = await Promise.all([notifyInquiry(inquiry), notifyInquiryTelegram(inquiry, product)]);
+  const [emailed, telegrammed] = await Promise.all([notifyInquiry(inquiry), notifyInquiryTelegram(inquiry, product, id)]);
   if (storeError) {
     after(() =>
       notifyTelegram(

@@ -9,7 +9,8 @@ import { useEffect } from "react";
  *
  * Messages (same origin only):
  *   preview → editor  { source: "cg-preview", type: "ready" } | { source: "cg-preview", type: "select", id }
- *   editor → preview  { source: "cg-editor", type: "focus", id, scroll }
+ *   editor → preview  { source: "cg-editor", type: "focus", id | blockType, scroll }
+ * `blockType` outlines the first block of that type (collection editors: the testimonials strip…).
  */
 export function PreviewBridge() {
   useEffect(() => {
@@ -38,9 +39,9 @@ export function PreviewBridge() {
       toEditor({ type: "select", id: block.dataset.cmsBlock });
     };
 
-    const highlight = (id: string, scroll: boolean) => {
+    const highlight = (id: string, scroll: boolean, attribute = "data-cms-block") => {
       document.querySelectorAll("[data-cms-active]").forEach((el) => el.removeAttribute("data-cms-active"));
-      const block = document.querySelector<HTMLElement>(`[data-cms-block="${CSS.escape(id)}"]`);
+      const block = document.querySelector<HTMLElement>(`[${attribute}="${CSS.escape(id)}"]`);
       if (!block) return;
       block.setAttribute("data-cms-active", "");
       if (scroll) block.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -48,7 +49,9 @@ export function PreviewBridge() {
 
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== location.origin || event.data?.source !== "cg-editor") return;
-      if (event.data.type === "focus" && typeof event.data.id === "string") highlight(event.data.id, Boolean(event.data.scroll));
+      if (event.data.type !== "focus") return;
+      if (typeof event.data.id === "string") highlight(event.data.id, Boolean(event.data.scroll));
+      else if (typeof event.data.blockType === "string") highlight(event.data.blockType, Boolean(event.data.scroll), "data-cms-block-type");
     };
 
     document.addEventListener("click", onClick, true);

@@ -12,8 +12,8 @@ export function getDb(): D1Database {
 
 // D1 stores booleans as 0/1 and arrays/objects as JSON text. Column names are unique in meaning
 // across tables, so one list each covers the whole schema (migrations/0001_init.sql).
-const JSON_COLUMNS = new Set(["gallery", "specs", "translations", "bio", "product_slugs", "data", "attribution", "blocks", "seo"]);
-const BOOL_COLUMNS = new Set(["featured", "published", "is_sample", "is_ceo"]);
+const JSON_COLUMNS = new Set(["gallery", "specs", "translations", "bio", "product_slugs", "data", "attribution", "blocks", "seo", "items"]);
+const BOOL_COLUMNS = new Set(["featured", "published", "is_sample", "is_ceo", "deleted", "disabled"]);
 
 export type Row = Record<string, unknown>;
 export type Value = string | number | null;
@@ -65,27 +65,33 @@ export async function count(sql: string, ...params: Value[]): Promise<number> {
   return (await first<{ n: number }>(sql, ...params))?.n ?? 0;
 }
 
-/** Inserts a record (undefined fields are left to the column default) and returns its id. */
-export async function insert(table: string, record: Row): Promise<string> {
+/** `insert into …` for a record (undefined fields are left to the column default), returning its id. */
+export function insertStatement(table: string, record: Row): D1PreparedStatement {
   const entries = Object.entries(record).filter(([, value]) => value !== undefined);
   const columns = entries.map(([column]) => column).join(", ");
   const placeholders = entries.map(() => "?").join(", ");
-  const row = await first<{ id: string }>(
-    `insert into ${table} (${columns}) values (${placeholders}) returning id`,
-    ...entries.map(([column, value]) => encodeValue(column, value)),
-  );
-  return row!.id;
+  return getDb()
+    .prepare(`insert into ${table} (${columns}) values (${placeholders}) returning id`)
+    .bind(...entries.map(([column, value]) => encodeValue(column, value)));
+}
+
+/** `update …` of the given fields of one row by id, bumping updated_at. */
+export function updateStatement(table: string, id: string, record: Row): D1PreparedStatement {
+  const entries = Object.entries({ ...record, updated_at: now() }).filter(([, value]) => value !== undefined);
+  const assignments = entries.map(([column]) => `${column} = ?`).join(", ");
+  return getDb()
+    .prepare(`update ${table} set ${assignments} where id = ?`)
+    .bind(...entries.map(([column, value]) => encodeValue(column, value)), id);
+}
+
+/** Inserts a record and returns its id. */
+export async function insert(table: string, record: Row): Promise<string> {
+  return (await insertStatement(table, record).first<{ id: string }>())!.id;
 }
 
 /** Updates the given fields of one row by id and bumps updated_at. */
-export async function update(table: string, id: string, record: Row) {
-  const entries = Object.entries({ ...record, updated_at: now() }).filter(([, value]) => value !== undefined);
-  const assignments = entries.map(([column]) => `${column} = ?`).join(", ");
-  return run(
-    `update ${table} set ${assignments} where id = ?`,
-    ...entries.map(([column, value]) => encodeValue(column, value)),
-    id,
-  );
+export function update(table: string, id: string, record: Row) {
+  return updateStatement(table, id, record).run();
 }
 
 export const now = () => new Date().toISOString();

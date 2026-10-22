@@ -2,9 +2,11 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
-import { requireAdmin } from "@/lib/admin/auth";
+import { allowed } from "@/lib/admin/auth";
+import { audit } from "@/lib/admin/audit";
+import type { Permission } from "@/lib/admin/roles";
 import { defaultPageBlocks } from "@/lib/blocks/defaults";
-import { blockSchema } from "@/lib/blocks/schema";
+import { validBlocks } from "@/lib/blocks/validate";
 import {
   isSystemPageKey,
   reservedSlugs,
@@ -14,29 +16,13 @@ import {
   type PageSeo,
   type SystemPageKey,
 } from "@/lib/blocks/types";
-import { CMS_CACHE_TAG, encodeValue, first, getDb, insert, isUniqueViolation, now, run, update } from "@/lib/db";
+import { CMS_CACHE_TAG, encodeValue, first, insert, isUniqueViolation, now, run, update } from "@/lib/db";
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
-
-const MAX_BYTES = 900_000;
 
 function refreshSite() {
   updateTag(CMS_CACHE_TAG);
   revalidatePath("/", "layout");
-}
-
-/** Rejects anything that isn't a list of known blocks with English content. */
-function validBlocks(value: unknown): value is Block[] {
-  if (!Array.isArray(value) || value.length > 80) return false;
-  const ids = new Set<string>();
-  for (const block of value) {
-    if (typeof block !== "object" || block === null) return false;
-    const { id, type, content } = block as Block;
-    if (typeof id !== "string" || !id || ids.has(id) || !blockSchema(type)) return false;
-    if (typeof content !== "object" || content === null || typeof content.en !== "object") return false;
-    ids.add(id);
-  }
-  return JSON.stringify(value).length < MAX_BYTES;
 }
 
 /**
@@ -46,8 +32,10 @@ function validBlocks(value: unknown): value is Block[] {
  */
 type PageRef = { id: string; key: string | null; slug: string; title: string; published: boolean };
 
-async function resolvePage(ref: string) {
-  const { user } = await requireAdmin();
+async function resolvePage(ref: string, permission: Permission) {
+  const auth = await allowed(permission);
+  if (!auth.ok) throw new Error(auth.error);
+  const { user } = auth;
   const system = isSystemPageKey(ref);
   const found = await first<PageRef>(
     `select id, key, slug, title, published from pages where ${system ? "key" : "id"} = ?`,
@@ -93,38 +81,9 @@ function fail(e: unknown): { ok: false; error: string } {
 export async function savePageDraft(ref: string, blocks: unknown, seo: PageSeo): Promise<Result<{ savedAt: string }>> {
   if (!validBlocks(blocks)) return { ok: false, error: "Dữ liệu khối không hợp lệ." };
   try {
-    const { user, page } = await resolvePage(ref);
+    const { user, page } = await resolvePage(ref, "content.write");
     await upsertDraft(page.id, blocks, seo, user.email);
     return { ok: true, savedAt: now() };
-  } catch (e) {
-    return fail(e);
-  }
-}
-
-/** Publishes the draft: it becomes the live page and is kept in the version history. */
-export async function publishPage(ref: string, note = ""): Promise<Result> {
-  try {
-    const { user, page } = await resolvePage(ref);
-    const draft = await first<{ blocks: Block[]; seo: PageSeo }>("select blocks, seo from page_drafts where page_id = ?", page.id);
-    if (!draft) return { ok: false, error: "Không có thay đổi nào để xuất bản." };
-    if (!validBlocks(draft.blocks)) return { ok: false, error: "Bản nháp có khối không hợp lệ." };
-
-    // One batch = one transaction: the live page, its history entry and the cleared draft change together.
-    const at = now();
-    const blocks = encodeValue("blocks", draft.blocks);
-    const seo = encodeValue("seo", draft.seo ?? {});
-    const db = getDb();
-    await db.batch([
-      db
-        .prepare("update pages set blocks = ?, seo = ?, published = 1, published_at = ?, updated_at = ? where id = ?")
-        .bind(blocks, seo, at, at, page.id),
-      db
-        .prepare("insert into page_versions (page_id, blocks, seo, published_by, published_at, note) values (?, ?, ?, ?, ?, ?)")
-        .bind(page.id, blocks, seo, user.email, at, String(note).trim().slice(0, 200)),
-      db.prepare("delete from page_drafts where page_id = ?").bind(page.id),
-    ]);
-    refreshSite();
-    return { ok: true };
   } catch (e) {
     return fail(e);
   }
@@ -133,8 +92,9 @@ export async function publishPage(ref: string, note = ""): Promise<Result> {
 /** Throws the draft away; the editor reloads the published version. */
 export async function discardPageDraft(ref: string): Promise<Result> {
   try {
-    const { page } = await resolvePage(ref);
+    const { user, page } = await resolvePage(ref, "content.publish");
     await run("delete from page_drafts where page_id = ?", page.id);
+    await audit(user.email, "discard", `Trang “${page.title}”`);
     return { ok: true };
   } catch (e) {
     return fail(e);
@@ -144,7 +104,7 @@ export async function discardPageDraft(ref: string): Promise<Result> {
 /** Loads a published version (or, for a system page, the default layout) into the draft. */
 export async function restorePageVersion(ref: string, versionId: string | "default"): Promise<Result<{ blocks: Block[] }>> {
   try {
-    const { user, page } = await resolvePage(ref);
+    const { user, page } = await resolvePage(ref, "content.publish");
     let blocks: Block[];
     let seo: PageSeo = {};
     if (versionId === "default") {
@@ -161,6 +121,7 @@ export async function restorePageVersion(ref: string, versionId: string | "defau
       seo = version.seo;
     }
     await upsertDraft(page.id, blocks, seo, user.email);
+    await audit(user.email, "page.restore", `Trang “${page.title}”`, versionId === "default" ? "Bố cục mặc định" : versionId);
     return { ok: true, blocks };
   } catch (e) {
     return fail(e);
@@ -176,14 +137,18 @@ const slugError = (slug: string) =>
 
 /** Creates an empty custom page (unpublished until its first publish). */
 export async function createPage(title: string, slug: string): Promise<Result<{ id: string }>> {
-  await requireAdmin();
+  const auth = await allowed("content.write");
+  if (!auth.ok) return auth;
+  const { user } = auth;
   const cleanTitle = String(title).trim();
   const cleanSlug = String(slug).trim().toLowerCase();
   if (!cleanTitle) return { ok: false, error: "Vui lòng nhập tên trang." };
   const invalid = slugError(cleanSlug);
   if (invalid) return { ok: false, error: invalid };
   try {
-    return { ok: true, id: await insert("pages", { title: cleanTitle, slug: cleanSlug, blocks: [], published: false }) };
+    const id = await insert("pages", { title: cleanTitle, slug: cleanSlug, blocks: [], published: false });
+    await audit(user.email, "page.create", `Trang “${cleanTitle}”`, `/${cleanSlug}`);
+    return { ok: true, id };
   } catch (e) {
     return isUniqueViolation(e) ? { ok: false, error: "Đường dẫn này đã có trang khác dùng." } : fail(e);
   }
@@ -191,7 +156,9 @@ export async function createPage(title: string, slug: string): Promise<Result<{ 
 
 /** Renames a custom page, changes its address, or takes it off the site. */
 export async function updatePageSettings(id: string, values: { title: string; slug: string; published: boolean }): Promise<Result> {
-  await requireAdmin();
+  const auth = await allowed("content.publish");
+  if (!auth.ok) return auth;
+  const { user } = auth;
   const page = await first<{ key: string | null }>("select key from pages where id = ?", id);
   if (!page) return { ok: false, error: "Không tìm thấy trang." };
   const changes: Record<string, unknown> = { title: values.title.trim() || "Trang", published: values.published };
@@ -207,13 +174,17 @@ export async function updatePageSettings(id: string, values: { title: string; sl
     return isUniqueViolation(e) ? { ok: false, error: "Đường dẫn này đã có trang khác dùng." } : fail(e);
   }
   refreshSite();
+  await audit(user.email, "page.settings", `Trang “${changes.title}”`, `${changes.slug ? `/${changes.slug} · ` : ""}${values.published ? "hiển thị" : "ẩn"}`);
   return { ok: true };
 }
 
 /** Deletes a custom page with its draft and history. System pages can't be deleted. */
 export async function deletePage(id: string): Promise<Result> {
-  await requireAdmin();
-  await run("delete from pages where id = ? and key is null", id);
+  const auth = await allowed("content.publish");
+  if (!auth.ok) return auth;
+  const { user } = auth;
+  const page = await first<{ title: string }>("delete from pages where id = ? and key is null returning title", id);
   refreshSite();
+  if (page) await audit(user.email, "page.delete", `Trang “${page.title}”`);
   return { ok: true };
 }

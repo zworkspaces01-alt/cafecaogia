@@ -99,7 +99,7 @@ export async function RenderBlocks({
     const view = <BlockView key={block.id} block={block} ctx={ctx} previousType={previous?.type} />;
     rendered.push(
       preview ? (
-        <div key={block.id} data-cms-block={block.id}>
+        <div key={block.id} data-cms-block={block.id} data-cms-block-type={block.type}>
           {view}
         </div>
       ) : (

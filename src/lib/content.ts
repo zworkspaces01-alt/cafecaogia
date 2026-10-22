@@ -4,6 +4,7 @@ import { cache } from "react";
 import type { Locale } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
 import { all, first } from "@/lib/db";
+import { draftRows, showingDrafts } from "@/lib/preview";
 import { mergeSettings } from "@/lib/settings";
 import type { CertificationRow, PartnerRow, PostRow, SiteSettings, TeamMemberRow, TestimonialRow } from "@/lib/types";
 
@@ -21,10 +22,16 @@ function localize<T extends WithTranslations>(row: T, locale: Locale): Omit<T, "
 
 type ContentTable = "testimonials" | "partners" | "certifications" | "team_members";
 
-/** Reads a published content table in CMS order. */
-function readTable<T>(table: ContentTable): Promise<T[]> {
-  return all<T>(`select * from ${table} where published = 1 order by sort_order`);
-}
+/**
+ * Reads a published content table in CMS order — or, in the Studio preview, the table with its drafts
+ * applied. Cached per request and per mode, so a read made before the preview turned drafts on
+ * (e.g. by the layout) doesn't leak into the preview.
+ */
+const readTableIn = cache(
+  (table: ContentTable, drafts: boolean): Promise<unknown[]> =>
+    drafts ? draftRows(table) : all(`select * from ${table} where published = 1 order by sort_order`),
+);
+const readTable = <T>(table: ContentTable) => readTableIn(table, showingDrafts()) as Promise<T[]>;
 
 export type Testimonial = Omit<TestimonialRow, "translations">;
 export type Partner = PartnerRow;
@@ -37,25 +44,25 @@ export const getSettings = cache(async (): Promise<SiteSettings> => {
   return mergeSettings(row?.data ?? {});
 });
 
-export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
+export async function getTestimonials(): Promise<Testimonial[]> {
   const [locale, rows] = await Promise.all([getLocale(), readTable<TestimonialRow>("testimonials")]);
   return rows.map((row) => localize(row, locale));
-});
+}
 
-export const getPartners = cache(async (): Promise<Partner[]> => readTable<PartnerRow>("partners"));
+export const getPartners = (): Promise<Partner[]> => readTable<PartnerRow>("partners");
 
-export const getCertifications = cache(async (): Promise<Certification[]> => {
+export async function getCertifications(): Promise<Certification[]> {
   const [locale, rows] = await Promise.all([
     getLocale(),
     readTable<CertificationRow>("certifications"),
   ]);
   return rows.map((row) => localize(row, locale));
-});
+}
 
-export const getTeam = cache(async (): Promise<TeamMember[]> => {
+export async function getTeam(): Promise<TeamMember[]> {
   const [locale, rows] = await Promise.all([getLocale(), readTable<TeamMemberRow>("team_members")]);
   return rows.map((row) => localize(row, locale));
-});
+}
 
 export async function getCeo(): Promise<TeamMember | null> {
   return (await getTeam()).find((m) => m.is_ceo) ?? null;
@@ -77,14 +84,17 @@ export async function hasPublishedCeo(): Promise<boolean> {
 // ── Insights ────────────────────────────────────────────────────────────────
 
 /** Newest first. */
-const readPosts = cache(
-  (): Promise<PostRow[]> => all<PostRow>("select * from posts where published = 1 order by published_at desc, sort_order"),
-);
+const readPostsIn = cache(async (drafts: boolean): Promise<PostRow[]> => {
+  if (!drafts) return all<PostRow>("select * from posts where published = 1 order by published_at desc, sort_order");
+  const rows = await draftRows<PostRow>("posts");
+  return rows.sort((a, b) => b.published_at.localeCompare(a.published_at) || a.sort_order - b.sort_order);
+});
+const readPosts = () => readPostsIn(showingDrafts());
 
-export const getPosts = cache(async (): Promise<Post[]> => {
+export async function getPosts(): Promise<Post[]> {
   const [locale, rows] = await Promise.all([getLocale(), readPosts()]);
   return rows.map((row) => localize(row, locale));
-});
+}
 
 export async function getPost(slug: string): Promise<Post | null> {
   return (await getPosts()).find((post) => post.slug === slug) ?? null;

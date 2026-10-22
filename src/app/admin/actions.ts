@@ -3,13 +3,12 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { endSession, isAuthConfigured, requireAdmin, startSession } from "@/lib/admin/auth";
-import { getEntity, type Entity, type Field } from "@/lib/admin/entities";
+import { allowed, endSession, isAuthConfigured, startSession } from "@/lib/admin/auth";
+import { audit, recentFailures } from "@/lib/admin/audit";
 import { verifyPassword } from "@/lib/admin/password";
-import { CMS_CACHE_TAG, first, insert, isUniqueViolation, now, run, update } from "@/lib/db";
+import { CMS_CACHE_TAG, count, first, now, run } from "@/lib/db";
 import { analyticsKeys, analyticsTools } from "@/lib/analytics-ids";
 import { cloudName } from "@/lib/cloudinary-loader";
-import { submitToIndexNow } from "@/lib/indexnow";
 import { site } from "@/lib/site";
 import {
   discoverTelegram,
@@ -21,6 +20,7 @@ import {
   type TelegramButton,
 } from "@/lib/telegram";
 import { isChatId } from "@/lib/telegram-topics";
+import type { Permission } from "@/lib/admin/roles";
 import type {
   AnalyticsSettings,
   NotificationSettings,
@@ -34,23 +34,34 @@ export type ActionResult = { ok: true; id?: string } | { ok: false; error: strin
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 
+/** Failed sign-ins allowed per email in LOCK_MINUTES before it is locked for a while. */
+const MAX_FAILURES = 8;
+const LOCK_MINUTES = 15;
+
 export async function signIn(
   _prev: { error?: string; email?: string },
   form: FormData,
 ): Promise<{ error?: string; email?: string }> {
   if (!isAuthConfigured()) return { error: "Chưa cấu hình AUTH_SECRET (xem README → Tài khoản quản trị)." };
 
-  const email = String(form.get("email") ?? "").trim();
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
-  const account = await first<{ email: string; password_hash: string }>(
-    "select email, password_hash from admin_users where email = ?",
+  if ((await recentFailures(email, LOCK_MINUTES)) >= MAX_FAILURES) {
+    await audit(email, "login.locked", email);
+    return { error: `Sai mật khẩu quá nhiều lần. Thử lại sau ${LOCK_MINUTES} phút.`, email };
+  }
+  const account = await first<{ email: string; password_hash: string; disabled: boolean }>(
+    "select email, password_hash, disabled from admin_users where email = ?",
     email,
   );
   // Echo the email back: React resets the form after each submission.
   if (!account || !(await verifyPassword(password, account.password_hash))) {
+    await audit(email, "login.failed", email);
     return { error: "Email hoặc mật khẩu không đúng.", email };
   }
+  if (account.disabled) return { error: "Tài khoản này đang bị khoá. Liên hệ Quản trị.", email };
   await startSession(account.email);
+  await audit(account.email, "login");
   redirect("/admin");
 }
 
@@ -59,61 +70,9 @@ export async function signOut() {
   redirect("/admin/login");
 }
 
-// ── Content ─────────────────────────────────────────────────────────────────
+// ── Inquiries & settings ────────────────────────────────────────────────────
 
-const nullableTypes = new Set(["image", "file", "number", "date"]);
-const nullableText = new Set(["product_slug", "url"]);
-
-function normalize(field: Field, value: unknown): unknown {
-  switch (field.type) {
-    case "boolean":
-      return Boolean(value);
-    case "number": {
-      if (value === "" || value === null || value === undefined) return null;
-      const n = Number(value);
-      return Number.isFinite(n) ? n : null;
-    }
-    case "gallery":
-    case "lines":
-      return Array.isArray(value) ? value.map((v) => String(v).trim()).filter(Boolean) : [];
-    case "specs":
-      return Array.isArray(value)
-        ? value
-            .map((s) => ({ label: String(s?.label ?? "").trim(), value: String(s?.value ?? "").trim() }))
-            .filter((s) => s.label || s.value)
-        : [];
-    default: {
-      const text = typeof value === "string" ? value.trim() : "";
-      if (!text && (nullableTypes.has(field.type) || nullableText.has(field.name))) return null;
-      return text;
-    }
-  }
-}
-
-const isEmpty = (v: unknown) => v === null || v === "" || (Array.isArray(v) && v.length === 0);
-
-function buildRow(entity: Entity, values: Record<string, unknown>) {
-  const row: Record<string, unknown> = {};
-  const translations: Record<string, Record<string, unknown>> = {};
-  const incoming = (values.translations ?? {}) as Record<string, Record<string, unknown>>;
-
-  for (const field of entity.fields) {
-    const value = normalize(field, values[field.name]);
-    if (field.required && isEmpty(value)) throw new Error(`Vui lòng nhập “${field.label}”.`);
-    row[field.name] = value;
-
-    if (field.translatable && entity.hasTranslations) {
-      for (const lang of ["ru", "ar"]) {
-        const translated = normalize(field, incoming[lang]?.[field.name]);
-        if (!isEmpty(translated)) (translations[lang] ??= {})[field.name] = translated;
-      }
-    }
-  }
-  if (entity.hasTranslations) row.translations = translations;
-  return row;
-}
-
-/** Expires cached CMS data and every rendered page, so edits appear on the website immediately. */
+/** Expires cached CMS data and every rendered page, so a settings save appears on the website immediately. */
 function refreshSite() {
   updateTag(CMS_CACHE_TAG);
   revalidatePath("/", "layout");
@@ -124,65 +83,7 @@ function notifyLater(topic: NotifyTopic, html: string, buttons?: TelegramButton[
   after(() => notifyTelegram(topic, html, buttons));
 }
 
-const who = (user: { email?: string }) => escapeHtml(user.email ?? "Quản trị viên");
-
-export async function saveRecord(entityKey: string, id: string | null, values: Record<string, unknown>): Promise<ActionResult> {
-  const entity = getEntity(entityKey);
-  if (!entity) return { ok: false, error: "Loại nội dung không hợp lệ." };
-  const { user } = await requireAdmin();
-
-  let row: Record<string, unknown>;
-  try {
-    row = buildRow(entity, values);
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
-  }
-
-  let savedId: string;
-  try {
-    if (id) {
-      const { meta } = await update(entity.table, id, row);
-      if (!meta.changes) return { ok: false, error: "Không tìm thấy bản ghi này (có thể đã bị xoá)." };
-      savedId = id;
-    } else savedId = await insert(entity.table, row);
-  } catch (error) {
-    return {
-      ok: false,
-      error: isUniqueViolation(error) ? "Đường dẫn (slug) này đã tồn tại." : `Không lưu được: ${(error as Error).message}`,
-    };
-  }
-
-  refreshSite();
-  // Product and article pages (plus the lists that show them) are announced to IndexNow engines.
-  const section = entity.key === "products" ? "/products" : entity.key === "posts" ? "/insights" : null;
-  if (section && typeof row.slug === "string" && row.slug) {
-    const changed = [`${section}/${row.slug}`, section, "/"];
-    after(() => submitToIndexNow(changed));
-  }
-  const title = escapeHtml(String(row[entity.titleField] ?? "") || "(chưa đặt tên)");
-  notifyLater("content", `${id ? "✏️" : "➕"} ${who(user)} đã ${id ? "sửa" : "thêm"} ${entity.singular} <b>${title}</b>`, [
-    { text: "Mở trong CMS", url: `${site.url}/admin/${entity.key}/${savedId}` },
-  ]);
-  return { ok: true, id: savedId };
-}
-
-export async function deleteRecord(entityKey: string, id: string): Promise<ActionResult> {
-  const entity = getEntity(entityKey);
-  if (!entity) return { ok: false, error: "Loại nội dung không hợp lệ." };
-  const { user } = await requireAdmin();
-  let data: Record<string, unknown> | null;
-  try {
-    data = await first(`delete from ${entity.table} where id = ? returning ${entity.titleField}`, id);
-  } catch (error) {
-    return { ok: false, error: `Không xoá được: ${(error as Error).message}` };
-  }
-  refreshSite();
-  const title = escapeHtml(String(data?.[entity.titleField] ?? "") || id);
-  notifyLater("content", `🗑 ${who(user)} đã xoá ${entity.singular} <b>${title}</b>`);
-  return { ok: true };
-}
-
-// ── Inquiries & settings ────────────────────────────────────────────────────
+const who = (user: { name?: string; email?: string }) => escapeHtml(user.name || user.email || "Quản trị viên");
 
 const inquiryStatuses = ["new", "contacted", "quoted", "won", "lost"];
 const statusNames: Record<string, string> = {
@@ -196,7 +97,9 @@ const statusIcons: Record<string, string> = { new: "🔄", contacted: "📞", qu
 
 export async function setInquiryStatus(id: string, status: string): Promise<ActionResult> {
   if (!inquiryStatuses.includes(status)) return { ok: false, error: "Trạng thái không hợp lệ." };
-  const { user } = await requireAdmin();
+  const auth = await allowed("inquiries");
+  if (!auth.ok) return auth;
+  const { user } = auth;
   let data: { name: string; company: string | null; product_slug: string | null } | null;
   try {
     data = await first("update inquiries set status = ? where id = ? returning name, company, product_slug", status, id);
@@ -205,18 +108,39 @@ export async function setInquiryStatus(id: string, status: string): Promise<Acti
   }
   revalidatePath("/admin", "layout");
   if (data) {
+    await audit(user.email, "inquiry.status", data.name, statusNames[status]);
     const lead = [data.name, data.company].filter(Boolean).map(String).map(escapeHtml).join(" · ");
     const product = data.product_slug ? ` (${escapeHtml(String(data.product_slug))})` : "";
     notifyLater("pipeline", `${statusIcons[status]} <b>${lead}</b>${product} → <b>${statusNames[status]}</b>\nbởi ${who(user)}`, [
-      { text: "Mở danh sách", url: `${site.url}/admin/inquiries?status=${status}` },
+      { text: "Mở yêu cầu", url: `${site.url}/admin/inquiries?id=${id}` },
     ]);
   }
   return { ok: true };
 }
 
+/** New quote requests, for the badge in the Studio rail. */
+export async function newInquiryCount(): Promise<number> {
+  const auth = await allowed("inquiries");
+  return auth.ok ? count("select count(*) as n from inquiries where status = 'new'") : 0;
+}
+
+/** The sales team's internal note on a quote request (never shown to the customer). */
+export async function setInquiryNote(id: string, note: string): Promise<ActionResult> {
+  const auth = await allowed("inquiries");
+  if (!auth.ok) return auth;
+  const { user } = auth;
+  const text = String(note).trim().slice(0, 4000);
+  const data = await first<{ name: string }>("update inquiries set note = ? where id = ? returning name", text, id);
+  if (!data) return { ok: false, error: "Không tìm thấy yêu cầu này." };
+  await audit(user.email, "inquiry.note", data.name);
+  return { ok: true };
+}
+
 /** Merges `patch` into the stored settings, so each admin screen only overwrites its own groups. */
-async function writeSettings(patch: Partial<SiteSettings>, what: string): Promise<ActionResult> {
-  const { user } = await requireAdmin();
+async function writeSettings(patch: Partial<SiteSettings>, what: string, permission: Permission = "settings"): Promise<ActionResult> {
+  const auth = await allowed(permission);
+  if (!auth.ok) return auth;
+  const { user } = auth;
   try {
     const current = await first<{ data: Partial<SiteSettings> }>("select data from site_settings where id = 1");
     await run(
@@ -229,6 +153,7 @@ async function writeSettings(patch: Partial<SiteSettings>, what: string): Promis
     return { ok: false, error: `Không lưu được: ${(error as Error).message}` };
   }
   refreshSite();
+  await audit(user.email, "settings", what);
   notifyLater("system", `⚙️ ${who(user)} đã lưu <b>${what}</b>`);
   return { ok: true };
 }
@@ -307,12 +232,13 @@ function cleanTelegram(draft: TelegramDraft): TelegramDraft | string {
 export async function saveNotificationSettings(draft: TelegramDraft): Promise<ActionResult> {
   const telegram = cleanTelegram(draft);
   if (typeof telegram === "string") return { ok: false, error: telegram };
-  return writeSettings({ notifications: { telegram } }, "Cài đặt thông báo Telegram");
+  return writeSettings({ notifications: { telegram } }, "Cài đặt thông báo Telegram", "users");
 }
 
 /** Sends a test message to one topic using the form's current (possibly unsaved) values. */
 export async function sendTestNotification(draft: TelegramDraft, topic: NotifyTopic): Promise<ActionResult> {
-  await requireAdmin();
+  const auth = await allowed("users");
+  if (!auth.ok) return auth;
   const telegram = cleanTelegram({ ...draft, enabled: true });
   if (typeof telegram === "string") return { ok: false, error: telegram };
   const result = await sendTelegramMessage(
@@ -323,7 +249,8 @@ export async function sendTestNotification(draft: TelegramDraft, topic: NotifyTo
 }
 
 export async function findTelegramChats(): Promise<{ ok: true; bot: string; chats: DiscoveredChat[] } | { ok: false; error: string }> {
-  await requireAdmin();
+  const auth = await allowed("users");
+  if (!auth.ok) return auth;
   const result = await discoverTelegram();
   return result.ok ? { ok: true, ...result.result } : { ok: false, error: `Telegram báo lỗi: ${result.error}` };
 }
@@ -336,7 +263,8 @@ export type UploadSignature =
 
 /** Signs a direct browser → Cloudinary upload so the API secret never leaves the server. */
 export async function signUpload(folder: string): Promise<UploadSignature> {
-  await requireAdmin();
+  const auth = await allowed("content.write");
+  if (!auth.ok) return auth;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const secret = process.env.CLOUDINARY_API_SECRET;
   if (!apiKey || !secret) {
