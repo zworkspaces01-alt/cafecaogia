@@ -62,9 +62,11 @@ const nextConfig: NextConfig = {
       { source: "/", destination: "/en", permanent: false },
       // Old or hand-typed links without a language, e.g. /products → /en/products.
       {
-        // Anything with a file extension (icons, /brand assets, sitemap.xml…) is left alone.
-        source: "/:path((?!en(?:/|$)|ru(?:/|$)|ar(?:/|$)|admin(?:/|$)|_next/)(?!.*\\.\\w+$).+)",
-        destination: "/en/:path",
+        // One param per path segment (OpenNext's router can't put a "/" inside a single param).
+        // Language prefixes, /admin, /api and /_next are skipped, and so is anything with a dot in it
+        // (icons, /brand assets, sitemap.xml…).
+        source: "/:first((?!(?:en|ru|ar|admin|api|_next)(?:/|$))[^/.]+)/:rest([^/.]+)*",
+        destination: "/en/:first/:rest*",
         permanent: true,
       },
     ];
