@@ -13,6 +13,21 @@ import {
   StoryBlock,
   ValueCardsBlock,
 } from "@/components/blocks/page-blocks";
+import {
+  CeoProfileBlock,
+  ChecklistBlock,
+  ContactFormBlock,
+  NotFoundBlock,
+  NumberedCardsBlock,
+  PhotoGalleryBlock,
+  PostListBlock,
+  PostMainBlock,
+  PostMoreBlock,
+  ProductGridBlock,
+  ProductInsightsBlock,
+  ProductMainBlock,
+  RelatedProductsBlock,
+} from "@/components/blocks/site-blocks";
 import { isExportGrade } from "@/components/commodity-hub";
 import { CtaBanner } from "@/components/cta-banner";
 import { AboutIntro } from "@/components/home/about-intro";
@@ -33,9 +48,20 @@ import type { Dictionary } from "@/i18n/dictionaries/en";
 import { getDictionary } from "@/i18n/server";
 import { resolveContent } from "@/lib/blocks/resolve";
 import type { Block } from "@/lib/blocks/types";
-import { getSettings, getTestimonials } from "@/lib/content";
+import { getSettings, getTestimonials, type Post } from "@/lib/content";
 import { getProducts } from "@/lib/products";
 import { buyerVisitPhotos, factoryPhotos, galleryGroups, type FactoryPhoto } from "@/lib/site";
+import type { Category, PostCategory, Product } from "@/lib/types";
+
+/** What the page knows that some blocks need: the product or article shown, the active filter, the quote form's query. */
+export type BlockContext = {
+  product?: Product;
+  post?: Post;
+  productCategory?: Category;
+  postCategory?: PostCategory;
+  quoteProduct?: string;
+  quoteSample?: boolean;
+};
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- block content is validated by its schema in the editor */
 type Any = any;
@@ -44,7 +70,17 @@ type Any = any;
  * Renders a page's visible blocks in order. In the page builder's preview each block is wrapped in a
  * `data-cms-block` element, so clicking it selects the block in the editor (see PreviewBridge).
  */
-export async function RenderBlocks({ blocks, locale, preview = false }: { blocks: Block[]; locale: Locale; preview?: boolean }) {
+export async function RenderBlocks({
+  blocks,
+  locale,
+  preview = false,
+  context = {},
+}: {
+  blocks: Block[];
+  locale: Locale;
+  preview?: boolean;
+  context?: BlockContext;
+}) {
   const visible = blocks.filter((block) => !block.hidden);
   const types = new Set(visible.map((block) => block.type));
   const needsProducts = ["featuredProducts", "aboutIntro", "productTable", "testimonials"].some((type) => types.has(type));
@@ -55,7 +91,7 @@ export async function RenderBlocks({ blocks, locale, preview = false }: { blocks
     needsProducts ? getProducts() : Promise.resolve([]),
     types.has("testimonials") ? getTestimonials() : Promise.resolve([]),
   ]);
-  const ctx: Ctx = { locale, dict, settings, products, testimonials };
+  const ctx: Ctx = { locale, dict, settings, products, testimonials, context };
 
   const rendered: ReactNode[] = [];
   visible.forEach((block, i) => {
@@ -80,6 +116,7 @@ type Ctx = {
   settings: Awaited<ReturnType<typeof getSettings>>;
   products: Awaited<ReturnType<typeof getProducts>>;
   testimonials: Awaited<ReturnType<typeof getTestimonials>>;
+  context: BlockContext;
 };
 
 function BlockView({ block, ctx, previousType }: { block: Block; ctx: Ctx; previousType?: string }) {
@@ -162,6 +199,36 @@ function BlockView({ block, ctx, previousType }: { block: Block; ctx: Ctx; previ
       return <DataTableBlock c={c} />;
     case "sources":
       return <SourcesBlock c={c} />;
+    case "numberedCards":
+      return <NumberedCardsBlock c={c} />;
+    case "checklist":
+      return <ChecklistBlock c={c} />;
+
+    // Listing, contact and leadership pages
+    case "productGrid":
+      return <ProductGridBlock c={c} dict={dict} category={ctx.context.productCategory} />;
+    case "postList":
+      return <PostListBlock c={c} dict={dict} locale={locale} category={ctx.context.postCategory} />;
+    case "photoGallery":
+      return <PhotoGalleryBlock c={c} dict={dict} />;
+    case "contactForm":
+      return <ContactFormBlock c={c} dict={dict} locale={locale} product={ctx.context.quoteProduct} sample={ctx.context.quoteSample} />;
+    case "ceoProfile":
+      return <CeoProfileBlock c={c} />;
+    case "notFound":
+      return <NotFoundBlock c={c} />;
+
+    // Templates: these need the product or article of the page and render nothing without it.
+    case "productMain":
+      return ctx.context.product ? <ProductMainBlock c={c} dict={dict} product={ctx.context.product} /> : null;
+    case "productInsights":
+      return ctx.context.product ? <ProductInsightsBlock c={c} dict={dict} locale={locale} product={ctx.context.product} /> : null;
+    case "relatedProducts":
+      return ctx.context.product ? <RelatedProductsBlock c={c} dict={dict} product={ctx.context.product} /> : null;
+    case "postMain":
+      return ctx.context.post ? <PostMainBlock c={c} dict={dict} locale={locale} post={ctx.context.post} /> : null;
+    case "postMore":
+      return ctx.context.post ? <PostMoreBlock c={c} dict={dict} locale={locale} post={ctx.context.post} /> : null;
     default:
       return null;
   }

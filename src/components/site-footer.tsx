@@ -5,12 +5,34 @@ import { Logo } from "@/components/logo";
 import { getDictionary } from "@/i18n/server";
 import { getCeo, getPosts, getSettings, whatsappLink } from "@/lib/content";
 
-export async function SiteFooter() {
+/** Footer text from the page builder (admin → Trang → Header, footer & nút liên hệ); links are [label, path] pairs. */
+export type FooterText = {
+  tagline: string;
+  description: string;
+  columns: { title: string; links: string[][] }[];
+  rights: string;
+  proudly: string;
+};
+
+export async function SiteFooter({ t }: { t?: FooterText } = {}) {
   const [dict, settings, ceo, posts] = await Promise.all([getDictionary(), getSettings(), getCeo(), getPosts()]);
   const { links } = dict.footer;
   const { company, contact } = settings;
+  const text = {
+    tagline: t?.tagline || dict.footer.tagline,
+    description: t?.description || dict.footer.description,
+    rights: t?.rights || dict.footer.rights,
+    proudly: t?.proudly || dict.footer.proudly,
+  };
 
-  const columns = [
+  // Links to the leadership page and the articles only while those pages exist.
+  const live = (href: string) => (href !== "/about-ceo" || Boolean(ceo)) && (href !== "/insights" || posts.length > 0);
+  const edited = t?.columns?.map((col) => ({
+    title: col.title,
+    links: col.links.filter(([label, href]) => label && href && live(href)).map(([label, href]) => ({ label, href })),
+  }));
+
+  const columns = edited ?? [
     {
       title: dict.footer.coffee,
       links: [
@@ -55,8 +77,8 @@ export async function SiteFooter() {
     <footer className="bg-ink text-white print:hidden">
       <div className="container-page grid gap-12 py-16 lg:grid-cols-[1.3fr_2fr]">
         <div data-reveal className="max-w-sm">
-          <Logo label={dict.common.homeLabel} tagline={dict.footer.tagline} />
-          <p className="mt-5 text-sm leading-relaxed text-white/60">{dict.footer.description}</p>
+          <Logo label={dict.common.homeLabel} tagline={text.tagline} />
+          <p className="mt-5 text-sm leading-relaxed text-white/60">{text.description}</p>
           <ul className="mt-6 space-y-3 text-sm text-white/80">
             <li className="flex gap-3">
               <MapPin className="mt-0.5 size-4 shrink-0 text-lime" />
@@ -103,11 +125,11 @@ export async function SiteFooter() {
 
         <div data-reveal-stagger className="grid grid-cols-2 gap-8 sm:grid-cols-3">
           {columns.map((col) => (
-            <div key={col.title}>
+            <div key={col.title || "column"}>
               <p className="text-sm font-medium text-lime">{col.title}</p>
               <ul className="mt-4 space-y-3 text-sm text-white/70">
                 {col.links.map((link) => (
-                  <li key={link.href}>
+                  <li key={`${link.href}-${link.label}`}>
                     <Link href={link.href} className="-my-1.5 inline-block py-1.5 hover:text-white">
                       {link.label}
                     </Link>
@@ -123,9 +145,9 @@ export async function SiteFooter() {
         <div className="container-page flex flex-col gap-2 pt-6 pb-24 text-xs text-white/50 sm:flex-row sm:justify-between lg:pb-6">
           <p>
             © {new Date().getFullYear()} <span dir="ltr">{company.legalName}</span> · {dict.footer.enterpriseCode}{" "}
-            <span dir="ltr">{company.enterpriseCode}</span>. {dict.footer.rights}
+            <span dir="ltr">{company.enterpriseCode}</span>. {text.rights}
           </p>
-          <p>{dict.footer.proudly} 🇻🇳</p>
+          <p>{text.proudly} 🇻🇳</p>
         </div>
       </div>
     </footer>

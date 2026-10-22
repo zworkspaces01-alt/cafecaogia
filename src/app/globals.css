@@ -233,3 +233,9 @@ details[open] > :not(summary) {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Page builder: the layout preview renders draft header/footer/contact buttons, so the published ones
+   from the site layout step aside (see app/[lang]/preview/[ref]). */
+body:has([data-chrome-preview]) [data-site-chrome] {
+  display: none;
+}

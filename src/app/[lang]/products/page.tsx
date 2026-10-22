@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { CtaBanner } from "@/components/cta-banner";
-import Link from "@/components/link";
+import { RenderBlocks } from "@/components/blocks/render-blocks";
 import { breadcrumbList, JsonLd, webPage } from "@/components/json-ld";
-import { PageHero } from "@/components/page-hero";
-import { ProductCard } from "@/components/product-card";
 import { localeTags } from "@/i18n/config";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
+import { loadSystemPage, systemPageSeo } from "@/lib/pages";
 import { getProducts } from "@/lib/products";
 import { pageMeta } from "@/lib/seo";
-import { factoryPhotos, site } from "@/lib/site";
+import { site } from "@/lib/site";
 import type { Category } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
+  const custom = await systemPageSeo("products", locale);
   return {
     ...(await pageMeta("products", { title: dict.productsPage.metaTitle, description: dict.productsPage.metaDescription })),
+    ...(custom.title && { title: custom.title }),
+    ...(custom.description && { description: custom.description }),
     alternates: localeAlternates(locale, "/products"),
   };
 }
@@ -30,29 +30,17 @@ export const dynamic = "force-dynamic";
 
 export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/products">) {
   const category = parseCategory((await searchParams).category);
-  const [locale, dict, products] = await Promise.all([getLocale(), getDictionary(), getProducts(category)]);
-  const t = dict.productsPage;
-
-  const filters: { value?: Category; label: string }[] = [
-    { label: t.all },
-    { value: "coffee", label: dict.categories.coffee },
-    { value: "cashew", label: dict.categories.cashew },
-  ];
+  const [locale, dict, products, page] = await Promise.all([getLocale(), getDictionary(), getProducts(category), loadSystemPage("products")]);
 
   const pageUrl = `${site.url}/${locale}/products`;
   const pageJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
-        ...webPage("CollectionPage", pageUrl, t.metaTitle, localeTags[locale]),
+        ...webPage("CollectionPage", pageUrl, dict.productsPage.metaTitle, localeTags[locale]),
         mainEntity: {
           "@type": "ItemList",
-          itemListElement: products.map((product, i) => ({
-            "@type": "ListItem",
-            position: i + 1,
-            name: product.name,
-            url: `${pageUrl}/${product.slug}`,
-          })),
+          itemListElement: products.map((product, i) => ({ "@type": "ListItem", position: i + 1, name: product.name, url: `${pageUrl}/${product.slug}` })),
         },
       },
       breadcrumbList([
@@ -65,43 +53,8 @@ export default async function ProductsPage({ searchParams }: PageProps<"/[lang]/
   return (
     <>
       <JsonLd data={pageJsonLd} />
-      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.forklift} />
-
-      <section className="py-16 md:py-20">
-        <div className="container-page">
-          <nav data-reveal aria-label={t.filterLabel} className="flex flex-wrap gap-2">
-            {filters.map((f) => {
-              const active = f.value === category;
-              return (
-                <Link
-                  key={f.label}
-                  href={f.value ? `/products?category=${f.value}` : "/products"}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "inline-flex min-h-11 items-center rounded-full px-5 text-sm transition-colors",
-                    active ? "bg-forest text-white" : "bg-white text-forest hover:bg-mist",
-                  )}
-                >
-                  {f.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Keeps the outline H1 → H2 → H3 (product cards) for crawlers and screen readers. */}
-          <h2 className="sr-only">{filters.find((f) => f.value === category)?.label}</h2>
-          <ul data-reveal-stagger className="mt-10 grid gap-x-6 gap-y-6 sm:grid-cols-2 sm:gap-y-12 lg:grid-cols-3">
-            {products.map((product) => (
-              <li key={product.slug}>
-                <ProductCard product={product} categoryLabel={dict.categories[product.category]} compact />
-              </li>
-            ))}
-          </ul>
-          {products.length === 0 && <p className="mt-10 text-muted">{t.empty}</p>}
-        </div>
-      </section>
-
-      <CtaBanner />
+      {/* Sections come from the page builder (admin → Trang). */}
+      <RenderBlocks blocks={page?.blocks ?? []} locale={locale} context={{ productCategory: category }} />
     </>
   );
 }

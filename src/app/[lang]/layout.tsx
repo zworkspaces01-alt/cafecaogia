@@ -11,7 +11,8 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { getContacts, getPosts, getSettings, whatsappLink } from "@/lib/content";
 import { getProducts } from "@/lib/products";
 import { imageUrl } from "@/lib/image-url";
-import { systemPageSeo } from "@/lib/pages";
+import { chromeFromBlocks } from "@/lib/chrome";
+import { loadSystemPage, systemPageSeo } from "@/lib/pages";
 import { pageMeta } from "@/lib/seo";
 import { factoryPhotos, site } from "@/lib/site";
 import "../globals.css";
@@ -91,14 +92,17 @@ export async function generateMetadata(): Promise<Metadata> {
 const motionPendingScript = `if(!matchMedia("(prefers-reduced-motion: reduce)").matches){var d=document.documentElement;d.classList.add("motion-pending");setTimeout(function(){d.classList.remove("motion-pending")},3000)}`;
 
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
-  const [locale, dict, products, settings, contacts, posts] = await Promise.all([
+  const [locale, dict, products, settings, contacts, posts, layout] = await Promise.all([
     getLocale(),
     getDictionary(),
     getProducts(),
     getSettings(),
     getContacts(),
     getPosts(),
+    loadSystemPage("layout"),
   ]);
+  // Header, footer and floating buttons as published in the page builder (admin → Trang).
+  const chrome = chromeFromBlocks(layout?.blocks ?? [], locale, dict);
   const whatsapp = settings.contact.whatsapp;
   const menuProducts = products.map(({ slug, name, grade, category, image, featured }) => ({
     slug,
@@ -116,27 +120,29 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
         <script dangerouslySetInnerHTML={{ __html: motionPendingScript }} />
       </head>
       <body className="flex min-h-svh flex-col">
-        <SiteHeader
-          locale={locale}
-          nav={dict.nav}
-          common={dict.common}
-          menu={{ products: menuProducts, t: dict.megaMenu, categories: dict.categories }}
-          whatsappHref={whatsappLink(whatsapp, dict.common.whatsappGreeting)}
-          showInsights={posts.length > 0}
-        />
-        <MotionMain footer={<SiteFooter />}>{children}</MotionMain>
-        <ContactDock
-          labels={{
-            requestQuote: dict.common.requestQuote,
-            chat: dict.common.chatWhatsApp,
-            greeting: dict.common.whatsappGreeting,
-            nudge: dict.common.whatsappNudge,
-            online: dict.common.online,
-            dismiss: dict.common.dismiss,
-          }}
-          whatsapp={whatsapp}
-          contactName={contacts[0]?.name ?? site.name}
-        />
+        {/* data-site-chrome: the page builder's layout preview hides these and shows its draft instead. */}
+        <div data-site-chrome className="contents">
+          <SiteHeader
+            locale={locale}
+            nav={chrome.nav}
+            common={chrome.common}
+            menu={{ products: menuProducts, t: dict.megaMenu, categories: dict.categories }}
+            whatsappHref={whatsappLink(whatsapp, chrome.common.whatsappGreeting)}
+            showInsights={posts.length > 0}
+          />
+        </div>
+        <MotionMain
+          footer={
+            <div data-site-chrome>
+              <SiteFooter t={chrome.footer} />
+            </div>
+          }
+        >
+          {children}
+        </MotionMain>
+        <div data-site-chrome className="contents">
+          <ContactDock labels={chrome.dock} whatsapp={whatsapp} contactName={contacts[0]?.name ?? site.name} />
+        </div>
         <Analytics ids={settings.analytics} />
       </body>
     </html>

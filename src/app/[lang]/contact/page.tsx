@@ -1,61 +1,36 @@
 import type { Metadata } from "next";
-import { WhatsAppIcon } from "@/components/icons/whatsapp";
-import { Clock, Mail, MapPin } from "lucide-react";
-import { InquiryForm } from "@/components/inquiry-form";
+import { RenderBlocks } from "@/components/blocks/render-blocks";
 import { breadcrumbList, JsonLd, webPage } from "@/components/json-ld";
-import { PageHero } from "@/components/page-hero";
 import { localeTags } from "@/i18n/config";
-import { format } from "@/i18n/format";
 import { localeAlternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
-import { getSettings, whatsappLink } from "@/lib/content";
-import { getProducts } from "@/lib/products";
+import { loadSystemPage, systemPageSeo } from "@/lib/pages";
 import { pageMeta } from "@/lib/seo";
-import { factoryPhotos, site } from "@/lib/site";
+import { site } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [locale, dict] = await Promise.all([getLocale(), getDictionary()]);
+  const custom = await systemPageSeo("contact", locale);
   return {
     ...(await pageMeta("contact", { title: dict.contact.metaTitle, description: dict.contact.metaDescription })),
+    ...(custom.title && { title: custom.title }),
+    ...(custom.description && { description: custom.description }),
     alternates: localeAlternates(locale, "/contact"),
   };
 }
 
-// Filters come from the query string, so this page renders per request rather than from the ISR cache.
+// The product and sample request come from the query string, so this page renders per request.
 export const dynamic = "force-dynamic";
 
 export default async function ContactPage({ searchParams }: PageProps<"/[lang]/contact">) {
-  const { product: productParam, sample } = await searchParams;
-  const [locale, dict, products, settings] = await Promise.all([
-    getLocale(),
-    getDictionary(),
-    getProducts(),
-    getSettings(),
-  ]);
-  const { contact } = settings;
-  const t = dict.contact;
-  const selected = products.find((p) => p.slug === productParam);
-  const { address } = contact;
-
-  const contacts = [
-    { icon: Mail, label: t.email, value: contact.email, href: `mailto:${contact.email}` },
-    {
-      icon: WhatsAppIcon,
-      label: `${t.whatsapp} / ${t.phone}`,
-      value: contact.whatsapp,
-      href: whatsappLink(contact.whatsapp),
-      ltr: true,
-      brand: true,
-    },
-    { icon: MapPin, label: t.office, value: `${address.street}, ${address.locality}, ${address.country}`, ltr: true },
-    { icon: Clock, label: t.hours, value: t.hoursValue },
-  ];
+  const { product, sample } = await searchParams;
+  const [locale, dict, page] = await Promise.all([getLocale(), getDictionary(), loadSystemPage("contact")]);
 
   const pageUrl = `${site.url}/${locale}/contact`;
   const pageJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
-      webPage("ContactPage", pageUrl, t.metaTitle, localeTags[locale]),
+      webPage("ContactPage", pageUrl, dict.contact.metaTitle, localeTags[locale]),
       breadcrumbList([
         { name: dict.nav.home, url: `${site.url}/${locale}` },
         { name: dict.nav.contact, url: pageUrl },
@@ -66,63 +41,12 @@ export default async function ContactPage({ searchParams }: PageProps<"/[lang]/c
   return (
     <>
       <JsonLd data={pageJsonLd} />
-      <PageHero eyebrow={t.eyebrow} title={t.title} accent={t.accent} description={t.description} image={factoryPhotos.sacksLiners} />
-
-      <section className="py-16 md:py-24">
-        <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.8fr]">
-          {/* Phones show the form first; the contact details follow it. */}
-          <aside className="order-last lg:order-none">
-            <div data-reveal-stagger>
-              <h2 className="text-2xl font-medium text-forest">{t.asideTitle}</h2>
-              <p className="mt-3 text-muted">{t.asideBody}</p>
-            </div>
-            <ul data-reveal-stagger className="mt-8 space-y-3">
-              {contacts.map(({ icon: Icon, label, value, href, ltr, brand }) => (
-                <li key={label} className="flex items-start gap-4 rounded-2xl bg-white p-4">
-                  <span
-                    className={`grid size-10 shrink-0 place-items-center rounded-xl ${brand ? "bg-[#25d366] text-white" : "bg-lime text-forest"}`}
-                  >
-                    <Icon className="size-5" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-xs text-muted">{label}</span>
-                    {href ? (
-                      <a
-                        href={href}
-                        dir={ltr ? "ltr" : undefined}
-                        className="text-sm font-medium break-words text-forest hover:text-leaf"
-                        {...(href.startsWith("http") && { target: "_blank", rel: "noopener noreferrer" })}
-                      >
-                        {value}
-                      </a>
-                    ) : (
-                      <span dir={ltr ? "ltr" : undefined} className="block text-sm font-medium text-forest">
-                        {value}
-                      </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div data-reveal className="mt-6 rounded-2xl border border-mist p-5 text-sm text-muted">
-              <p className="font-medium text-forest">{t.tradeTerms}</p>
-              <p className="mt-2">
-                {t.incoterms}: {site.incoterms.join(", ")}
-              </p>
-              <p>
-                {t.payment}: {dict.common.paymentTerms.join(", ")}
-              </p>
-            </div>
-          </aside>
-
-          <InquiryForm
-            locale={locale}
-            t={dict.form}
-            defaultProduct={selected?.slug}
-            defaultMessage={selected && sample ? format(t.sampleMessage, { product: selected.name }) : undefined}
-          />
-        </div>
-      </section>
+      {/* Sections come from the page builder (admin → Trang). */}
+      <RenderBlocks
+        blocks={page?.blocks ?? []}
+        locale={locale}
+        context={{ quoteProduct: typeof product === "string" ? product : undefined, quoteSample: Boolean(sample) }}
+      />
     </>
   );
 }

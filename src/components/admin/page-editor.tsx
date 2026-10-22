@@ -40,7 +40,7 @@ import { inputClass } from "@/components/admin/ui";
 import { locales, type Locale } from "@/i18n/config";
 import { moveBlock } from "@/lib/blocks/edit";
 import { newBlockId } from "@/lib/blocks/resolve";
-import { blockGroups, blockSchema, blockSchemas } from "@/lib/blocks/schema";
+import { blockGroups, blockSchema, blocksFor } from "@/lib/blocks/schema";
 import type { Block, PageSeo } from "@/lib/blocks/types";
 import { cn } from "@/lib/utils";
 
@@ -562,7 +562,7 @@ export function PageEditor(props: Props) {
         />
       </div>
 
-      {palette && <Palette onPick={(type) => addBlock(type, palette.at)} onClose={() => setPalette(null)} />}
+      {palette && <Palette pageRef={props.pageRef} onPick={(type) => addBlock(type, palette.at)} onClose={() => setPalette(null)} />}
       {publishOpen && <PublishDialog busy={busy} onPublish={publish} onClose={() => setPublishOpen(false)} />}
     </div>
   );
@@ -688,7 +688,9 @@ function PublishDialog({ busy, onPublish, onClose }: { busy: boolean; onPublish:
   );
 }
 
-function Palette({ onPick, onClose }: { onPick: (type: string) => void; onClose: () => void }) {
+/** Blocks that can go on this page, grouped; templates and the site layout only offer their own. */
+function Palette({ pageRef, onPick, onClose }: { pageRef: string; onPick: (type: string) => void; onClose: () => void }) {
+  const available = blocksFor(pageRef);
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4" onClick={onClose}>
       <div className="max-h-[85svh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -698,11 +700,11 @@ function Palette({ onPick, onClose }: { onPick: (type: string) => void; onClose:
             <X className="size-5" />
           </button>
         </div>
-        {blockGroups.map((group) => (
+        {blockGroups.filter((group) => available.some((s) => s.group === group.key)).map((group) => (
           <div key={group.key} className="mt-5">
             <p className="text-xs font-medium tracking-wide text-muted uppercase">{group.label}</p>
             <ul className="mt-2 grid gap-2 sm:grid-cols-2">
-              {blockSchemas
+              {available
                 .filter((s) => s.group === group.key)
                 .map((s) => (
                   <li key={s.type}>
