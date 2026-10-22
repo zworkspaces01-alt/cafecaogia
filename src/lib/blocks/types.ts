@@ -22,13 +22,27 @@ export type Block = {
 export type PageSeo = Partial<Record<Locale, { title?: string; description?: string }>>;
 
 /** Pages that exist in code (their routes, JSON-LD and data stay in code; their blocks are editable). */
+// `kind`: "page" — a route of its own; "template" — the layout shared by every product or article page
+// (their own data stays under Sản phẩm / Bài viết); "layout" — header, footer and floating contact
+// buttons on every page.
 export const systemPages = [
-  { key: "home", path: "", label: "Trang chủ" },
-  { key: "about", path: "/about", label: "Giới thiệu (About)" },
-  { key: "process", path: "/process", label: "Quy trình (Process)" },
-  { key: "green-coffee", path: "/green-coffee", label: "Cà phê nhân (Green coffee)" },
-  { key: "cashew-kernels", path: "/cashew-kernels", label: "Hạt điều (Cashew kernels)" },
+  { key: "home", path: "", label: "Trang chủ", kind: "page" },
+  { key: "about", path: "/about", label: "Giới thiệu (About)", kind: "page" },
+  { key: "about-ceo", path: "/about-ceo", label: "Lãnh đạo (About CEO)", kind: "page" },
+  { key: "process", path: "/process", label: "Quy trình (Process)", kind: "page" },
+  { key: "products", path: "/products", label: "Danh sách sản phẩm", kind: "page" },
+  { key: "green-coffee", path: "/green-coffee", label: "Cà phê nhân (Green coffee)", kind: "page" },
+  { key: "cashew-kernels", path: "/cashew-kernels", label: "Hạt điều (Cashew kernels)", kind: "page" },
+  { key: "gallery", path: "/gallery", label: "Thư viện ảnh (Gallery)", kind: "page" },
+  { key: "insights", path: "/insights", label: "Danh sách bài viết (Insights)", kind: "page" },
+  { key: "contact", path: "/contact", label: "Liên hệ / báo giá (Contact)", kind: "page" },
+  { key: "not-found", path: "/404", label: "Trang 404", kind: "page" },
+  { key: "product-template", path: "/products/…", label: "Mẫu trang sản phẩm", kind: "template" },
+  { key: "post-template", path: "/insights/…", label: "Mẫu trang bài viết", kind: "template" },
+  { key: "layout", path: "", label: "Header, footer & nút liên hệ", kind: "layout" },
 ] as const;
+
+export type SystemPageKind = (typeof systemPages)[number]["kind"];
 
 export type SystemPageKey = (typeof systemPages)[number]["key"];
 
@@ -88,7 +102,7 @@ export type Field = TextField | LinesField | PairsField | SharedField | ListFiel
 
 export const isSharedField = (field: Field) => field.type === "image" || field.type === "url" || field.type === "select";
 
-export type BlockGroup = "home" | "page" | "content";
+export type BlockGroup = "home" | "page" | "content" | "template" | "layout";
 
 /** What the editor knows about a block type. */
 export type BlockSchema = {
@@ -97,4 +111,6 @@ export type BlockSchema = {
   description: string;
   group: BlockGroup;
   fields: Field[];
+  /** Pages this block can be added to; omitted = any page (but not the templates or layout). */
+  only?: SystemPageKey[];
 };

@@ -155,6 +155,159 @@ function hubBlocks(d: Dicts, hub: "coffee" | "cashew"): Block[] {
   ];
 }
 
+
+const hero = (x: { eyebrow: string; title: string; accent: string; description: string }) => ({
+  eyebrow: x.eyebrow,
+  title: x.title,
+  accent: x.accent,
+  description: x.description,
+});
+
+function productsBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "products-hero", "pageHero", (x) => hero(x.productsPage), (en) => ({ ...en, image: factoryPhotos.forklift })),
+    fromDict(d, "products-grid", "productGrid", (x) => ({ filterLabel: x.productsPage.filterLabel, all: x.productsPage.all, empty: x.productsPage.empty })),
+    fromDict(d, "products-cta", "cta", (x) => x.cta),
+  ];
+}
+
+function insightsBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "insights-hero", "pageHero", (x) => hero(x.insights), (en) => ({ ...en, image: photos.hillside })),
+    fromDict(d, "insights-list", "postList", (x) => ({ filterLabel: x.insights.filterLabel, all: x.insights.all, empty: x.insights.empty })),
+    fromDict(d, "insights-cta", "cta", (x) => x.cta),
+  ];
+}
+
+function galleryBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "gallery-hero", "pageHero", (x) => hero(x.gallery), (en) => ({ ...en, image: factoryPhotos.sacksSilos })),
+    fromDict(d, "gallery-photos", "photoGallery", (x) => ({ photoCount: x.gallery.photoCount })),
+    fromDict(d, "gallery-cta", "cta", (x) => x.cta),
+  ];
+}
+
+function contactBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "contact-hero", "pageHero", (x) => hero(x.contact), (en) => ({ ...en, image: factoryPhotos.sacksLiners })),
+    fromDict(d, "contact-form", "contactForm", (x) => {
+      const { asideTitle, asideBody, email, whatsapp, phone, office, hours, hoursValue, tradeTerms, incoterms, payment, sampleMessage } = x.contact;
+      return { asideTitle, asideBody, email, whatsapp, phone, office, hours, hoursValue, tradeTerms, incoterms, payment, sampleMessage };
+    }),
+  ];
+}
+
+const focusIcons = ["plane", "shield", "globe", "ruler"];
+
+function ceoBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "ceo-hero", "pageHero", (x) => hero(x.ceo), (en) => ({ ...en, image: factoryPhotos.processingFloor })),
+    fromDict(d, "ceo-profile", "ceoProfile", (x) => ({ contactTitle: x.ceo.contactTitle })),
+    fromDict(
+      d,
+      "ceo-focus",
+      "valueCards",
+      (x) => ({ eyebrow: x.ceo.focusEyebrow, title: x.ceo.focusTitle, accent: x.ceo.focusAccent, description: "", items: x.ceo.focus }),
+      (en) => ({ ...en, showStats: "no", items: withItems(en.items, focusIcons.map((icon) => ({ icon }))) }),
+    ),
+    fromDict(d, "ceo-principles", "numberedCards", (x) => ({ eyebrow: x.ceo.principlesEyebrow, title: x.ceo.principlesTitle, accent: x.ceo.principlesAccent, items: x.ceo.principles })),
+    fromDict(
+      d,
+      "ceo-buyers",
+      "checklist",
+      (x) => ({ eyebrow: "", title: x.ceo.buyersTitle, accent: x.ceo.buyersAccent, items: x.ceo.buyers, cta: x.common.requestQuote }),
+      (en) => ({ ...en, ctaHref: "/contact" }),
+    ),
+    fromDict(d, "ceo-cta", "cta", (x) => x.cta),
+  ];
+}
+
+function notFoundBlocks(d: Dicts): Block[] {
+  return [fromDict(d, "not-found", "notFound", (x) => x.notFound)];
+}
+
+function productTemplateBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "product-main", "productMain", (x) => {
+      const { origin, moq, packing, specification, terms, requestQuote, askSample, products } = x.product;
+      return { origin, moq, packing, specification, terms, requestQuote, askSample, products };
+    }),
+    fromDict(d, "product-insights", "productInsights", (x) => ({ title: x.product.insightsTitle, accent: x.product.insightsAccent })),
+    fromDict(d, "product-related", "relatedProducts", (x) => ({ title: x.product.relatedTitle, accent: x.product.relatedAccent })),
+  ];
+}
+
+function postTemplateBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "post-main", "postMain", (x) => ({
+      productsTitle: x.insights.productsTitle,
+      boxTitle: x.megaMenu.samplesTitle,
+      boxBody: x.megaMenu.samplesBody,
+      boxCta: x.common.requestQuote,
+    })),
+    fromDict(d, "post-more", "postMore", (x) => ({ title: x.insights.moreTitle, accent: x.insights.moreAccent, allArticles: x.insights.allArticles })),
+  ];
+}
+
+/** Footer link columns as they were in code: [label, path] pairs. */
+const footerColumns = (x: Dictionary) => {
+  const l = x.footer.links;
+  return [
+    {
+      title: x.footer.coffee,
+      links: [
+        [l.robustaS18, "/products/robusta-s18-clean"],
+        [l.roastedBlend, "/products/roasted-ground-blend-70-30"],
+        [l.arabicaS18, "/products/arabica-s18-clean"],
+        [l.allCoffee, "/green-coffee"],
+      ],
+    },
+    {
+      title: x.footer.cashew,
+      links: [
+        [l.w240, "/products/cashew-ww240"],
+        [l.w320, "/products/cashew-ww320"],
+        [l.splits, "/products/cashew-ws"],
+        [l.roasted, "/products/roasted-salted-cashews"],
+        [l.allCashew, "/cashew-kernels"],
+      ],
+    },
+    {
+      title: x.footer.company,
+      links: [
+        [x.nav.about, "/about"],
+        [l.leadership, "/about-ceo"],
+        [x.nav.process, "/process"],
+        [x.nav.gallery, "/gallery"],
+        [x.nav.insights, "/insights"],
+        [l.allProducts, "/products"],
+        [l.profile, "/company-profile"],
+        [x.common.requestQuote, "/contact"],
+      ],
+    },
+  ];
+};
+
+function layoutBlocks(d: Dicts): Block[] {
+  return [
+    fromDict(d, "site-header", "siteHeader", (x) => ({ nav: x.nav, requestQuote: x.common.requestQuote })),
+    fromDict(d, "site-footer", "siteFooter", (x) => ({
+      tagline: x.footer.tagline,
+      description: x.footer.description,
+      columns: footerColumns(x),
+      rights: x.footer.rights,
+      proudly: x.footer.proudly,
+    })),
+    fromDict(d, "contact-dock", "contactDock", (x) => ({
+      chat: x.common.chatWhatsApp,
+      requestQuote: x.common.requestQuote,
+      nudge: x.common.whatsappNudge,
+      greeting: x.common.whatsappGreeting,
+      online: x.common.online,
+    })),
+  ];
+}
+
 /** The layout a system page has when nothing has been saved for it. */
 export async function defaultPageBlocks(key: SystemPageKey): Promise<Block[]> {
   const dicts = await loadAll();
@@ -169,6 +322,24 @@ export async function defaultPageBlocks(key: SystemPageKey): Promise<Block[]> {
       return hubBlocks(dicts, "coffee");
     case "cashew-kernels":
       return hubBlocks(dicts, "cashew");
+    case "products":
+      return productsBlocks(dicts);
+    case "insights":
+      return insightsBlocks(dicts);
+    case "gallery":
+      return galleryBlocks(dicts);
+    case "contact":
+      return contactBlocks(dicts);
+    case "about-ceo":
+      return ceoBlocks(dicts);
+    case "not-found":
+      return notFoundBlocks(dicts);
+    case "product-template":
+      return productTemplateBlocks(dicts);
+    case "post-template":
+      return postTemplateBlocks(dicts);
+    case "layout":
+      return layoutBlocks(dicts);
   }
 }
 
@@ -176,7 +347,22 @@ export async function defaultPageBlocks(key: SystemPageKey): Promise<Block[]> {
 export async function blockTemplates(): Promise<Record<string, Block["content"]>> {
   const dicts = await loadAll();
   const templates: Record<string, Block["content"]> = {};
-  for (const block of [...homeBlocks(dicts), ...aboutBlocks(dicts), ...processBlocks(dicts), ...hubBlocks(dicts, "coffee")]) {
+  const all = [
+    ...homeBlocks(dicts),
+    ...aboutBlocks(dicts),
+    ...processBlocks(dicts),
+    ...hubBlocks(dicts, "coffee"),
+    ...productsBlocks(dicts),
+    ...insightsBlocks(dicts),
+    ...galleryBlocks(dicts),
+    ...contactBlocks(dicts),
+    ...ceoBlocks(dicts),
+    ...notFoundBlocks(dicts),
+    ...productTemplateBlocks(dicts),
+    ...postTemplateBlocks(dicts),
+    ...layoutBlocks(dicts),
+  ];
+  for (const block of all) {
     templates[block.type] ??= block.content;
   }
   templates.richText = {

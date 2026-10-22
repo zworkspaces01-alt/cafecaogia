@@ -23,6 +23,8 @@ export const iconOptions = [
   { value: "ship", label: "Tàu" },
   { value: "globe", label: "Địa cầu" },
   { value: "award", label: "Giải thưởng" },
+  { value: "plane", label: "Máy bay" },
+  { value: "ruler", label: "Thước đo" },
 ];
 
 export const blockSchemas: BlockSchema[] = [
@@ -485,12 +487,252 @@ export const blockSchemas: BlockSchema[] = [
       { name: "languages", label: "Ngôn ngữ hỗ trợ", type: "text" },
     ],
   },
+
+  // ── Listing, contact and leadership pages ─────────────────────────────────
+  {
+    type: "productGrid",
+    label: "Lưới sản phẩm có bộ lọc",
+    description: "Tất cả sản phẩm (lấy từ mục Sản phẩm) với bộ lọc Cà phê / Hạt điều.",
+    group: "page",
+    only: ["products"],
+    fields: [
+      { name: "filterLabel", label: "Nhãn bộ lọc (cho trình đọc màn hình)", type: "text" },
+      { name: "all", label: "Nút \"Tất cả\"", type: "text" },
+      { name: "empty", label: "Khi không có sản phẩm", type: "text" },
+    ],
+  },
+  {
+    type: "postList",
+    label: "Danh sách bài viết",
+    description: "Bài nổi bật và các bài còn lại (lấy từ mục Bài viết), lọc theo chủ đề.",
+    group: "page",
+    only: ["insights"],
+    fields: [
+      { name: "filterLabel", label: "Nhãn bộ lọc (cho trình đọc màn hình)", type: "text" },
+      { name: "all", label: "Nút \"Tất cả\"", type: "text" },
+      { name: "empty", label: "Khi chưa có bài viết", type: "text" },
+    ],
+  },
+  {
+    type: "photoGallery",
+    label: "Thư viện ảnh",
+    description: "Toàn bộ ảnh theo công đoạn, mở xem lớn được.",
+    group: "page",
+    only: ["gallery"],
+    fields: [{ name: "photoCount", label: "Số ảnh", type: "text", help: "Dùng {count} cho số ảnh." }],
+  },
+  {
+    type: "contactForm",
+    label: "Form báo giá & thông tin liên hệ",
+    description: "Form gửi yêu cầu cùng email, WhatsApp, địa chỉ (từ Cài đặt công ty).",
+    group: "page",
+    only: ["contact"],
+    fields: [
+      { name: "asideTitle", label: "Tiêu đề cột liên hệ", type: "text" },
+      { name: "asideBody", label: "Mô tả cột liên hệ", type: "textarea" },
+      { name: "email", label: "Nhãn email", type: "text" },
+      { name: "whatsapp", label: "Nhãn WhatsApp", type: "text" },
+      { name: "phone", label: "Nhãn điện thoại", type: "text" },
+      { name: "office", label: "Nhãn văn phòng", type: "text" },
+      { name: "hours", label: "Nhãn giờ làm việc", type: "text" },
+      { name: "hoursValue", label: "Giờ làm việc", type: "text" },
+      { name: "tradeTerms", label: "Tiêu đề điều khoản", type: "text" },
+      { name: "incoterms", label: "Nhãn Incoterms", type: "text" },
+      { name: "payment", label: "Nhãn thanh toán", type: "text" },
+      { name: "sampleMessage", label: "Lời nhắn khi xin mẫu", type: "text", help: "Dùng {product} cho tên sản phẩm." },
+    ],
+  },
+  {
+    type: "ceoProfile",
+    label: "Hồ sơ lãnh đạo",
+    description: "Ảnh, tên, tiểu sử và liên hệ của CEO (sửa ở mục Đội ngũ & CEO).",
+    group: "page",
+    only: ["about-ceo"],
+    fields: [{ name: "contactTitle", label: "Tiêu đề phần liên hệ", type: "text" }],
+  },
+  {
+    type: "numberedCards",
+    label: "Thẻ đánh số (nền tối)",
+    description: "Các thẻ 01, 02, 03… trên nền tối.",
+    group: "content",
+    fields: [
+      ...heading(false),
+      {
+        name: "items",
+        label: "Thẻ",
+        type: "list",
+        titleField: "title",
+        fields: [
+          { name: "title", label: "Tiêu đề", type: "text" },
+          { name: "body", label: "Nội dung", type: "textarea" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "checklist",
+    label: "Danh sách có dấu tích",
+    description: "Tiêu đề bên trái, danh sách tích và nút bên phải.",
+    group: "content",
+    fields: [
+      ...heading(false),
+      { name: "items", label: "Các ý", type: "lines" },
+      { name: "cta", label: "Nút", type: "text" },
+      { name: "ctaHref", label: "Link nút", type: "url" },
+    ],
+  },
+  {
+    type: "notFound",
+    label: "Thông báo 404",
+    description: "Thông báo không tìm thấy trang và nút quay lại.",
+    group: "page",
+    only: ["not-found"],
+    fields: [
+      { name: "title", label: "Tiêu đề", type: "text" },
+      { name: "accent", label: "Tiêu đề (chữ nghiêng)", type: "text" },
+      { name: "body", label: "Nội dung", type: "text" },
+      { name: "home", label: "Nút về trang chủ", type: "text" },
+      { name: "browse", label: "Nút xem sản phẩm", type: "text" },
+    ],
+  },
+
+  // ── Product and article templates ─────────────────────────────────────────
+  {
+    type: "productMain",
+    label: "Nội dung sản phẩm",
+    description: "Ảnh, tên, mô tả, thông số và nút báo giá của từng sản phẩm (dữ liệu ở mục Sản phẩm).",
+    group: "template",
+    only: ["product-template"],
+    fields: [
+      { name: "origin", label: "Nhãn xuất xứ", type: "text" },
+      { name: "moq", label: "Nhãn MOQ", type: "text" },
+      { name: "packing", label: "Nhãn đóng gói", type: "text" },
+      { name: "specification", label: "Tiêu đề bảng thông số", type: "text" },
+      { name: "terms", label: "Nhãn điều khoản", type: "text" },
+      { name: "requestQuote", label: "Nút báo giá", type: "text" },
+      { name: "askSample", label: "Nút xin mẫu", type: "text" },
+    ],
+  },
+  {
+    type: "productInsights",
+    label: "Bài viết về sản phẩm",
+    description: "Các bài viết gắn với sản phẩm; tự ẩn khi không có.",
+    group: "template",
+    only: ["product-template"],
+    fields: [
+      { name: "title", label: "Tiêu đề", type: "text" },
+      { name: "accent", label: "Tiêu đề (chữ nghiêng)", type: "text" },
+    ],
+  },
+  {
+    type: "relatedProducts",
+    label: "Sản phẩm cùng loại",
+    description: "3 sản phẩm khác cùng danh mục.",
+    group: "template",
+    only: ["product-template"],
+    fields: [
+      { name: "title", label: "Tiêu đề", type: "text" },
+      { name: "accent", label: "Tiêu đề (chữ nghiêng)", type: "text" },
+    ],
+  },
+  {
+    type: "postMain",
+    label: "Nội dung bài viết",
+    description: "Tiêu đề, ảnh bìa, thân bài và sản phẩm liên quan của từng bài (dữ liệu ở mục Bài viết).",
+    group: "template",
+    only: ["post-template"],
+    fields: [
+      { name: "productsTitle", label: "Tiêu đề sản phẩm liên quan", type: "text" },
+      { name: "boxTitle", label: "Ô bên: tiêu đề", type: "text" },
+      { name: "boxBody", label: "Ô bên: nội dung", type: "textarea" },
+      { name: "boxCta", label: "Ô bên: nút", type: "text" },
+    ],
+  },
+  {
+    type: "postMore",
+    label: "Bài viết khác",
+    description: "3 bài khác, ưu tiên cùng chủ đề.",
+    group: "template",
+    only: ["post-template"],
+    fields: [
+      { name: "title", label: "Tiêu đề", type: "text" },
+      { name: "accent", label: "Tiêu đề (chữ nghiêng)", type: "text" },
+      { name: "allArticles", label: "Nút xem tất cả", type: "text" },
+    ],
+  },
+
+  // ── Site-wide: header, footer, floating contact buttons ───────────────────
+  {
+    type: "siteHeader",
+    label: "Header (menu)",
+    description: "Tên các mục menu và nút báo giá trên đầu mọi trang.",
+    group: "layout",
+    only: ["layout"],
+    fields: [
+      { name: "nav.home", label: "Menu: Trang chủ", type: "text" },
+      { name: "nav.products", label: "Menu: Sản phẩm", type: "text" },
+      { name: "nav.about", label: "Menu: Giới thiệu", type: "text" },
+      { name: "nav.process", label: "Menu: Quy trình", type: "text" },
+      { name: "nav.gallery", label: "Menu: Thư viện ảnh", type: "text" },
+      { name: "nav.insights", label: "Menu: Bài viết", type: "text" },
+      { name: "nav.contact", label: "Menu: Liên hệ", type: "text" },
+      { name: "requestQuote", label: "Nút báo giá", type: "text" },
+    ],
+  },
+  {
+    type: "siteFooter",
+    label: "Footer",
+    description: "Mô tả công ty, khẩu hiệu và các cột link cuối mọi trang.",
+    group: "layout",
+    only: ["layout"],
+    fields: [
+      { name: "tagline", label: "Khẩu hiệu dưới logo", type: "text" },
+      { name: "description", label: "Mô tả công ty", type: "textarea" },
+      {
+        name: "columns",
+        label: "Cột link",
+        type: "list",
+        titleField: "title",
+        fields: [
+          { name: "title", label: "Tiêu đề cột", type: "text" },
+          { name: "links", label: "Link (tên | đường dẫn)", type: "pairs" },
+        ],
+      },
+      { name: "rights", label: "Dòng bản quyền", type: "text" },
+      { name: "proudly", label: "Dòng cuối", type: "text" },
+    ],
+  },
+  {
+    type: "contactDock",
+    label: "Nút liên hệ nổi",
+    description: "Nút WhatsApp và báo giá nổi ở góc màn hình.",
+    group: "layout",
+    only: ["layout"],
+    fields: [
+      { name: "chat", label: "Nút WhatsApp", type: "text" },
+      { name: "requestQuote", label: "Nút báo giá", type: "text" },
+      { name: "nudge", label: "Lời chào hiện lên", type: "text" },
+      { name: "greeting", label: "Tin nhắn soạn sẵn trong WhatsApp", type: "text" },
+      { name: "online", label: "Trạng thái", type: "text" },
+    ],
+  },
 ];
 
 export const blockSchema = (type: string) => blockSchemas.find((schema) => schema.type === type);
 
 export const blockGroups: { key: BlockSchema["group"]; label: string }[] = [
+  { key: "template", label: "Mẫu trang" },
+  { key: "layout", label: "Giao diện chung" },
   { key: "content", label: "Nội dung" },
   { key: "page", label: "Khối trang" },
   { key: "home", label: "Khối trang chủ" },
 ];
+
+/**
+ * Blocks the editor offers on a page: those limited to it (`only`) plus, except on the templates and
+ * the site layout, every general block.
+ */
+export function blocksFor(pageKey: string) {
+  const special = pageKey === "layout" || pageKey.endsWith("-template");
+  return blockSchemas.filter((schema) => (schema.only ? (schema.only as string[]).includes(pageKey) : !special));
+}

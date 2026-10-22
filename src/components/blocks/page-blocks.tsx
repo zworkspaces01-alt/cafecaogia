@@ -12,6 +12,8 @@ import {
   Globe,
   HeartHandshake,
   Leaf,
+  Plane,
+  Ruler,
   Package,
   ShieldCheck,
   Ship,
@@ -42,6 +44,8 @@ const icons: Record<string, LucideIcon> = {
   ship: Ship,
   globe: Globe,
   award: Award,
+  plane: Plane,
+  ruler: Ruler,
 };
 const iconFor = (name: unknown) => icons[String(name)] ?? Leaf;
 

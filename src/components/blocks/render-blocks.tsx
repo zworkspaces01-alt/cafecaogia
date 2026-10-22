@@ -40,8 +40,11 @@ import { buyerVisitPhotos, factoryPhotos, galleryGroups, type FactoryPhoto } fro
 /* eslint-disable @typescript-eslint/no-explicit-any -- block content is validated by its schema in the editor */
 type Any = any;
 
-/** Renders a page's visible blocks in order. */
-export async function RenderBlocks({ blocks, locale }: { blocks: Block[]; locale: Locale }) {
+/**
+ * Renders a page's visible blocks in order. In the page builder's preview each block is wrapped in a
+ * `data-cms-block` element, so clicking it selects the block in the editor (see PreviewBridge).
+ */
+export async function RenderBlocks({ blocks, locale, preview = false }: { blocks: Block[]; locale: Locale; preview?: boolean }) {
   const visible = blocks.filter((block) => !block.hidden);
   const types = new Set(visible.map((block) => block.type));
   const needsProducts = ["featuredProducts", "aboutIntro", "productTable", "testimonials"].some((type) => types.has(type));
@@ -57,7 +60,16 @@ export async function RenderBlocks({ blocks, locale }: { blocks: Block[]; locale
   const rendered: ReactNode[] = [];
   visible.forEach((block, i) => {
     const previous = visible[i - 1];
-    rendered.push(<BlockView key={block.id} block={block} ctx={ctx} previousType={previous?.type} />);
+    const view = <BlockView key={block.id} block={block} ctx={ctx} previousType={previous?.type} />;
+    rendered.push(
+      preview ? (
+        <div key={block.id} data-cms-block={block.id}>
+          {view}
+        </div>
+      ) : (
+        view
+      ),
+    );
   });
   return <>{rendered}</>;
 }

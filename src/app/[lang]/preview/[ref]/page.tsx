@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PreviewBridge } from "@/components/admin/preview-bridge";
 import { RenderBlocks } from "@/components/blocks/render-blocks";
 import { PreviewBanner } from "@/components/preview-banner";
 import { getLocale } from "@/i18n/server";
@@ -19,8 +20,9 @@ export default async function PreviewPage({ params }: PageProps<"/[lang]/preview
   if (!draft) notFound();
   return (
     <>
-      <RenderBlocks blocks={draft.blocks} locale={locale} />
+      <RenderBlocks blocks={draft.blocks} locale={locale} preview />
       <PreviewBanner />
+      <PreviewBridge />
     </>
   );
 }

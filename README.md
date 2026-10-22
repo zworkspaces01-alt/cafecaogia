@@ -137,10 +137,12 @@ CMS → **Trang**: mỗi trang là danh sách khối (hero, thẻ, FAQ, bảng s
 
 - **Trang hệ thống** (Trang chủ, Giới thiệu, Quy trình, Cà phê nhân, Hạt điều): chưa sửa thì hiển thị bố cục mặc định lấy từ `src/i18n/dictionaries`. Lần sửa đầu tiên sẽ lưu bố cục đó vào D1.
 - **Trang tự tạo**: nằm ở `/{lang}/{slug}`, ẩn cho tới lần xuất bản đầu tiên; không được trùng các đường dẫn đã có (`reservedSlugs` trong `src/lib/blocks/types.ts`).
-- Kéo thả để sắp xếp, ẩn/hiện từng khối, sửa nội dung theo từng ngôn ngữ. Mọi thay đổi tự lưu thành **bản nháp**, khách vẫn thấy bản đã xuất bản.
-- Khung xem trước bên phải là `/{lang}/preview/{trang}`: hiển thị bản nháp trong giao diện thật, chỉ admin mở được, không được lập chỉ mục.
-- **Xuất bản** cập nhật website ngay và lưu vào lịch sử phiên bản; có thể khôi phục một phiên bản cũ hoặc bố cục mặc định vào bản nháp.
-- Bảng D1: `pages`, `page_drafts`, `page_versions` (`migrations/0003_page_builder.sql`).
+- Trình sửa có 3 cột (cần màn hình ≥ 1024px): **danh sách khối** (kéo thả để sắp xếp, ẩn/hiện) · **nội dung khối đang chọn** theo từng ngôn ngữ · **xem trước** trang thật. Ô tên trang ở góc trái để chuyển nhanh sang trang khác.
+- Bấm vào một khối trong khung xem trước để chọn nó; chọn khối trong danh sách thì khung xem trước cuộn tới. Xem trước theo máy tính (1440px), máy tính bảng (820px), điện thoại (390px) — hiển thị đúng bề rộng rồi thu nhỏ cho vừa.
+- Mọi thay đổi tự lưu thành **bản nháp** (⌘S để lưu ngay), khách vẫn thấy bản đã xuất bản. ⌘Z / ⇧⌘Z để hoàn tác / làm lại. Trạng thái: *Đang lưu… / Đã lưu nháp — chưa xuất bản / Khớp với website*.
+- Khung xem trước là `/{lang}/preview/{trang}`: bản nháp trong giao diện thật, chỉ admin mở được, không được lập chỉ mục.
+- **Xuất bản** (kèm ghi chú tuỳ chọn) cập nhật website ngay và lưu vào lịch sử; có thể khôi phục một phiên bản cũ hoặc bố cục mặc định vào bản nháp.
+- Bảng D1: `pages`, `page_drafts`, `page_versions` (`migrations/0003_page_builder.sql`, ghi chú xuất bản: `0004`).
 
 ### Tài khoản quản trị
 

@@ -102,7 +102,7 @@ export async function savePageDraft(ref: string, blocks: unknown, seo: PageSeo):
 }
 
 /** Publishes the draft: it becomes the live page and is kept in the version history. */
-export async function publishPage(ref: string): Promise<Result> {
+export async function publishPage(ref: string, note = ""): Promise<Result> {
   try {
     const { user, page } = await resolvePage(ref);
     const draft = await first<{ blocks: Block[]; seo: PageSeo }>("select blocks, seo from page_drafts where page_id = ?", page.id);
@@ -119,8 +119,8 @@ export async function publishPage(ref: string): Promise<Result> {
         .prepare("update pages set blocks = ?, seo = ?, published = 1, published_at = ?, updated_at = ? where id = ?")
         .bind(blocks, seo, at, at, page.id),
       db
-        .prepare("insert into page_versions (page_id, blocks, seo, published_by, published_at) values (?, ?, ?, ?, ?)")
-        .bind(page.id, blocks, seo, user.email, at),
+        .prepare("insert into page_versions (page_id, blocks, seo, published_by, published_at, note) values (?, ?, ?, ?, ?, ?)")
+        .bind(page.id, blocks, seo, user.email, at, String(note).trim().slice(0, 200)),
       db.prepare("delete from page_drafts where page_id = ?").bind(page.id),
     ]);
     refreshSite();
